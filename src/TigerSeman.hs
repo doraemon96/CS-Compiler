@@ -146,10 +146,17 @@ buscarM s ((s',t,_):xs) | s == s' = Just t
 -- El objetivo de esta función es obtener el tipo
 -- de la variable a la que se está **accediendo**.
 -- ** transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
+-- Leer Nota [1] para SimpleVar
 transVar :: (Manticore w) => Var -> w ( () , Tipo)
-transVar (SimpleVar s)      = undefined -- Nota [1]
-transVar (FieldVar v s)     = undefined
-transVar (SubscriptVar v e) = undefined
+transVar (SimpleVar s)      = ((),) <$> getTipoT s
+transVar (FieldVar v s)     = transVar v >>= \case
+                                    (_ , TRecord lt _) -> maybe (derror (pack "Not a record field")) (return . ((),)) (buscarM s lt)
+                                    _                  -> derror $ pack "Not a record var"
+transVar (SubscriptVar v e) = transVar v >>= \case
+                                    (_ , TArray t _) -> transExp e >>= \case
+                                                            (() , TInt _) -> return ((),t)
+                                                            _             -> derror $ pack "Not a valid index"
+                                    _                -> derror $ pack "Not an array var"
 
 -- | __Completar__ 'TransTy'
 -- El objetivo de esta función es dado un tipo
@@ -184,7 +191,7 @@ transExp UnitExp{} = return ((), TUnit) -- ** fmap (,TUnit) unitExp
 transExp NilExp{} = return ((), TNil) -- ** fmap (,TNil) nilExp
 transExp (IntExp i _) = return ((), TInt RW) -- ** fmap (,TInt RW) (intExp i)
 transExp (StringExp s _) = return (() , TString) -- ** fmap (,TString) (stringExp (pack s))
-transExp (CallExp nm args p) = undefined -- Completar
+transExp (CallExp nm args p) = undefined  -- **
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (_ , el) <- transExp el'
         (_ , er) <- transExp er'
