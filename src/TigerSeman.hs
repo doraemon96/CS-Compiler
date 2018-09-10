@@ -148,7 +148,7 @@ buscarM s ((s',t,_):xs) | s == s' = Just t
 -- ** transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
 -- Leer Nota [1] para SimpleVar
 transVar :: (Manticore w) => Var -> w ( () , Tipo)
-transVar (SimpleVar s)      = ((),) <$> getTipoT s
+transVar (SimpleVar s)      = ((),) <$> getTipoValV s
 transVar (FieldVar v s)     = transVar v >>= \case
                                     (_ , TRecord lt _) -> maybe (derror (pack "Not a record field")) (return . ((),)) (buscarM s lt)
                                     _                  -> derror $ pack "Not a record var"
