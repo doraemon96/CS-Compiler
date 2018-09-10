@@ -167,9 +167,12 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
-transTy (NameTy s)      = undefined
-transTy (RecordTy flds) = undefined
-transTy (ArrayTy s)     = undefined
+transTy (NameTy s)      = return $ TTipo s
+transTy (RecordTy flds) = do flds' <- mapM (\(s,t) -> do t' <- transTy t
+                                                         return (s,t',0)) flds --TODO int
+                             return $ TRecord flds' 0 --TODO unique
+transTy (ArrayTy s)     = do t' <- getTipoT s
+                             return $ TArray t' 0 --TODO unique
 
 
 fromTy :: (Manticore w) => Ty -> w Tipo
