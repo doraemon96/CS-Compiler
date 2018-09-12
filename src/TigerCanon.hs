@@ -10,6 +10,7 @@ module TigerCanon
 where
 
 import           TigerTemp
+import           TigerUnique
 import           TigerTree
 
 import           TigerSymbol
@@ -138,7 +139,7 @@ class Monad w => Trackable w where
     enterBlock _ = return ()
     getBlock :: Label -> w (Maybe [Stm])
 
-data Obus = O {mapLS :: M.Map Label [Stm], lgen :: Int , tgen :: Int}
+data Obus = O {mapLS :: M.Map Label [Stm], lgen :: Integer, tgen :: Integer}
 
 firstTank :: Obus
 firstTank = O {mapLS = M.empty, lgen = 0, tgen = 0}
@@ -223,11 +224,11 @@ canonM st = do
     lss <- basicBlocks lin
     traceSchedule lss
 
-canon :: Int -> Int -> [(Stm,a)] -> ([([Stm],a)], Int, Int)
-canon tseed lseed frs = let
-    fsTank = firstTank {lgen = lseed, tgen = tseed}
-    (res,est) = runState (
-                    mapM (\(st,fr) -> do
-                            ss <- canonM st
-                            return (ss,fr)) frs) fsTank
-    in (res, tgen est, lgen est)
+--canon :: Integer -> Integer -> [(Stm,a)] -> ([([Stm],a)], Integer, Integer)
+--canon tseed lseed frs = let
+--    fsTank = firstTank {lgen = lseed, tgen = tseed}
+--    (res,est) = runState (
+--                    mapM (\(st,fr) -> do
+--                            ss <- canonM st
+--                            return (ss,fr)) frs) fsTank
+--    in (res, tgen est, lgen est)

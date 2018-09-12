@@ -8,6 +8,7 @@ import           TigerTips
 
 -- Segunda parte imports:
 import           TigerTemp
+import           TigerUnique
 -- import           TigerTrans
 
 -- Monads
@@ -88,9 +89,9 @@ class (Demon w, Monad w) => Manticore w where
     tiposIguales  e (RefRecord s) = E.internal $ pack $ "No son tipos iguales... 123+4" ++ (show e ++ show s)
     tiposIguales a b = return (equivTipo a b)
     --
-    -- | Generador de uniques. Etapa 2
+    -- | Generador de uniques.
     --
-    -- ugen :: w Unique
+    ugen :: w Unique
 
 -- | Definimos algunos helpers
 
@@ -168,11 +169,15 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
 transTy (NameTy s)      = return $ TTipo s
-transTy (RecordTy flds) = do flds' <- mapM (\(s,t) -> do t' <- transTy t
-                                                         return (s,t',0)) flds --TODO int
-                             return $ TRecord flds' 0 --TODO unique
-transTy (ArrayTy s)     = do t' <- getTipoT s
-                             return $ TArray t' 0 --TODO unique
+transTy (RecordTy flds) = do fldsTys <- mapM (\(nm, cod) -> (nm,) <$> transTy cod) flds
+                             let ordered = List.sortBy (Ord.comparing fst) fldsTys
+                                 ziplist = List.map triplar $ List.zip ordered [0..]
+                             uniq <- ugen
+                             return $ TRecord ziplist uniq
+                          where triplar ((a,b),c) = (a,b,c)
+transTy (ArrayTy s)     = do t'   <- getTipoT s
+                             uniq <- ugen
+                             return $ TArray t' uniq
 
 
 fromTy :: (Manticore w) => Ty -> w Tipo
@@ -323,6 +328,55 @@ instance Manticore Monada where
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
   -- TODO: Parte del estudiante
+  -- | Inserta una Función al entorno
+  --   insertFunV :: Symbol -> FunEntry -> w a -> w a
+    insertFunV sym fentry m = do
+      oldEst <- get
+      put (oldEst{ vEnv = M.insert sym (Func fentry) (vEnv oldEst) })
+      a <- m
+      put oldEst
+      return a
+  -- | Inserta una Variable de sólo lectura al entorno
+  --   insertVRO :: Symbol -> w a -> w a
+    insertVRO sym m = do
+      oldEst <- get
+      put (oldEst{ vEnv = M.insert sym (Var (TInt RO)) (vEnv oldEst)})
+      a <- m
+      put oldEst
+      return a
+  -- | Inserta una variable de tipo al entorno
+  --   insertTipoT :: Symbol -> Tipo -> w a -> w a
+    insertTipoT sym tentry m = do
+      oldEst <- get
+      put (oldEst{ tEnv = M.insert sym tentry (tEnv oldEst)})
+      a <- m
+      put oldEst
+      return a
+  -- | Busca una función en el entorno
+  --   getTipoFunV :: Symbol -> w FunEntry
+    getTipoFunV sym = do
+      est <- get
+      maybe (derror (pack "No se encontro la funcion en el map.")) 
+            (\(Func f) -> return f) (M.lookup sym (vEnv est))
+  -- | Busca una variable en el entorno. Ver [1]
+  --   getTipoValV :: Symbol -> w ValEntry
+    getTipoValV sym = do
+      est <- get
+      maybe (derror (pack "No se encontro el valor en el map.")) 
+            (\(Var f) -> return f) (M.lookup sym (vEnv est))
+  -- | Busca un tipo en el entorno
+  --   getTipoT :: Symbol -> w Tipo
+    getTipoT sym = do
+      est <- get
+      maybe (derror (pack "No se encontro el tipo en el map.")) 
+            (\t -> return t) (M.lookup sym (tEnv est))
+  -- | Funciones de Debugging!
+  --   showVEnv :: w a -> w a
+  --   showTEnv :: w a -> w a
+  -- | Generador de uniques.
+  --   ugen :: w Unique
+    ugen = mkUnique
+
 
 runMonada :: Monada ((), Tipo)-> StGen (Either Symbol ((), Tipo))
 runMonada = runExceptT . flip evalStateT initConf

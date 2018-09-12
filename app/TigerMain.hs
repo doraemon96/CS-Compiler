@@ -13,6 +13,7 @@ import TigerEscap
 import TigerPretty
 import TigerSeman
 import TigerTemp
+import TigerUnique
 
 import Text.Parsec (runParser)
 
@@ -65,6 +66,8 @@ templabRel ast = do
   -- something <- canonM sometree :: StGen [Stm]
   return ()
 
+-- Toma opciones, nombre del archivo, source code
+-- Devuelve el archivo parseado o el error
 parserStep :: Options -> String -> String -> IO Exp
 parserStep opts nm sc = either
   (\perr -> error $ "Parser error" ++ show perr)
