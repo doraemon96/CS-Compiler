@@ -2,11 +2,17 @@ module TigerTips where
 
 import           TigerErrores
 import           TigerSymbol
-
-type Unique = Integer
+import TigerUnique
 
 data RWO = RW | RO
     deriving (Show,Eq)
+
+-- # Libro: /Bindings for the Tiger Compiler/ [5.2]
+
+-- | Representa la posición en memoria en la que va a estar el campo
+-- de un record
+-- Es decir, el offset en palabras del puntero a la /primer posición/.
+type Posicion = Int
 
 -- | 'Tipo' es la representación interna de los tipos,
 -- son los tipos que maneja el compilador. En código
@@ -23,7 +29,7 @@ data Tipo = TUnit
           | TArray Tipo Unique
           -- ^ Tipo de los arreglos (de otro tipo) que necesita de un
           -- identificador /único/.
-          | TRecord [(Symbol, Tipo, Int)] Unique
+          | TRecord [(Symbol, Tipo, Posicion)] Unique
           -- ^ Tipo de los records, similar a los arreglos pero con campos
           -- con nombre.
           -- | Referencia a un record y a un Tipo.

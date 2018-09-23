@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
+  other-modules: State
   exposed-modules:
       -- Primer entrega
           TigerAbs
@@ -58,7 +59,6 @@ library
                     , LambdaCase
                     , PatternSynonyms
                     , DeriveDataTypeable
-                    , QuasiQuotes
 
 executable HaskTiger
   hs-source-dirs:      app

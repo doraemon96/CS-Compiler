@@ -1,24 +1,24 @@
 module Main (main) where
-import qualified System.Environment as Env
-import System.Exit
-import System.Console.GetOpt
-import Control.Monad
-import Control.Monad.State
-import Data.Maybe
-import Data.Either
+import           Control.Monad
+import           Control.Monad.State   hiding (evalState)
+import           Data.Either
+import           Data.Maybe
+import           System.Console.GetOpt
+import qualified System.Environment    as Env
+import           System.Exit
 
-import TigerAbs
-import TigerParser
-import TigerEscap
-import TigerPretty
-import TigerSeman
-import TigerTemp
-import TigerUnique
+import           TigerAbs
+import           TigerEscap
+import           TigerParser
+import           TigerPretty
+import           TigerSeman
+import           TigerTemp
+import           TigerUnique
 
-import Text.Parsec (runParser)
+import           Text.Parsec           (runParser)
 
 data Options = Options {
-        optArbol :: Bool
+        optArbol     :: Bool
         ,optDebEscap :: Bool
     }
     deriving Show
@@ -51,7 +51,7 @@ calculoEscapadas rawAST opts =
                fail (show err)
            ) (\(tree, envs) ->
                 putStrLn "********* Resultado Stepper *****" >>
-                print envs >>
+                mapM putStrLn (snd envs)>>
                 return tree
                 ) (calcularEscStepper rawAST)
   else

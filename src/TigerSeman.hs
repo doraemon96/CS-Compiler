@@ -1,10 +1,11 @@
 module TigerSeman where
 
 import           TigerAbs
-import           TigerErrores         as E
+import           TigerErrores               as E
 import           TigerSres
 import           TigerSymbol
 import           TigerTips
+import           TigerUnique
 
 -- Segunda parte imports:
 import           TigerTemp
@@ -12,22 +13,22 @@ import           TigerUnique
 -- import           TigerTrans
 
 -- Monads
-import qualified Control.Conditional  as C
+import qualified Control.Conditional        as C
 import           Control.Monad
-import           Control.Monad.Trans.Except
 import           Control.Monad.State
+import           Control.Monad.Trans.Except
 
 -- Data
-import           Data.List            as List
-import           Data.Map             as M
-import           Data.Ord             as Ord
+import           Data.List                  as List
+import           Data.Map                   as M
+import           Data.Ord                   as Ord
 
 -- Le doy nombre al Preludio.
-import           Prelude              as P
+import           Prelude                    as P
 
 -- Debugging. 'trace :: String -> a -> a'
 -- imprime en pantalla la string cuando se ejecuta.
-import           Debug.Trace          (trace)
+import           Debug.Trace                (trace)
 
 -- * Análisis Semántico, aka Inferidor de Tipos
 
@@ -145,7 +146,7 @@ buscarM s ((s',t,_):xs) | s == s' = Just t
 
 -- | __Completar__ 'transVar'.
 -- El objetivo de esta función es obtener el tipo
--- de la variable a la que se está **accediendo**.
+-- de la variable a la que se está __accediendo__.
 -- ** transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
 -- Leer Nota [1] para SimpleVar
 transVar :: (Manticore w) => Var -> w ( () , Tipo)
@@ -208,7 +209,7 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
           NeqOp ->if tiposComparables el er EqOp then oOps el er
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
-          -- Los unifico en esta etapa porque solo chequeamos los tipos, en la proxima
+          -- Los unifico en esta etapa porque solo chequeamos los tipos, en la próxima
           -- tendrán que hacer algo más interesante.
           PlusOp -> oOps el er
           MinusOp -> oOps el er
@@ -218,12 +219,14 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
           LeOp -> oOps el er
           GtOp -> oOps el er
           GeOp -> oOps el er
-          where oOps l r = if equivTipo l r
+          where oOps l r = if equivTipo l r -- Chequeamos que son el mismo tipo
+                              && equivTipo l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
                            then return ((), TInt RO)
                            else addpos (derror (pack "Error en el chequeo de una comparación.")) p
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
 -- Donde el primer argumento son los campos del records, y el segundo es
--- el texto plano de un tipo (que ya debería estar definido).
+-- el texto plano de un tipo (que ya debería estar definido). Una expresión
+-- de este tipo está creando un nuevo record.
 transExp(RecordExp flds rt p) =
   addpos (getTipoT rt) p >>= \case -- Buscamos en la tabla que tipo es 'rt', y hacemos un análisis por casos.
     trec@(TRecord fldsTy _) -> -- ':: TRecord [(Symbol, Tipo, Int)] Unique'
@@ -294,26 +297,28 @@ initConf :: Estado
 initConf = Est
            { tEnv = M.insert (pack "int") (TInt RW) (M.singleton (pack "string") TString)
            , vEnv = M.fromList
-                    [(pack "print", Func (1,pack "print",[TString], TUnit, True))
-                    ,(pack "flush", Func (1,pack "flush",[],TUnit, True))
-                    ,(pack "getchar",Func (1,pack "getchar",[],TString,True))
-                    ,(pack "ord",Func (1,pack "ord",[TString],TInt RW,True))
-                    ,(pack "chr",Func (1,pack "chr",[TInt RW],TString,True))
-                    ,(pack "size",Func (1,pack "size",[TString],TInt RW,True))
-                    ,(pack "substring",Func (1,pack "substring",[TString,TInt RW, TInt RW],TString,True))
-                    ,(pack "concat",Func (1,pack "concat",[TString,TString],TString,True))
-                    ,(pack "not",Func (1,pack "not",[TInt RW],TInt RW,True))
-                    ,(pack "exit",Func (1,pack "exit",[TInt RW],TUnit,True))
+                    [(pack "print", Func (1,pack "print",[TString], TUnit, Runtime))
+                    ,(pack "flush", Func (1,pack "flush",[],TUnit, Runtime))
+                    ,(pack "getchar",Func (1,pack "getchar",[],TString,Runtime))
+                    ,(pack "ord",Func (1,pack "ord",[TString],TInt RW,Runtime))
+                    ,(pack "chr",Func (1,pack "chr",[TInt RW],TString,Runtime))
+                    ,(pack "size",Func (1,pack "size",[TString],TInt RW,Runtime))
+                    ,(pack "substring",Func (1,pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
+                    ,(pack "concat",Func (1,pack "concat",[TString,TString],TString,Runtime))
+                    ,(pack "not",Func (1,pack "not",[TBool],TBool,Runtime))
+                    ,(pack "exit",Func (1,pack "exit",[TInt RW],TUnit,Runtime))
                     ]
            }
 
 -- Utilizando alguna especie de run de la monada definida, obtenemos algo así
-type Monada = StateT Estado (ExceptT Symbol StGen)
+type Monada = ExceptT Symbol (StateT Estado StGen)
+  -- StateT Estado (ExceptT Symbol StGen)
 
 instance Demon Monada where
-  -- | Levantamos la operación de 'throwE' de la mónada de excepciones.
-  derror =  lift . throwE
+  -- | 'throwE' de la mónada de excepciones.
+  derror =  throwE
   -- TODO: Parte del estudiante
+  -- adder :: w a -> Symbol -> w a
 instance Manticore Monada where
   -- | A modo de ejemplo esta es una opción de ejemplo de 'insertValV :: Symbol -> ValEntry -> w a -> w'
     insertValV sym ventry m = do
@@ -327,6 +332,8 @@ instance Manticore Monada where
       put oldEst
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
+    -- ugen :: w Unique
+    ugen = mkUnique
   -- TODO: Parte del estudiante
   -- | Inserta una Función al entorno
   --   insertFunV :: Symbol -> FunEntry -> w a -> w a
@@ -373,13 +380,10 @@ instance Manticore Monada where
   -- | Funciones de Debugging!
   --   showVEnv :: w a -> w a
   --   showTEnv :: w a -> w a
-  -- | Generador de uniques.
-  --   ugen :: w Unique
-    ugen = mkUnique
 
 
 runMonada :: Monada ((), Tipo)-> StGen (Either Symbol ((), Tipo))
-runMonada = runExceptT . flip evalStateT initConf
+runMonada =  flip evalStateT initConf . runExceptT
 
 runSeman :: Exp -> StGen (Either Symbol ((), Tipo))
 runSeman = runMonada . transExp
