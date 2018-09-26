@@ -189,9 +189,36 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 -- Tip2: Van a tener que pensar bien que hacen. Ver transExp (LetExp...)
 -- ** transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 transDecs :: (Manticore w) => [Dec] -> w a -> w a
-transDecs ((FunctionDec fs) : xs)          = id
-transDecs ((VarDec nm escap t init p): xs) = id
-transDecs ((TypeDec xs): xss)              = id
+transDecs [] m = m
+transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
+                                                        insertValV nm et (transDecs xs m)
+transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
+                                                         wt     <- getTipoT t
+                                                         bt     <- tiposIguales et wt
+                                                         if bt then insertValV nm wt (transDecs xs m) 
+                                                         else addpos (derror (pack "Tipos no compatibles #1")) p
+transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte fs) >> (transDecs xs m)) fs
+                                                   where
+                                                    insertf (nm,args,Nothing,_,p)  m' =
+                                                        do largs <- mapM (\(_,_,at) -> fromTy at) args
+                                                           insertFunV nm (0, genlab nm p, largs, TUnit, Propia) m'
+                                                    insertf (nm,args,(Just s),_,p) m' = 
+                                                        do largs <- mapM (\(_,_,at) -> fromTy at) args
+                                                           t     <- getTipoT s
+                                                           insertFunV nm (0, genlab nm p, largs, t, Propia) m'
+
+                                                    genlab t p = pack $ (show t) ++ "_" ++(show p)
+
+                                                    inserte (_,_,Nothing,exp,p) =
+                                                        do (_,et) <- transExp exp
+                                                           bt     <- tiposIguales TUnit et
+                                                           unless bt $ addpos (derror (pack "Tipo de exp no es Unit")) p
+                                                    inserte (_,_,(Just s),exp,p) =
+                                                        do (_,et) <- transExp exp
+                                                           t      <- getTipoT s
+                                                           bt     <- tiposIguales et t
+                                                           unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
+transDecs ((TypeDec xs): xss)               m = undefined 
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)
