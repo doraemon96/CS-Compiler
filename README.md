@@ -266,6 +266,10 @@ archivos de un directorio.
   * [ ] [QQ](https://wiki.haskell.org/Quasiquotation) para simplificar el testing
   * [ ] Simplificación del algoritmo abusando de reader (No sé bien que sería esto)
   * [ ] Simplificación de otras partes del compilador (Pensar mejor cómo hacer bien las cosas)
+  * [ ] TopSort:
+    + [x] Esqueleto andando
+    + [ ] Resolver tipos previos.
+    + [ ] Permitir ciclos con los records.
 - [ ] Interprete Código Intermedio
   * [x] Parte Fácil.
   * [ ] Parte difícil **llamada a de funciones**.
