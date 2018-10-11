@@ -16,10 +16,10 @@ makeStringL :: Label -> String
 makeStringL = unpack
 
 detgenTemp :: Integer -> Temp
-detgenTemp i = pack ("T"++show i)
+detgenTemp i = pack ("T" ++ show i)
 
 detgenLabel :: Integer -> Label
-detgenLabel i = pack ("L"++show i)
+detgenLabel i = pack ("L" ++ show i)
 
 -- | Clase generadora de temps, y labels
 class TLGenerator w where

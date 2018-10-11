@@ -1,10 +1,11 @@
 {-# Language MultiParamTypeClasses #-}
 module TigerUnique where
 
-import Control.Monad.Trans
-import Control.Monad.State.Class hiding (modify)
+import           Control.Monad.Trans
+import           Control.Monad.State.Class
+                                         hiding ( modify )
 
-import State as St
+import           State                         as St
 
 -- | Los 'Uniques' nos vendrán bien para definir números que supondremos únicos.
 -- Ya que los vamos a usar a lo largo del compilador, voy a definir una mónada
@@ -14,7 +15,7 @@ import State as St
 -- más abajo. Porque 'State a = StateT Identity a'.
 -- Es más para que no se use mucho este 'State' lo separo en otro archivo.
 
-evalState :: State s a -> s -> (a , s)
+evalState :: State s a -> s -> (a, s)
 evalState = runSt
 
 -- | Claramente los 'Unique' propiamente dichos son enteros.

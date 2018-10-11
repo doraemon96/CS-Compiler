@@ -1,6 +1,6 @@
 module State where
 
-import Control.Arrow
+import           Control.Arrow
 
 newtype State s v = St {runSt :: s -> (v , s)}
 
@@ -21,7 +21,7 @@ instance Monad (State s) where
                         in runSt (g x') s'
 
 get :: State a a
-get = St $ \s -> (s,s)
+get = St $ \s -> (s, s)
 
 put :: b -> State b ()
 put b = St $ const ((), b)

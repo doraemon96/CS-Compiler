@@ -46,14 +46,7 @@ calculoEscapadas :: Exp -> Options -> IO Exp
 calculoEscapadas rawAST opts =
   if (optDebEscap opts)
   then
-    either (\err ->
-               putStrLn "Error de Escap:" >>
-               fail (show err)
-           ) (\(tree, envs) ->
-                putStrLn "********* Resultado Stepper *****" >>
-                mapM putStrLn (snd envs)>>
-                return tree
-                ) (calcularEscStepper rawAST)
+    fail "NO DEBBUGING!"
   else
     either (\err ->
                putStrLn "Error de Escap:" >>

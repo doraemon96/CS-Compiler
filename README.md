@@ -259,19 +259,22 @@ archivos de un directorio.
 
 - [ ] Tiger Haskell Esqueleto
   * [x] Esqueleto Andando
+  * [ ] Esqueleto Lenguajes Esambladores.
   * [x] Mejorar errores de los tipos.
   * [x] Mejorar el TigerMain, modularizar el estado de los temporales como dos
         estados.
   * [x] Testing
-  * [ ] [QQ](https://wiki.haskell.org/Quasiquotation) para simplificar el testing
-  * [ ] Simplificación del algoritmo abusando de reader (No sé bien que sería esto)
+  * [x] [QQ](https://wiki.haskell.org/Quasiquotation) para simplificar el testing
   * [ ] Simplificación de otras partes del compilador (Pensar mejor cómo hacer bien las cosas)
-  * [ ] TopSort:
+  * [x] TopSort:
+    + [x] Documentar solución de cíclos, citar [Tying The Knot](https://wiki.haskell.org/Tying_the_Knot)
     + [x] Esqueleto andando
-    + [ ] Resolver tipos previos.
-    + [ ] Permitir ciclos con los records.
+    + [x] Resolver tipos previos.
+    + [x] Permitir ciclos con los records.
+  * [x] Propagar bien los cambios a los test.
 - [ ] Interprete Código Intermedio
   * [x] Parte Fácil.
+  * [x] Documentación.
   * [ ] Parte difícil **llamada a de funciones**.
 - [ ] Representación de Ciertas Máquinas. Necesito gente que llegue al final
       del compilador.
@@ -280,5 +283,6 @@ archivos de un directorio.
 - [ ] Terminar de documentar todo:
   * [x] Monadas
   * [x] Extensiones
-  * [ ] Lazy Top Sort
+  * [x] Lazy Top Sort
   * [x] Algoritmos a la Haskell
+  * [ ] Canonizador? Frame?

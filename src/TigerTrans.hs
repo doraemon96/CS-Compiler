@@ -1,21 +1,32 @@
-{-# Language UndecidableInstances  #-}
+{-# LANGUAGE UndecidableInstances #-}
 module TigerTrans where
 
-import qualified Control.Monad.State as ST
-import           Prelude             hiding (EQ, GT, LT, error, exp, seq)
-import qualified Prelude             as P (error)
-import qualified TigerAbs            as Abs
+import qualified Control.Monad.State           as ST
+import           Prelude                 hiding ( EQ
+                                                , GT
+                                                , LT
+                                                , error
+                                                , exp
+                                                , seq
+                                                )
+import qualified Prelude                       as P
+                                                ( error )
+import           TigerAbs                       ( Escapa(..) )
+import qualified TigerAbs                      as Abs
 import           TigerErrores
-import           TigerFrame          as F
-import           TigerSres           (Externa (..))
-import           TigerSymbol         as T
+import           TigerFrame                    as F
+import           TigerSres                      ( Externa(..) )
+import           TigerSymbol                   as T
 import           TigerTemp
 import           TigerTree
 
 import           Control.Monad
-import qualified Data.Foldable       as Fold
-import           Data.List           as List
-import           Data.Ord            hiding (EQ, GT, LT)
+import qualified Data.Foldable                 as Fold
+import           Data.List                     as List
+import           Data.Ord                hiding ( EQ
+                                                , GT
+                                                , LT
+                                                )
 
 
 import           Debug.Trace
@@ -53,50 +64,52 @@ instance Show BExp where
 -- | Función helper /seq/ que nos permite escribir
 -- fácilmente una secuencia de [Stm] usando listas.
 seq :: [Stm] -> Stm
-seq []     = ExpS $ Const 0
-seq [s]    = s
-seq (x:xs) = Seq x (seq xs)
+seq []       = ExpS $ Const 0
+seq [s     ] = s
+seq (x : xs) = Seq x (seq xs)
 
 -- | Eventualmente vamos a querer obtener nuevamente las expresiones
--- empaquetas por este nuevo tipo [BExp]. Para eso damos las siguientes
+-- empaquetadas por este nuevo tipo [BExp]. Para eso damos las siguientes
 -- funciones des-empaquetadoras. Definidas en [7.3] del libro.
 
 -- | Des-empaquetador de expresiones
 -- Es mónadico ya que deberá crear labels, y temps
 -- para des-empaquetar una condición.
 unEx :: (Monad w, TLGenerator w) => BExp -> w Exp
-unEx (Ex e) = return e
-unEx (Nx s) = return $ Eseq s (Const 0)
+unEx (Ex e ) = return e
+unEx (Nx s ) = return $ Eseq s (Const 0)
 unEx (Cx cf) = do
-    r <- newTemp
-    t <- newLabel
-    f <- newLabel
-    return $ Eseq
-        (seq [
-            Move (Temp r) (Const 1),
-            cf(t,f),
-            Label f,
-            Move (Temp r) (Const 0),
-            Label t])
-        (Temp r)
+  r <- newTemp
+  t <- newLabel
+  f <- newLabel
+  return $ Eseq
+    (seq
+      [ Move (Temp r) (Const 1)
+      , cf (t, f)
+      , Label f
+      , Move (Temp r) (Const 0)
+      , Label t
+      ]
+    )
+    (Temp r)
 
 
 -- | Des-empaquetador de statements
-unNx :: (Monad w,TLGenerator w) => BExp -> w Stm
-unNx (Ex e) = return $ ExpS e
-unNx (Nx s) = return s
+unNx :: (Monad w, TLGenerator w) => BExp -> w Stm
+unNx (Ex e ) = return $ ExpS e
+unNx (Nx s ) = return s
 unNx (Cx cf) = do
-        t <- newLabel
-        return $ seq [cf(t,t),Label t]
+  t <- newLabel
+  return $ seq [cf (t, t), Label t]
 
 -- | Des-empaquetador de condiciones
-unCx :: (Monad w,TLGenerator w, Demon w) => BExp -> w ((Label, Label) -> Stm)
-unCx (Nx s)         = internal $ pack "unCx(Nx...)"
-unCx (Cx cf)        = return cf
+unCx :: (Monad w, TLGenerator w, Demon w) => BExp -> w ((Label, Label) -> Stm)
+unCx (Nx _        ) = internal $ pack "unCx(Nx...)"
+unCx (Cx cf       ) = return cf
 -- Pequeña optimización boluda
-unCx (Ex (Const 0)) = return (\(_,f) -> Jump (Name f) f)
-unCx (Ex (Const _)) = return (\(t,_) -> Jump (Name t) t)
-unCx (Ex e)         = return (uncurry (CJump NE e (Const 0)))
+unCx (Ex (Const 0)) = return (\(_, f) -> Jump (Name f) f)
+unCx (Ex (Const _)) = return (\(t, _) -> Jump (Name t) t)
+unCx (Ex e        ) = return (uncurry (CJump NE e (Const 0)))
 
 -- | Los niveles son un stack de (Frame, Int)
 -- Recordar que Frame es una representación del Marco Virtual.
@@ -116,16 +129,16 @@ setFrame :: Frame -> Level -> Level
 setFrame f (MkLI _ l : xs) = MkLI f l : xs
 setFrame _ _               = P.error "setFrame"
 
-newLevel :: Level -> Symbol -> [Bool] -> Level
-newLevel [] s bs                 = [MkLI (newFrame s bs) 0]
-newLevel ls@(MkLI _ lvl :_) s bs = MkLI (newFrame s bs) (lvl+1) : ls
+newLevel :: Level -> Symbol -> [Escapa] -> Level
+newLevel []                  s bs = [MkLI (newFrame s bs) 0]
+newLevel ls@(MkLI _ lvl : _) s bs = MkLI (newFrame s bs) (lvl + 1) : ls
 
 getParent :: Level -> Level
-getParent []     = P.error "No fuimos del outermost level"
-getParent (_:xs) = xs
+getParent []       = P.error "No fuimos del outermost level"
+getParent (_ : xs) = xs
 
 outermost :: Level
-outermost = [ MkLI (newFrame (pack "_undermain") []) (-1) ]
+outermost = [MkLI (newFrame (pack "_undermain") []) (-1)]
 
 -- | Clase encargada del manejo de memoria y niveles.
 -- Esta etapa va a consumir el AST y construir un nuevo lenguaje llamado Código
@@ -136,6 +149,7 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
     -- | Level management
     -- Es un entero que nos indica en qué nivel estamos actualmente.
     getActualLevel :: w Int
+    getActualLevel = getNlvl <$> topLevel
     upLvl :: w ()
     downLvl :: w ()
     -- | Salida management.
@@ -154,7 +168,7 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
     -- Esto básicamente debería aumentar en uno la cantidad de variables locales
     -- usadas. Es lo que se usará eventualmente para toquetear el stack o lo que
     -- sea que use la arquitectura deseada.
-    allocLocal :: Bool -> w Access
+    allocLocal :: Escapa -> w Access
     allocLocal b = do
       -- | Dame el nivel actual
         t <- topLevel
@@ -170,7 +184,7 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
         return  acc
     -- | Manejo de /pedido/ de memoria para argumentos.
     -- ver lo que hicimos en /allocLocal/
-    allocArg :: Bool -> w Access
+    allocArg :: Escapa -> w Access
     allocArg b = do
         t <- topLevel
         popLevel
@@ -233,6 +247,8 @@ instance (MemM w) => IrGen w where
         let res = Proc bd' (getFrame lvl)
         pushFrag res
     stringExp t = do
+      -- | Esto debería ser dependiente de la arquitectura...
+      -- No estoy seguro que tenga que estar esto acá.
         l <- newLabel
         let ln = T.append (pack ".long ")  (pack $ show $ T.length t)
         let str = T.append (T.append (pack ".string \"") t) (pack "\"")
@@ -283,7 +299,10 @@ instance (MemM w) => IrGen w where
     -- callExp :: Label -> Externa -> Bool -> Level -> [BExp] -> w BExp
     callExp name external isproc lvl args = P.error "COMPLETAR"
     -- letExp :: [BExp] -> BExp -> w BExp
-    letExp [] e = do -- Puede parecer al dope, pero no...
+    letExp [] e = do
+      -- Des-empaquetar y empaquetar como un |Ex| puede generar
+      -- la creación de nuevo temporales, etc. Es decir, hay efectos que necesitamos contemplar.
+      -- Ver la def de |unEx|
             e' <- unEx e
             return $ Ex e'
     letExp bs body = do
@@ -295,9 +314,7 @@ instance (MemM w) => IrGen w where
     breakExp = P.error "COMPLETAR"
     -- seqExp :: [BExp] -> w BExp
     seqExp [] = return $ Nx $ ExpS $ Const 0
-    seqExp bes = do
-        let ret = last bes
-        case ret of
+    seqExp bes = case last bes of
             Nx _ -> Nx . seq <$> mapM unNx bes
             Ex e' -> do
                     let bfront = init bes
