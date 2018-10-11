@@ -6,6 +6,7 @@ import           TigerSres
 import           TigerSymbol
 import           TigerTips
 import           TigerUnique
+import           TigerTopSort
 
 -- Segunda parte imports:
 import           TigerTemp
@@ -112,7 +113,6 @@ depend (NameTy s)    = [s]
 depend (ArrayTy s)   = [s]
 depend (RecordTy ts) = concatMap (depend . snd) ts
 
-
 -- | Función auxiliar que chequea cuales son los tipos
 -- comparables.
 -- Por ejemplo, ` if nil = nil then ...` es una expresión ilegal
@@ -126,6 +126,10 @@ tiposComparables TNil TNil NeqOp = False
 tiposComparables TUnit _ NeqOp   = False
 tiposComparables _ _ NeqOp       = True
 tiposComparables _ _ _           = True
+
+esInt :: Tipo -> Bool
+esInt (TInt _) = True
+esInt _        = False
 
 -- | Función que chequea que los tipos de los campos sean los mismos
 -- Ver 'transExp (RecordExp ...)'
@@ -169,7 +173,7 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
-transTy (NameTy s)      = return $ TTipo s
+transTy (NameTy s)      = return $ TTipo s --TODO: CHEQUEAR TTipo
 transTy (RecordTy flds) = do fldsTys <- mapM (\(nm, cod) -> (nm,) <$> transTy cod) flds
                              let ordered = List.sortBy (Ord.comparing fst) fldsTys
                                  ziplist = List.map triplar $ List.zip ordered [0..]
@@ -218,7 +222,21 @@ transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte 
                                                            t      <- getTipoT s
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs): xss)               m = undefined 
+transDecs ((TypeDec xs): xss)               m = 
+                                                   where
+                                                    ltipos = map (\(x,y,_)->(x,y)) xs
+                                                    -- Ordenamos los tipos segun kahnSort (elimina Records)
+                                                    sorted = kahnSort ltipos --TODO:capturar los erroreso
+                                                    -- Ponemos para insertar primero los records (as refrecords) y luego el resto
+                                                    --  que potencialmente use records (y los veran como refs)
+                                                    rtipos = makeRef ltipos ++ sorted
+                                                    -- Finalmente hacemos un TyingTheKnot :D
+                                                    putossss = undefined
+                                                    
+                                                    makeRef :: [(Symbol,Tipo)] -> [(Symbol,Tipo)]
+                                                    makeRef []               = []
+                                                    makeRef (s,TRecord _):xs = (s,RefRecord s):(makeRef xs)
+                                                    makeRef _:xs             = makeRef xs
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)
@@ -227,7 +245,11 @@ transExp UnitExp{} = return ((), TUnit) -- ** fmap (,TUnit) unitExp
 transExp NilExp{} = return ((), TNil) -- ** fmap (,TNil) nilExp
 transExp (IntExp i _) = return ((), TInt RW) -- ** fmap (,TInt RW) (intExp i)
 transExp (StringExp s _) = return (() , TString) -- ** fmap (,TString) (stringExp (pack s))
-transExp (CallExp nm args p) = undefined  -- **
+transExp (CallExp nm args p) = do (_,_,targs,ret,_) <- getTipoFunV nm
+                                  targs' <- mapM transExp args
+                                  mbs <- mapM (\(x,y)-> tiposIguales x y) (zip targs (P.map snd targs'))
+                                  unless ((and mbs) && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
+                                  return ((),ret)
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (_ , el) <- transExp el'
         (_ , er) <- transExp er'
@@ -277,7 +299,12 @@ transExp(SeqExp es p) = fmap last (mapM transExp es)
 -- do
 --       es' <- mapM transExp es
 --       return ( () , snd $ last es')
-transExp(AssignExp var val p) = error "Completar"
+transExp(AssignExp var val p) = do (_ , tvar) <- transVar var
+                                   unless (tvar == TInt RW) $ addpos (derror (pack "Int Read Only")) p
+                                   (_ , tval) <- transExp val
+                                   bt <- tiposIguales tvar tval
+                                   unless bt $ addpos (derror (pack "Tipos no compatibles #4.")) p
+                                   return ((),TUnit)
 transExp(IfExp co th Nothing p) = do
         -- ** (ccond , co') <- transExp co
   -- Analizamos el tipo de la condición
@@ -305,11 +332,25 @@ transExp(WhileExp co body p) = do
   (_ , boTy) <- transExp body
   unless (equivTipo boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
   return ((), TUnit)
-transExp(ForExp nv mb lo hi bo p) = error "Completar" -- Completar
+transExp(ForExp nv mb lo hi bo p) = do (_,lo') <- transExp lo
+                                       unless (esInt lo') $ addpos (derror (pack "Limite inferior no es entero.")) p
+                                       (_,hi') <- transExp hi
+                                       unless (esInt hi') $ addpos (derror (pack "Limite superior no es entero.")) p
+                                       (_,tbo) <- insertVRO nv (transExp bo)
+                                       b3 <- tiposIguales TUnit tbo
+                                       unless b3 $ addpos (derror (pack "El for retorna algo (y no debe).")) p
+                                       return ((),TUnit)
 transExp(LetExp dcs body p) = transDecs dcs (transExp body)
 transExp(BreakExp p) = return ((), TUnit)
-transExp(ArrayExp sn cant init p) = error "Completar" -- Completar
-
+transExp(ArrayExp sn cant init p) = do t <- getTipoValV sn
+                                       case t of
+                                           (TArray t' _) -> do (_,cant') <- transExp cant
+                                                               unless (esInt cant') $ addpos (derror (pack "Tamanio no es entero.")) p
+                                                               (_,init') <- transExp init
+                                                               b2 <- tiposIguales t' init'
+                                                               unless b2 $ addpos (derror (pack "Valores iniciales incompatibles.")) p
+                                                               return ((),t)
+                                           _             -> addpos (derror (pack "El array no tiene tipo ahrey")) p
 
 -- Un ejemplo de estado que alcanzaría para realizar todas la funciones es:
 data Estado = Est {vEnv :: M.Map Symbol EnvEntry, tEnv :: M.Map Symbol Tipo}
