@@ -21,7 +21,7 @@ addT x = modify (\st -> st{ret = x : ret st})
 buildDepMap :: [(Symbol , Ty)] -> DepMap
 buildDepMap [] = M.empty
 buildDepMap ((sTy, NameTy s) : xs) = M.insertWith (++) sTy [s] (M.insertWith (++) s [] (buildDepMap xs))
-buildDepMap ((sTy, RecordTy ss) : xs) = M.inserWith (++) sTy [] (buildDepMap xs)
+buildDepMap ((sTy, RecordTy ss) : xs) = M.insertWith (++) sTy [] (buildDepMap xs)
 --buildDepMap ((sTy, RecordTy ss) : xs) = buildDepMap (zip (repeat sTy) (fmap snd ss) ++ xs)
 buildDepMap ((sTy, ArrayTy s) : xs) = M.insertWith (++) sTy [s] (buildDepMap xs)
 
@@ -63,4 +63,4 @@ kahnSort xs = ret $ execState (iterador initialSyms) (GR initialDeps [])
 
 kahnSorter :: [(Symbol,Ty)] -> [(Symbol,Ty)]
 kahnSorter xs = let ks = kahnSort xs
-                in  map (maybe (error "What") id (flip lookup xs)) ks
+                in  map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks

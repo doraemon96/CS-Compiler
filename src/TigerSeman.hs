@@ -203,6 +203,7 @@ transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
                                                          else addpos (derror (pack "Tipos no compatibles #1")) p
 transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte fs) >> (transDecs xs m)) fs
                                                    where
+                                                    -- Primer pasada: inserto la interfaz de funciones
                                                     insertf (nm,args,Nothing,_,p)  m' =
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            insertFunV nm (0, genlab nm p, largs, TUnit, Propia) m'
@@ -213,6 +214,7 @@ transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte 
 
                                                     genlab t p = pack $ (show t) ++ "_" ++(show p)
 
+                                                    -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (_,_,Nothing,exp,p) =
                                                         do (_,et) <- transExp exp
                                                            bt     <- tiposIguales TUnit et
@@ -222,21 +224,30 @@ transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte 
                                                            t      <- getTipoT s
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs): xss)               m = 
+transDecs ((TypeDec xs): xss)               m = --P.foldr (\(sym,ti) -> insertTipoT sym ti) (transDecs xss m) sorref
                                                    where
-                                                    ltipos = map (\(x,y,_)->(x,y)) xs
-                                                    -- Ordenamos los tipos segun kahnSort (elimina Records)
-                                                    sorted = kahnSort ltipos --TODO:capturar los erroreso
-                                                    -- Ponemos para insertar primero los records (as refrecords) y luego el resto
-                                                    --  que potencialmente use records (y los veran como refs)
-                                                    rtipos = makeRef ltipos ++ sorted
-                                                    -- Finalmente hacemos un TyingTheKnot :D
-                                                    putossss = undefined
+                                                    -- insertar todos los xs con posibles referencias
+                                                    -- insertar todos los xs limpiando las referencias.
+                                                    -- continuar analizando las declaraciones (xss)
+                                                    --transDecs xss
                                                     
-                                                    makeRef :: [(Symbol,Tipo)] -> [(Symbol,Tipo)]
-                                                    makeRef []               = []
-                                                    makeRef (s,TRecord _):xs = (s,RefRecord s):(makeRef xs)
-                                                    makeRef _:xs             = makeRef xs
+                                                    -- -- --
+                                                    ltipos = P.map (\(x,y,_)->(x,y)) xs
+                                                    -- Obtenemos los records
+                                                    rtipos = P.filter (isRec . snd) ltipos
+                                                    isRec (RecordTy _) = True
+                                                    isRec _            = False
+                                                    -- Ordenamos los tipos segun kahnSort (elimina Records)
+                                                    sorted = kahnSorter ltipos --TODO: que devuelva MAYBE!!!
+                                                    -- Ponemos para insertar primero los records (as refrecords) y luego el resto
+                                                    --  que potencialmente use records (y los veran como refrecords)
+                                                    sorref = mapM makeRef sorted
+                                                    -- Cambian todos los Records a RefRecords y Ty a Tipo
+                                                    makeRef :: (Symbol,Ty) -> w (Symbol, Tipo)
+                                                    makeRef (s, RecordTy _) = return (s, RefRecord s)
+                                                    makeRef (s, t)          = (s, ) <$> transTy t
+                                                    -- 
+
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)
