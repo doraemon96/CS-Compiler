@@ -10,7 +10,6 @@ import           TigerTopSort
 
 -- Segunda parte imports:
 import           TigerTemp
-import           TigerUnique
 -- import           TigerTrans
 
 -- Monads
@@ -173,10 +172,10 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
-transTy (NameTy s)      = return $ TTipo s --TODO: CHEQUEAR TTipo
+transTy (NameTy s)      = getTipoT s --TODO chequear (esta bien? Siempre tengo a s en mi manticore?)
 transTy (RecordTy flds) = do fldsTys <- mapM (\(nm, cod) -> (nm,) <$> transTy cod) flds
                              let ordered = List.sortBy (Ord.comparing fst) fldsTys
-                                 ziplist = List.map triplar $ List.zip ordered [0..]
+                                 ziplist = List.zipWith (curry triplar) ordered [0..]
                              uniq <- ugen
                              return $ TRecord ziplist uniq
                           where triplar ((a,b),c) = (a,b,c)
@@ -188,6 +187,8 @@ transTy (ArrayTy s)     = do t'   <- getTipoT s
 fromTy :: (Manticore w) => Ty -> w Tipo
 fromTy (NameTy s) = getTipoT s
 fromTy _ = P.error "no debería haber una definición de tipos en los args..."
+
+-- funcionesDeIns :: ____ => Algo -> w a -> w a
 
 -- | Tip: Capaz que se debería restringir el tipo de 'transDecs'.
 -- Tip2: Van a tener que pensar bien que hacen. Ver transExp (LetExp...)
@@ -201,52 +202,68 @@ transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
                                                          bt     <- tiposIguales et wt
                                                          if bt then insertValV nm wt (transDecs xs m) 
                                                          else addpos (derror (pack "Tipos no compatibles #1")) p
-transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf ((mapM_ inserte fs) >> (transDecs xs m)) fs
+transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf (mapM_ inserte fs >> transDecs xs m) fs
                                                    where
                                                     -- Primer pasada: inserto la interfaz de funciones
                                                     insertf (nm,args,Nothing,_,p)  m' =
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            insertFunV nm (0, genlab nm p, largs, TUnit, Propia) m'
-                                                    insertf (nm,args,(Just s),_,p) m' = 
+                                                    insertf (nm,args,Just s,_,p) m' = 
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            t     <- getTipoT s
                                                            insertFunV nm (0, genlab nm p, largs, t, Propia) m'
 
-                                                    genlab t p = pack $ (show t) ++ "_" ++(show p)
+                                                    genlab t p = pack $ show t ++ "_" ++ show p
 
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (_,_,Nothing,exp,p) =
                                                         do (_,et) <- transExp exp
                                                            bt     <- tiposIguales TUnit et
                                                            unless bt $ addpos (derror (pack "Tipo de exp no es Unit")) p
-                                                    inserte (_,_,(Just s),exp,p) =
+                                                    inserte (_,_,Just s,exp,p) =
                                                         do (_,et) <- transExp exp
                                                            t      <- getTipoT s
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs): xss)               m = --P.foldr (\(sym,ti) -> insertTipoT sym ti) (transDecs xss m) sorref
-                                                   where
+transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRef sorted $ transDecs xss m
                                                     -- insertar todos los xs con posibles referencias
-                                                    -- insertar todos los xs limpiando las referencias.
+                                                    -- insertar todos los xs limpiando las referencias
                                                     -- continuar analizando las declaraciones (xss)
-                                                    --transDecs xss
-                                                    
-                                                    -- -- --
+                                                   where
                                                     ltipos = P.map (\(x,y,_)->(x,y)) xs
-                                                    -- Obtenemos los records
-                                                    rtipos = P.filter (isRec . snd) ltipos
-                                                    isRec (RecordTy _) = True
-                                                    isRec _            = False
-                                                    -- Ordenamos los tipos segun kahnSort (elimina Records)
+                                                    -- Ordenamos los tipos segun kahnSort
                                                     sorted = kahnSorter ltipos --TODO: que devuelva MAYBE!!!
                                                     -- Ponemos para insertar primero los records (as refrecords) y luego el resto
                                                     --  que potencialmente use records (y los veran como refrecords)
-                                                    sorref = mapM makeRef sorted
+                                                    -- Los records se insertan "primero" porque khanSort los ve sin dependencias
+                                                    makeRefs :: (Manticore w) => [(Symbol, Ty)] -> w a -> w a
+                                                    makeRefs []     m' = m'
+                                                    makeRefs (x:xs) m' = do (s',t') <- makeRef x
+                                                                            insertTipoT s' t' $ makeRefs xs m'
                                                     -- Cambian todos los Records a RefRecords y Ty a Tipo
-                                                    makeRef :: (Symbol,Ty) -> w (Symbol, Tipo)
+                                                    makeRef :: (Manticore w) => (Symbol,Ty) -> w (Symbol, Tipo)
                                                     makeRef (s, RecordTy _) = return (s, RefRecord s)
                                                     makeRef (s, t)          = (s, ) <$> transTy t
-                                                    -- 
+
+                                                    -- Ahora limpiamos las referencias
+                                                    undoRefs :: (Manticore w) => [(Symbol,Ty)] -> w a -> w a
+                                                    undoRefs []         m' = m'
+                                                    undoRefs ((s,t):xs) m' = case t of
+                                                                                RecordTy flds -> --foreach fld in flds:
+                                                                                                 insertTipoT s t'
+                                                                                                    where t' = TRecord [undoRef s t' (getTipoT fld)]
+                                                                                _             -> undefined --aca ya puedo usar getTipoT no?
+                                                    -- Cambia todos los RefRecords al nudo anudado
+                                                    undoRef :: Symbol -> Tipo -> Tipo -> Tipo
+                                                    undoRef sym dummy TUnit            = TUnit
+                                                    undoRef sym dummy TString          = TString
+                                                    undoRef sym dummy TNil             = TNil
+                                                    undoRef sym dummy (TInt rw)        = TInt rw
+                                                    undoRef sym dummy (TArray t u)     = TArray undefined u
+                                                    undoRef sym dummy (TRecord fs u)   = TRecord undefined u
+                                                    undoRef sym dummy (RefRecord sym)  = dummy
+                                                    undoRef sym dummy (RefRecord sym') = TRecord undefined u
+                                                    undoRef sym dummy _                = error "Handleame esta"
 
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
@@ -258,8 +275,8 @@ transExp (IntExp i _) = return ((), TInt RW) -- ** fmap (,TInt RW) (intExp i)
 transExp (StringExp s _) = return (() , TString) -- ** fmap (,TString) (stringExp (pack s))
 transExp (CallExp nm args p) = do (_,_,targs,ret,_) <- getTipoFunV nm
                                   targs' <- mapM transExp args
-                                  mbs <- mapM (\(x,y)-> tiposIguales x y) (zip targs (P.map snd targs'))
-                                  unless ((and mbs) && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
+                                  mbs <- zipWithM tiposIguales targs (P.map snd targs')
+                                  unless (and mbs && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
                                   return ((),ret)
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (_ , el) <- transExp el'

@@ -1,0 +1,106 @@
+--------------------------------------------------------------------------------
+-- Khan Sort
+--------------------------------------------------------------------------------
+
+LSTipos -> kahnSort
+[A->B, B->C] -> [A ,B ,C] -
+
+--------------------------------------------------------------------------------
+-- Insertar algo en el entorno.
+--------------------------------------------------------------------------------
+
+type A = Array of S
+type S = Record of { hd : A, tail : S}
+                         ^^ NameTy A ^^ NameTy S
+type X = Record of Y
+type Y = Record of X
+
+
+type E = ArrayTy int -> (E,ArrayTy int)
+type F = NameTy int  -> (F,NameTy int)
+
+
+---
+X -> TRecord [( _ , TRecord Y , _)]
+Y -> TRecord [( _ , TRecord X , _)]
+
+--- KahnSort
+ (S , A)
+--- TigerSeman
+    insertTTipo.... meto a S como TRecordRef "S" en el entorno de tipos
+    ...
+    -- Ty = Array (NameTy "S")
+    insertarTipo A (TArray TRecordRef "S")
+
+----------------------------------------
+-- Estado de los entornos
+----------------------------------------
+    "S" -> TRecordRef "S"
+    "A" -> TArray (TRecordRef "S")
+
+type List = Record {"hd" : string , "tail" : List}
+
+    "List" -> TRecord "List"
+
+     where
+        t = TRecord [( "hd", TString, 1) , ("tail" , t , 2)]
+    
+
+--
+    insertTipo "S" t
+        where
+            t = TRecord [("hd" , fijaRef "S" t (getTipo "A") , 1 ) , ( "tail" , fijaRef "S" t (TRecordRef "S") = t , 2 )]
+            -- t = TRecord [("hd" , TArray t , 1 ) , ( "tail" , t , 2 )]
+
+fijaRef :: Symbol -> Tipo -> Tipo -> Tipo
+ 
+
+
+--
+LSTipos [(Symbol,Record)] <- todos los Record hacelos Ref
+
+B = Array of S -> (B,S) ->
+S = Record ...
+
+insertalos en el env
+
+desRefRec = Tipo A:Record [RefRecord A,..] -> t
+                where t = Tipo A:Record [t,..]
+
+
+
+--------------------------------------------
+
+
+1ro - me quedo con los RecordTy
+2do - ordeno el resto (kahnSort me devueve todo menos RecordTy)
+3ro - meto los RecordTy en manticore (como RefRecord :: Tipo)
+3ro - meto el resto en manticore (pasado por transTy) porque pueden
+      hacer uso de los RecordTy (que veran como RefRecord)
+4to - tying the knot (cambio los refrecords a los record reales)
+
+decs_con_ref(decs_sin_ref(seguirComputando xss))
+
+
+--------------------------------------------
+
+type S = {hd: A ; tl: C}
+type C = {hd: Int ; tl: S}
+type A = {hd: Int ; tl: C}
+
+S -> (([S]) -> [A,C]) -A> (([S,A]) -> [Int, A]) -Int> /
+                                                -A>   /
+                      -C> (([S,C]) -> [Int, C])
+                
+
+Para mi tendriamos que analizar los ciclos de C y A por separado,
+si uno de ellos no cierra el ciclo, lo descartamos y pasamos a
+analizar el segundo.
+Hay que recordar que tenemos que hacer un where t = ... (t)
+(o sea que habria que llevar ese t para cerrar los ciclos)
+
+
+------------------------------------------
+
+type A = {fld: B}
+type B = {fld: B}
