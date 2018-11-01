@@ -88,10 +88,6 @@ class (Demon w, Monad w) => Manticore w where
     tiposIguales (RefRecord _) _ = E.internal $ pack "No son tipos iguales... 123+3"
     tiposIguales  e (RefRecord s) = E.internal $ pack $ "No son tipos iguales... 123+4" ++ (show e ++ show s)
     tiposIguales a b = return (equivTipo a b)
-    --
-    -- | Generador de uniques.
-    --
-    ugen :: w Unique
 
 -- | Definimos algunos helpers
 
@@ -170,13 +166,25 @@ fromTy :: (Manticore w) => Ty -> w Tipo
 fromTy (NameTy s) = getTipoT s
 fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 
--- | Tip: Capaz que se debería restringir el tipo de 'transDecs'.
--- Tip2: Van a tener que pensar bien que hacen. Ver transExp (LetExp...)
+-- | transDecs es la encargada de tipar las definiciones y posteriormente
+-- generar código intermedio solamente para las declaraciones de variables.
+----------------------------------------
+-- Aquí se encontrararán con la parte más díficil de esta etapa,
+-- que es la detección de búcles y correcta inserción de tipos
+-- en el entorno.
+-- + Para realizar correctamente la detección de cíclos se utiliza el algoritmo
+--   de sort topologico. Pueden encontrar una simple implementación en el
+--   archivo [TigerTopSort](src/TigerTopSort.hs).
+----------------------------------------
 -- ** transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 transDecs :: (Manticore w) => [Dec] -> w a -> w a
-transDecs ((FunctionDec fs) : xs)          = id
-transDecs ((VarDec nm escap t init p): xs) = id
-transDecs ((TypeDec xs): xss)              = id
+transDecs [] m = m
+----------------------------------------
+transDecs ((VarDec nm escap t init p): xs) m = m
+----------------------------------------
+transDecs ((FunctionDec fs) : xs)          m = m
+----------------------------------------
+transDecs ((TypeDec xs) : xss)              m = m
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)
@@ -317,8 +325,6 @@ instance Manticore Monada where
       put oldEst
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
-    -- ugen :: w Unique
-    ugen = mkUnique
   -- TODO: Parte del estudiante
 
 runMonada :: Monada ((), Tipo)-> StGen (Either Symbol ((), Tipo))
