@@ -267,6 +267,7 @@ archivos de un directorio.
   * [ ] Simplificación del algoritmo abusando de reader (No sé bien que sería esto)
   * [ ] Simplificación de otras partes del compilador (Pensar mejor cómo hacer bien las cosas)
   * [ ] TopSort:
+    + [ ] Documentar solución de cíclos, citar [Tying The Knot](https://wiki.haskell.org/Tying_the_Knot)
     + [x] Esqueleto andando
     + [ ] Resolver tipos previos.
     + [ ] Permitir ciclos con los records.
