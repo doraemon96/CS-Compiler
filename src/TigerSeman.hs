@@ -225,7 +225,7 @@ transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf (mapM_ inserte f
                                                            t      <- getTipoT s
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRef sorted $ transDecs xss m
+transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRefs sorted $ transDecs xss m
                                                     -- insertar todos los xs con posibles referencias
                                                     -- insertar todos los xs limpiando las referencias
                                                     -- continuar analizando las declaraciones (xss)
@@ -247,24 +247,48 @@ transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRef sorte
 
                                                     -- Ahora limpiamos las referencias
                                                     undoRefs :: (Manticore w) => [(Symbol,Ty)] -> w a -> w a
-                                                    undoRefs []         m' = m'
-                                                    undoRefs ((s,t):xs) m' = case t of
-                                                                                RecordTy flds -> --foreach fld in flds:
-                                                                                                 insertTipoT s t'
-                                                                                                    where t' = TRecord [undoRef s t' (getTipoT fld)]
-                                                                                _             -> undefined --aca ya puedo usar getTipoT no?
+                                                    undoRefs nicos = undoRefs' nicos (fst $ unzip nicos)
+
+                                                    undoRefs' :: (Manticore w) => [(Symbol, Ty)] -> [Symbol] -> w a -> w a
+                                                    undoRefs' []         _ m' = m'
+                                                    undoRefs' ((s,RecordTy flds):xs) nicos m' = aux1 flds s nicos $ undoRefs' xs nicos m'
+                                                    undoRefs' (_ : xs) nicos m' = undoRefs' xs nicos m'
+
+                                                    aux1 :: (Manticore w) => [(Symbol,Ty)] -> Symbol -> [Symbol] -> w a -> w a
+                                                    aux1 flds s nicos m = 
+                                                        do flds' <- mapM (getTipoT . fst) flds
+                                                           uNicos <- ugen
+                                                           insertTipoT s (t' uNicos flds') $ propagarS s (t' uNicos flds') nicos m
+                                                               where syms   = P.map fst flds
+                                                                     syms'  = List.sort syms
+                                                                     t' u f = TRecord (zip3 syms' (P.map (undoRef s (t' u f)) f) [0..]) u --TODO: cambiar nombres
+
+                                                    propagarS :: (Manticore w) => Symbol -> Tipo -> [Symbol] -> w a -> w a
+                                                    propagarS s t [] m = m
+                                                    propagarS s t (s' : ss') m = do tip <- getTipoT s' -- >>= \t' -> insertTipoT s' (undoRef s t t')
+                                                                                    let t' = undoRef s t tip
+                                                                                    insertTipoT s' t' (propagarS s t ss' m)
+
                                                     -- Cambia todos los RefRecords al nudo anudado
                                                     undoRef :: Symbol -> Tipo -> Tipo -> Tipo
-                                                    undoRef sym dummy TUnit            = TUnit
-                                                    undoRef sym dummy TString          = TString
-                                                    undoRef sym dummy TNil             = TNil
-                                                    undoRef sym dummy (TInt rw)        = TInt rw
-                                                    undoRef sym dummy (TArray t u)     = TArray undefined u
-                                                    undoRef sym dummy (TRecord fs u)   = TRecord undefined u
-                                                    undoRef sym dummy (RefRecord sym)  = dummy
-                                                    undoRef sym dummy (RefRecord sym') = TRecord undefined u
-                                                    undoRef sym dummy _                = error "Handleame esta"
+                                                    undoRef sym dummy (TArray t u)      = TArray (undoRef sym dummy t) u
+                                                    undoRef sym dummy (TRecord fs u)    = let syms = P.map fst3 fs
+                                                                                              tips = P.map snd3 fs
+                                                                                              poss = P.map thd3 fs
+                                                                                              undone = P.map (undoRef sym dummy) tips
+                                                                                          in  TRecord (zip3 syms undone poss) u
+                                                    undoRef sym dummy r@(RefRecord sym') | sym == sym' = dummy
+                                                                                         | otherwise   =  r
+                                                    undoRef _ _ (TTipo _ ) = error "TTipo ..."
+                                                    undoRef _ _ a                = a
 
+
+fst3 :: (a,b,c) -> a
+fst3 (x,_,_) = x
+snd3 :: (a,b,c) -> b
+snd3 (_,y,_) = y
+thd3 :: (a,b,c) -> c
+thd3 (_,_,z) = z
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)

@@ -102,5 +102,26 @@ Hay que recordar que tenemos que hacer un where t = ... (t)
 
 ------------------------------------------
 
-type A = {fld: B}
-type B = {fld: B}
+type A = {uno: B, dos: C}   -- TRecord [(uno, TRecord (tres, t2), (dos, TRecord (cuatro, t))]
+type B = {tres: B}
+type C = {cuatro: A}
+
+undoRefs (RefRecordA) -> insertTipoT A t
+                            where t = TRecord [(uno, undoRef A t (getTipoT B)), (dos, undoRef A t (getTipoT C))]
+
+    >undoRef A t (RefRecord B) -> undoRefs (RefRecord B)
+    
+    >> undoRefs (RefRecord B) -> insertTipoT B t2
+                                    where t2 = TRecord [(tres, undoRef B t2 (getTipoT B))]
+
+    >>> undoRef B t2 (RefRecordB B) -> t2
+    
+    >> t2 = TRecord [(..,t2,..)]
+
+    >undoRef A t (RefRecord C) -> undoRefs (RefRecord C)      -- TRecord [(cuatro,t)]
+
+    >> undoRefs (RefRecord C) -> insertTipoT C t3
+                                    where t3 = TRecord [(cuatro, undoRef C t3
+                                    (getTipoT A))]
+
+    >>> undoRef C t3 (RefRecord A)
