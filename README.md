@@ -271,6 +271,7 @@ archivos de un directorio.
     + [x] Esqueleto andando
     + [ ] Resolver tipos previos.
     + [ ] Permitir ciclos con los records.
+  * [ ] Propagar bien los cambios a los test.
 - [ ] Interprete Código Intermedio
   * [x] Parte Fácil.
   * [ ] Parte difícil **llamada a de funciones**.

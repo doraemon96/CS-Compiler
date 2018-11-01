@@ -175,15 +175,93 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 -- + Para realizar correctamente la detección de cíclos se utiliza el algoritmo
 --   de sort topologico. Pueden encontrar una simple implementación en el
 --   archivo [TigerTopSort](src/TigerTopSort.hs).
+-- + Para generar los representantes correspondientes de tipo |Tipo|, vamos a
+--   necesitar generar valores potencialmente infinitos y para esto usaremos una
+--   técnica conocida en la literatura de Haskell conocida como [Tying the
+--   Knot](https://wiki.haskell.org/Tying_the_Knot)
 ----------------------------------------
 -- ** transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 transDecs :: (Manticore w) => [Dec] -> w a -> w a
 transDecs [] m = m
 ----------------------------------------
+-- Aquí veremos brillar la abstracción que tomamos en |invertValV|
 transDecs ((VarDec nm escap t init p): xs) m = m
 ----------------------------------------
+-- Aquí veremos brillar la abstracción que tomamos en |invertFunV| Recuerden
+-- viene una lista de declaración de funciones, todas se toman como mutuamente
+-- recursivas así que tendrán que hacer un poco más de trabajo.
 transDecs ((FunctionDec fs) : xs)          m = m
 ----------------------------------------
+-- Las declaraciones de tipos al igual que las funciones vendrán en batch de
+-- tipos mutuamente recursivos.
+-- Para esto pueden seguir el siguiente camino:
+-- + Separar la lista xs en dos, por un lado los Records y por otro los tipos NoRecords.
+-- + Ordenar usando el sort topologico las definiciones que __no__ son records . Ya que
+--   estos __no__ generan conflictos (ver Teoría)
+-- + Ya que los records no generan dependencias, pero si podríamos necesitarlos
+--   para definir los otros tipos. Los metemos directamente como (rName, rTy) ->
+--   insertTipoT rName (TRecordRef rName)
+-- + Luego siguiendo el resultado del Sort Topologico insertamos el resto de los
+--   tipos, para esto van a necesitar una función |transTy :: Ty -> Tipo| que sólo
+--   analizará |Ty| que __no__ son records.
+----------------------------------------
+-- Pequeño parate acá, en el entorno tenemos los records definidos como
+-- referencias a sí mismo y a los demás tipos con sus estructuras pero con
+-- posibles |TRefRecords| que __tenemos que sacar__.
+
+-- Lo que nos falta hacer es darle estructura a los Records (algo que todavía no
+-- hicimos), pero claramente para esto vamos a tener que resolver posibles
+-- dependencias mutuas que podrían llegar a aparecer (algo que vamos a tener que
+-- evitar).
+
+-- Pensar en cómo deberíamos terminar con las siguientes definiciones:
+
+-- ```Tiger
+-- type List = Record {hd : int, tl : List}
+-- ```
+-- En Haskell debemos tener un poco más de cuidado.
+-- Para List vamos a generar el siguiente código:
+--   ```Haskell
+--   insertTValV "List" t
+--     where t = TRecord [ ("hd", TInt RW) , ("tl", t) ]
+--   ```
+-- Notar que el en el |where| el |t| se usa para continuar definiendose a sí
+-- mismo, pero Haskell al ser lazy anda todo bien.
+
+-- ```Tiger
+-- type A = Record {a : B , b : C}
+-- type B = Record {b : B}
+-- type C = Record {b : B , a : A}
+-- ```
+-- Pensar cómo deberían quedar estos...
+----------------------------------------
+-- + Para analizar y construir los records, lo vamos a hacer de a poco.
+-- Volveremos a utilizar la lista de los records, construiremos parcialmente el
+-- cuerpo de este record y propagar el cambio a __todos__ los tipos del batch.
+-- Por ejemplo, si tenemos 5 definiciones de tipos, de las cuales 2 son records.
+-- Tendremos dos listas una |rs| con la información de los records, de longitud
+-- 2, y una lista |ts| con los nombres e información de cada uno de los tipos
+-- que __no__ son records. Para cada uno de los records (son dos) vamos a
+-- actualizar todos los tipos que son (4).
+--
+-- Para esto vamos a necesitar principalmente la ayuda de una función
+--  |autoRef :: Symbol -> Tipo -> Tipo -> Tipo|
+--   que toma un |s :: Symbol|, |t : Tipo|, |r : Tipo| y retorna un |r' : Tipo|,
+--   lo que hace es recorrer a |r| y cada vez que encuentre una referencia de
+--   record a |s| ponga en su lugar a |t|. Esta la vamos a usar para generar
+--   correctamente el tipo recursivo de los records recursivos. Básicamente es
+--   lo que va a generar el |t| del ejemplo de |List| (ver más arriba).
+----------------------------------------
+-- Siguiendo el ejemplo de |List| tendríamos un |insertValV "List" t| donde
+-- ahora |t| no tiene mención a si mísmo, pero podría tener otras referencias.
+-- Al propagar esta información al resto de los tipos eliminamos las posibles
+-- referencias al record que acábamos de definir.
+--
+-- Es decir, tenemos un nombre
+-- menos!!! Si hacemos esto con todos los records estmos listos!!!
+----------------------------------------
+
+
 transDecs ((TypeDec xs) : xss)              m = m
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)

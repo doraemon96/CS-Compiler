@@ -13,6 +13,7 @@ import           TigerTemp
 import           TigerTree
 
 import           TigerSymbol
+import           TigerUnique
 
 import           Control.Monad.State
 import           Data.Map.Strict     as M
@@ -141,31 +142,9 @@ class Monad w => Trackable w where
 data Obus = O {mapLS :: M.Map Label [Stm], lgen :: Integer , tgen :: Integer}
 
 firstTank :: Obus
-firstTank = O {mapLS = M.empty, lgen = 0, tgen = 0}
+firstTank = O {mapLS = M.empty}
 
-type Tank = State Obus
-
--- instance Environmental Tank where
---     data Mapper Tank a b = M (Map a b)
---     lookupI a (M m) = lookup a m
---     insertI k v (M m) = M $ insert k v m
---     intersecI f (M m1) (M m2) = M $intersectionWith f m1 m2
---     updateI k v (M m) = M $ insert k v m
---     emptyI = M empty
-
-instance TLGenerator Tank where
-    newTemp = do
-        st <- get
-        let i = tgen st
-        let temp = detgenTemp i
-        put st{tgen=i+1}
-        return temp
-    newLabel = do
-        st <- get
-        let i = lgen st
-        let label = detgenLabel i
-        put st{lgen=i+1}
-        return label
+type Tank = StateT Obus StGen
 
 instance Trackable Tank where
     enterBlock' l b = do
