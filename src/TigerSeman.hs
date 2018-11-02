@@ -6,6 +6,7 @@ import           TigerSres
 import           TigerSymbol
 import           TigerTips
 import           TigerUnique
+import           TigerTopSort
 
 -- Segunda parte imports:
 import           TigerTemp
@@ -134,6 +135,15 @@ cmpZip ((sl,tl):xs) ((sr,tr,p):ys) =
         then cmpZip xs ys
         else errorTipos tl tr
 
+-- Función auxiliar que utilizaremos para separar una lista utilizando una
+-- función que separe los elementos en pares.
+splitWith :: (a -> Either b c) -> [a] -> ([b], [c])
+addIzq :: ([a], [b]) -> a -> ([a],[b])
+addDer :: ([a], [b]) -> b -> ([a],[b])
+splitWith f = P.foldr (\x rs -> either (addIzq rs) (addDer rs) (f x)) ([] , [])
+addIzq (as,bs) a = (a : as, bs)
+addDer (as,bs) b = (as, b : bs)
+
 buscarM :: Symbol -> [(Symbol, Tipo, Int)] -> Maybe Tipo
 buscarM s [] = Nothing
 buscarM s ((s',t,_):xs) | s == s' = Just t
@@ -150,10 +160,10 @@ transVar (SubscriptVar v e) = undefined
 
 -- | __Completar__ 'TransTy'
 -- El objetivo de esta función es dado un tipo
--- que proviene de la gramatica, dar una representación
+-- que proviene de la gramática, dar una representación
 -- de tipo interna del compilador
 
--- | Nota para cuando se generte código intermedio
+-- | Nota para cuando se generarte código intermedio
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
@@ -169,8 +179,8 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 -- | transDecs es la encargada de tipar las definiciones y posteriormente
 -- generar código intermedio solamente para las declaraciones de variables.
 ----------------------------------------
--- Aquí se encontrararán con la parte más díficil de esta etapa,
--- que es la detección de búcles y correcta inserción de tipos
+-- Aquí se encontraran con la parte más difícil de esta etapa,
+-- que es la detección de bucles y correcta inserción de tipos
 -- en el entorno.
 -- + Para realizar correctamente la detección de cíclos se utiliza el algoritmo
 --   de sort topologico. Pueden encontrar una simple implementación en el
@@ -181,8 +191,11 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --   Knot](https://wiki.haskell.org/Tying_the_Knot)
 ----------------------------------------
 -- ** transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
-transDecs :: (Manticore w) => [Dec] -> w a -> w a
-transDecs [] m = m
+transDecs :: Manticore w => [Dec] -> w a -> w a
+--
+----------------------------------------
+-- Caso base.
+transDecs [] m                               = m
 ----------------------------------------
 -- Aquí veremos brillar la abstracción que tomamos en |invertValV|
 transDecs ((VarDec nm escap t init p): xs) m = m
@@ -192,18 +205,44 @@ transDecs ((VarDec nm escap t init p): xs) m = m
 -- recursivas así que tendrán que hacer un poco más de trabajo.
 transDecs ((FunctionDec fs) : xs)          m = m
 ----------------------------------------
+transDecs ((TypeDec xs) : xss)              m =
+  let
+    -- (0) Nos quedamos con todos los nombres. Nos va venir bien para cuando
+    -- tengamos que actualizar a todos los tipos del batch
+    -- __en este esqueleto voy a tirar las posiciones__.
+    xs' = fmap (\(x,y,_) -> (x,y)) xs
+    tyNames =  fst $ unzip xs'
+    -- (1)
+    (recordsTy, nrTy) = splitWith (\(s , t) -> either (Left . (s,)) (Right . (s,)) (splitRecordTy t)) xs'
+    -- (2)
+    sortedTys = kahnSort nrTy
+  in
+    -- (3)
+    insertRecordsAsRef recordsTy $
+    -- (4)
+    insertSortedTys sortedTys $
+----------------------------------------
+    undefined -- Completar el algoritmo.
+----------------------------------------
 -- Las declaraciones de tipos al igual que las funciones vendrán en batch de
 -- tipos mutuamente recursivos.
 -- Para esto pueden seguir el siguiente camino:
--- + Separar la lista xs en dos, por un lado los Records y por otro los tipos NoRecords.
--- + Ordenar usando el sort topologico las definiciones que __no__ son records . Ya que
---   estos __no__ generan conflictos (ver Teoría)
--- + Ya que los records no generan dependencias, pero si podríamos necesitarlos
---   para definir los otros tipos. Los metemos directamente como (rName, rTy) ->
---   insertTipoT rName (TRecordRef rName)
--- + Luego siguiendo el resultado del Sort Topologico insertamos el resto de los
---   tipos, para esto van a necesitar una función |transTy :: Ty -> Tipo| que sólo
---   analizará |Ty| que __no__ son records.
+-- + 1) Separar la lista xs en dos, por un lado los Records y por otro los tipos
+-- NoRecords.
+-- + 2) Ordenar usando el sort topologico las definiciones que __no__ son
+--   records . Ya que estos __no__ generan conflictos (ver Teoría)
+-- + 3) Ya que los records no generan dependencias, pero si podríamos
+--   necesitarlos para definir los otros tipos. Los metemos directamente como
+--   (rName, rTy) -> insertTipoT rName (TRecordRef rName)
+insertRecordsAsRef  :: Manticore w => [(Symbol, Ty)] -> w a -> w a
+insertRecordsAsRef [] m = m
+insertRecordsAsRef ((rSym, rTy) : rs) m = undefined -- Completar el algoritmo.
+-- + 4) Luego siguiendo el resultado del Sort Topológico insertamos el resto de
+--   los tipos, para esto van a necesitar una función |transTy :: Ty -> Tipo|
+--   que sólo analizará |Ty| que __no__ son records.
+insertSortedTys :: Manticore w => [(Symbol, Ty)] -> w a -> w a
+insertSortedTys [] m = m
+insertSortedTys ((tSym, tTy) : ts) m = undefined -- Completar el algoritmo.
 ----------------------------------------
 -- Pequeño parate acá, en el entorno tenemos los records definidos como
 -- referencias a sí mismo y a los demás tipos con sus estructuras pero con
@@ -243,6 +282,7 @@ transDecs ((FunctionDec fs) : xs)          m = m
 -- 2, y una lista |ts| con los nombres e información de cada uno de los tipos
 -- que __no__ son records. Para cada uno de los records (son dos) vamos a
 -- actualizar todos los tipos que son (4).
+----------------------------------------
 --
 -- Para esto vamos a necesitar principalmente la ayuda de una función
 --  |autoRef :: Symbol -> Tipo -> Tipo -> Tipo|
@@ -251,18 +291,30 @@ transDecs ((FunctionDec fs) : xs)          m = m
 --   record a |s| ponga en su lugar a |t|. Esta la vamos a usar para generar
 --   correctamente el tipo recursivo de los records recursivos. Básicamente es
 --   lo que va a generar el |t| del ejemplo de |List| (ver más arriba).
+autoRef :: Symbol -> Tipo -> Tipo -> Tipo
+autoRef s t t'@(RefRecord s') | s == s' = t | otherwise = t'
+autoRef _ _ t = t
 ----------------------------------------
 -- Siguiendo el ejemplo de |List| tendríamos un |insertValV "List" t| donde
--- ahora |t| no tiene mención a si mísmo, pero podría tener otras referencias.
+-- ahora |t| no tiene mención a si mismo, pero podría tener otras referencias.
 -- Al propagar esta información al resto de los tipos eliminamos las posibles
--- referencias al record que acábamos de definir.
+-- referencias al record que acabamos de definir.
 --
--- Es decir, tenemos un nombre
--- menos!!! Si hacemos esto con todos los records estmos listos!!!
+-- Es decir, tenemos un nombre menos!!! Si hacemos esto con todos los records
+-- estamos listos!!!
 ----------------------------------------
-
-
-transDecs ((TypeDec xs) : xss)              m = m
+-- Para propagar la info, podemos tener una funcion auxiliar que sea
+-- |updateT :: Manticore w => Symbol -> Tipo -> Symbol -> w a -> w a| que para
+--  dados |(s : Symbol)|, |(t : Tipo)|, y un simbolo |w|, busque en la tabla el
+--  tipo que tiene asignado |w| y lko recorra buscando referencias al record |s|
+--  y si la encuentra la reemplaze por el tipo |t|. (ver |autoRef|).
+----------------------------------------
+updateRefs :: Manticore w => Symbol -> Tipo -> Symbol -> w a -> w a
+updateRefs  s t s' m = do
+  -- | Buscamos el tipo de s'
+  t'  <- getTipoT s'
+  -- | Insertamos el nuevo tipo eliminando si la tiene, las referencias a |s|
+  insertTipoT s' (autoRef s t t') m
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)

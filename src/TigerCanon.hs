@@ -139,21 +139,20 @@ class Monad w => Trackable w where
     enterBlock _ = return ()
     getBlock :: Label -> w (Maybe [Stm])
 
-data Obus = O {mapLS :: M.Map Label [Stm], lgen :: Integer , tgen :: Integer}
+-- [TAM](https://es.wikipedia.org/wiki/Tanque_Argentino_Mediano)
+type TAM = M.Map Label [Stm]
 
-firstTank :: Obus
-firstTank = O {mapLS = M.empty}
+firstTank :: TAM
+firstTank = M.empty
 
-type Tank = StateT Obus StGen
+-- Recuerden que StGen nos da gratis el generador de temporales y labels.
+type Tank = StateT TAM StGen
 
 instance Trackable Tank where
     enterBlock' l b = do
         st <- get
-        let nmap = insert l b (mapLS st)
-        put st{mapLS=nmap}
-    getBlock l = do
-        st <- get
-        return $ lookup l (mapLS st)
+        put $ insert l b st
+    getBlock l = gets $ lookup l
 
 splitlast :: [a] -> ([a] , a)
 splitlast ls = (init ls, last ls)
@@ -178,7 +177,7 @@ traceR b@(Label lab : _)  rs = do
                     rest' <- getnext rs
                     return $ most ++ [CJump p x y t l', Label l', Jump (Name f) f] ++ rest'
         (_ , Jump _ _) -> do {t <- getnext rs; return $ b ++ t}
-        _ -> error "Derbería ser imposible"
+        _ -> error "Debería ser imposible"
 traceR _ _ = error "Debería ser imposible"
 
 getnext :: (Trackable w, TLGenerator w) => [[Stm]] -> w [Stm]
@@ -201,12 +200,3 @@ canonM st = do
     lin <- linearize st
     lss <- basicBlocks lin
     traceSchedule lss
-
--- canon :: Int -> Int -> [(Stm,a)] -> ([([Stm],a)], Int, Int)
--- canon tseed lseed frs = let
---     fsTank = firstTank {lgen = lseed, tgen = tseed}
---     (res,est) = runState (
---                     mapM (\(st,fr) -> do
---                             ss <- canonM st
---                             return (ss,fr)) frs) fsTank
---     in (res, tgen est, lgen est)

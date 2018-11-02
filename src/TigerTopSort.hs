@@ -10,7 +10,10 @@ import           Data.List
 
 import qualified Data.Map            as M
 
--- Implementación simple de el algoritmo de [Kahn](https://en.wikipedia.org/wiki/Topological_sorting)
+-- Implementación simple de el algoritmo de
+-- [Kahn](https://en.wikipedia.org/wiki/Topological_sorting)
+-- Deberían obviamente mejorar el código, particularmente si quieren dar errores
+-- significativos
 
 type DepMap = M.Map Symbol [Symbol]
 
