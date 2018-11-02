@@ -263,15 +263,15 @@ archivos de un directorio.
   * [x] Mejorar el TigerMain, modularizar el estado de los temporales como dos
         estados.
   * [x] Testing
-  * [ ] [QQ](https://wiki.haskell.org/Quasiquotation) para simplificar el testing
+  * [x] [QQ](https://wiki.haskell.org/Quasiquotation) para simplificar el testing
   * [ ] Simplificación del algoritmo abusando de reader (No sé bien que sería esto)
   * [ ] Simplificación de otras partes del compilador (Pensar mejor cómo hacer bien las cosas)
   * [ ] TopSort:
-    + [ ] Documentar solución de cíclos, citar [Tying The Knot](https://wiki.haskell.org/Tying_the_Knot)
+    + [x] Documentar solución de cíclos, citar [Tying The Knot](https://wiki.haskell.org/Tying_the_Knot)
     + [x] Esqueleto andando
-    + [ ] Resolver tipos previos.
-    + [ ] Permitir ciclos con los records.
-  * [ ] Propagar bien los cambios a los test.
+    + [x] Resolver tipos previos.
+    + [x] Permitir ciclos con los records.
+  * [x] Propagar bien los cambios a los test.
 - [ ] Interprete Código Intermedio
   * [x] Parte Fácil.
   * [ ] Parte difícil **llamada a de funciones**.
@@ -282,5 +282,5 @@ archivos de un directorio.
 - [ ] Terminar de documentar todo:
   * [x] Monadas
   * [x] Extensiones
-  * [ ] Lazy Top Sort
+  * [x] Lazy Top Sort
   * [x] Algoritmos a la Haskell
