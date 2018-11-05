@@ -42,7 +42,8 @@ getFBody (FBody sts) = sts
 getFBody _ = error "NOT A FUN"
 
 data CPU = CPU
-    { mem :: M.Map Temp Int
+    { -- | Mem representa la memoria del CPU, básicamente los registros.
+      mem :: M.Map Temp Int
     , wat :: M.Map Int Dato
     , dat :: M.Map Label Dato
     , output :: [Symbol]
@@ -192,7 +193,10 @@ loadCPU fs ss tmain =
                                     }
                                )
                  loadStrings fs
+    -- Separamos los primeros Statements hasta el primer label, que lo separamos.
     (main, restLabels) = splitStms tmain
-    inCpu = Prelude.foldl (\ r (l,s) -> r{dat = M.insert l (FBody ([], s)) (dat r)} ) loadProcs restLabels
+    -- Agregamos los nuevos lbls que encontramos en el main.
+    inCpu = Prelude.foldl (\ r (l,s) -> r{dat = M.insert l (FBody ([], s))
+                                               (dat r)} ) loadProcs restLabels
   in
-  runInitial inCpu main
+    runInitial inCpu (snd $ head $ restLabels)

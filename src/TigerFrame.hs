@@ -81,7 +81,12 @@ defaultFrame =  Frame {name = empty
 
 -- TODOS A stack por i386
 prepFormals :: Frame -> [Access]
-prepFormals fs = reverse $  snd (foldl (\ (n,rs) _ -> (n+argsGap, InFrame n : rs) ) (argsInicial,[]) (formals fs))
+prepFormals fs = reverse
+                 $ snd
+                 (foldl (\ (n,rs) _ -> (n+argsGap, InFrame n : rs))
+                        (argsInicial,[])
+                        (formals fs)
+                 )
 
 newFrame :: Symbol -> [Bool] -> Frame
 newFrame nm fs = defaultFrame {name = nm, formals = fs}
