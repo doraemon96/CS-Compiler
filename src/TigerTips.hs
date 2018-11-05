@@ -35,7 +35,7 @@ data Tipo = TUnit
           -- | Referencia a un record y a un Tipo.
           -- Estos elementos son útiles en el proceso de detección de ciclos,
           -- pero no deberían verse una vez realizada la detección.
-          | RefRecord Symbol | TTipo Symbol
+          | RefRecord Symbol
     deriving (Show,Eq)
 
 -- | Internamente capaz que es mejor usar esta construcción.
@@ -58,10 +58,6 @@ equivTipo TNil TRecord{}                = True
 equivTipo (TRecord _ u1) (TRecord _ u2) = u1 == u2
 equivTipo (TArray _ u1) (TArray _ u2)   = u1 == u2
 equivTipo (TInt _) (TInt _)             = True
--- TTipo es una referencia a otro tipo, no deberíamos
--- encontrarnos ninguno de estos tipos.
-equivTipo (TTipo _) _                   = error "Referencia a un tipo.[1]"
-equivTipo _ (TTipo _)                   = error "Referencia a un tipo.[2]"
 equivTipo a b                           = a == b -- Eq
 
 -- | Función /linda/ para mostrar un error de tipos.
