@@ -16,7 +16,7 @@ main =
                           , (pack "r2", 100)
                           ])
                 (M.fromList [(1, Str "hola")])
-                (M.fromList [ ("str1" , GG 1)])
+                (M.fromList [ ("str1" , DInt 1)])
                 []
                 []
   in

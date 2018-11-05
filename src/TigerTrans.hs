@@ -1,4 +1,4 @@
-{-# Language UndecidableInstances  #-}
+{-# Language UndecidableInstances #-}
 module TigerTrans where
 
 import qualified Control.Monad.State as ST
@@ -136,6 +136,7 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
     -- | Level management
     -- Es un entero que nos indica en qué nivel estamos actualmente.
     getActualLevel :: w Int
+    getActualLevel = getNlvl <$> topLevel
     upLvl :: w ()
     downLvl :: w ()
     -- | Salida management.
