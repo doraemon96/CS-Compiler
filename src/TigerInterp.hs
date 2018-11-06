@@ -1,19 +1,20 @@
-{-# Language LambdaCase #-}
-{-# Language OverloadedStrings #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
 module TigerInterp where
 
-import Prelude hiding (compare, EQ)
+import           Prelude             hiding (EQ, compare)
 
-import TigerTree
-import TigerFrame
-import TigerTemp
-import TigerSymbol
+import           TigerFrame
+import           TigerSymbol
+import           TigerTemp
+import           TigerTree
 
-import Data.Map as M
+import           Data.Map            as M
 
-import Control.Monad.State
+import           Control.Arrow
+import           Control.Monad.State
 
-import Debug.Trace
+import           Debug.Trace
 
 -- | Datos a almacenar en memoria.
 data Dato
@@ -31,23 +32,27 @@ data Dato
 
 getInt :: Dato -> Int
 getInt (DInt i) = i
-getInt _ = error "NOT AN INT"
+getInt _        = error "NOT AN INT"
 
 getStr :: Dato -> Symbol
 getStr (Str s) = s
-getStr _ = error "NOT A Symbol?"
+getStr _       = error "NOT A Symbol?"
 
 getFBody :: Dato -> ([Access] , [Stm])
 getFBody (FBody sts) = sts
-getFBody _ = error "NOT A FUN"
+getFBody _           = error "NOT A FUN"
 
 data CPU = CPU
     { -- | Mem representa la memoria del CPU, básicamente los registros.
-      mem :: M.Map Temp Int
-    , wat :: M.Map Int Dato
-    , dat :: M.Map Label Dato
+      mem    :: M.Map Temp Int
+      -- | Representa la memoria RAM, mapea direcciones de memoria a datos.
+    , wat    :: M.Map Int Dato
+      -- | Mapea Labels en Datos, en una CPU normal, Wat y Dat son lo mismo.
+    , dat    :: M.Map Label Dato
+      -- | Buffer de salida, a donde imprime la llamada a print.
     , output :: [Symbol]
-    , input :: [Symbol]
+      -- | Buffer de entrada, de donde sacamos la entrada cuando thacemos getchar.
+    , input  :: [Symbol]
     } deriving Show
 
 type RC = State CPU
@@ -68,11 +73,11 @@ extDispatcher "print" (x : _ ) = printExec x
 
 compute :: BOp -> Int -> Int -> Int
 compute Plus = (+)
-compute _ = error "TODO"
+compute _    = error "TODO"
 
 compare :: Relop -> Int -> Int -> Bool
 compare EQ = (==)
-compare _ = error "TODO"
+compare _  = error "TODO"
 
 -- | Exp :: TInt
 iexp :: Exp -> RC Int
@@ -136,9 +141,9 @@ step (CJump bop x y tt ff) = do
     [Jump (Const 0) ff]
 
 runPc :: [Stm] -> RC ()
-runPc [] = return ()
+runPc []             = return ()
 runPc (l@Jump{} : _) = step l >>= runPc
-runPc (x : xs) = step x >>= \ys -> runPc (ys ++ xs)
+runPc (x : xs)       = step x >>= \ys -> runPc (ys ++ xs)
 
 emptyCPU :: CPU
 emptyCPU = CPU M.empty M.empty M.empty [] []
@@ -149,21 +154,21 @@ runInitial cpu prog = execState (runPc prog) cpu
 -- | Función que búsca los posibles labels dentro de una sequencia de stms.
 splitStms :: [Stm]
           ->
-             -- | Lista de stms hasta encontrar un Label.
+          -- | Lista de stms hasta encontrar un Label.
              ([Stm]
-             -- | Segmentos Lable lista de Stmts debajo de él.
+          -- | Segmentos Lable lista de Stmts debajo de él.
              , [(Label, [Stm])])
-splitStms [] = ([],[])
+splitStms []               = ([],[])
 splitStms ((Label l) : ts) = ([], splitLbls ts (l , []))
-splitStms (t : ts) = let (res, lbls) = splitStms ts in (t : res, lbls)
+splitStms (t : ts)         = let (res, lbls) = splitStms ts in (t : res, lbls)
 
 -- | Función auxiliar que claramente hace todo el trabajo. Básicamente va
 -- acumulando hasta encontrar un Label, lo agrega al final de la lista, y pasa a
 -- acumular otro label.
 splitLbls :: [Stm] -> (Label, [Stm]) -> [(Label, [Stm])]
-splitLbls [] ts = [ts]
-splitLbls ((Label l) : ts) rs = rs : splitLbls ts (l,[])
-splitLbls (t : ts) (l, rs) = splitLbls ts (l, t : rs)
+splitLbls [] ts               = [ second reverse ts]
+splitLbls ((Label l) : ts) rs = (second reverse rs) : splitLbls ts (l,[])
+splitLbls (t : ts) (l, rs)    = splitLbls ts (l, t : rs)
 
 -- | Preparamos la CPU para que corra desde un estado inicial.
 loadCPU ::
@@ -200,3 +205,13 @@ loadCPU fs ss tmain =
                                                (dat r)} ) loadProcs restLabels
   in
     runInitial inCpu (snd $ head $ restLabels)
+
+test = [ Label "L0"
+       , Move (Temp rv) (Const 1)
+       , Jump (Name "L1") "L1"
+       , Label "L1"
+       , Move (Temp fp) (Const 2)
+       ]
+
+ll :: Label
+ll = "L8"
