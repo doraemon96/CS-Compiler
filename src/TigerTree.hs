@@ -1,8 +1,11 @@
 module TigerTree where
 
-import qualified TigerTemp as Temp
+import qualified TigerTemp                     as Temp
 
-import           Prelude   hiding (EQ, GT, LT)
+import           Prelude                 hiding ( EQ
+                                                , GT
+                                                , LT
+                                                )
 
 data Exp
     = Const Int
@@ -37,7 +40,7 @@ notRel LT  = GE
 notRel GE  = LT
 notRel GT  = LE
 notRel LE  = GT
-notRel ULT=UGE
-notRel UGE=ULT
+notRel ULT = UGE
+notRel UGE = ULT
 notRel ULE = UGT
 notRel UGT = ULE

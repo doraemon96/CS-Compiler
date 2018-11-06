@@ -4,7 +4,7 @@
 
 module TigerTraversals where
 
-import Prelude hiding (Traversable)
+import           Prelude                 hiding ( Traversable )
 
 import           TigerAbs
 import           TigerSymbol
@@ -81,7 +81,6 @@ travFold f = getConstant . traversable (Constant . f)
 
 countPrints :: Exp -> Int
 countPrints = getSum . travFold caso
-  where
-    caso (CallExp s _ _) = if unpack s == "print" then Sum 1
-                           else Sum 0
-    caso e = travFold caso e
+ where
+  caso (CallExp s _ _) = if unpack s == "print" then Sum 1 else Sum 0
+  caso e               = travFold caso e
