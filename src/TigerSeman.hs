@@ -28,7 +28,7 @@ import           Prelude                    as P
 
 -- Debugging. 'trace :: String -> a -> a'
 -- imprime en pantalla la string cuando se ejecuta.
-import           Debug.Trace                (trace)
+import           Debug.Trace                (trace, traceM)
 
 -- * Análisis Semántico, aka Inferidor de Tipos
 
@@ -439,6 +439,8 @@ instance Demon Monada where
   derror =  throwE
   -- TODO: Parte del estudiante
   -- adder :: w a -> Symbol -> w a
+  adder m s = catchE m (throwE . flip append s)
+
 instance Manticore Monada where
   -- | A modo de ejemplo esta es una opción de ejemplo de 'insertValV :: Symbol -> ValEntry -> w a -> w'
     insertValV sym ventry m = do
