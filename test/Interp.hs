@@ -9,23 +9,25 @@ import Data.Map as M
 
 main :: IO ()
 main =
-  let cpu = CPU (M.fromList [ (rv , 0)
-                          , (fp , 0)
-                          , (sp , 0)
-                          , (pack "r1", 15)
-                          , (pack "r2", 100)
-                          ])
-                (M.fromList [(1, Str "hola")])
-                (M.fromList [ ("str1" , DInt 1)])
-                []
-                []
+  let cpu = CPU
+            -- mem
+               (M.fromList
+                 [ (rv , 0)
+                 , (fp , 0)
+                 , (sp , 0)
+                 , (pack "r1", 15)
+                 , (pack "r2", 100)
+                 ])
+            -- wat
+               (M.fromList [(1, Str "hola")])
+            -- dat
+               (M.fromList [ ("str1" , DInt 1)])
+            -- I/O
+               []
+               []
   in
   putStrLn "\n======= Test Interpreter n progress =======" >>
-  -- if (testinterp cpu [(res sumareg)] 115) then
-  --   bluenice
-  -- else
-  --   putStrLn "FAIL" >>
-  print (testinterp cpu [(res callP)] 1) >>
+  putStrLn (printCpu $ runInitial cpu [(res callP)]) >>
   putStrLn "\n======= Test FIN ======="
 
 testinterp :: CPU -> [Stm] -> Int -> Bool

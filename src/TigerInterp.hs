@@ -4,6 +4,7 @@ module TigerInterp where
 
 import           Prelude                 hiding ( EQ
                                                 , compare
+                                                , (!!)
                                                 )
 
 import           TigerFrame
@@ -59,23 +60,37 @@ data CPU = CPU
     , input  :: [Symbol]
     } deriving Show
 
+printCpu :: CPU -> String
+printCpu cpu =
+  "----------\n" ++
+  "RV : " ++ show (mem cpu ! rv) ++
+               "\n" ++
+               "Output: " ++ show (output cpu) ++
+  "\n----------\n"
+
 type RC = State CPU
+
+-- Map helper test function
+(!!) :: (Ord k , Show k, Show v) => Map k v -> k -> v
+m !! k = maybe (error $ "No encontrada la clave: "
+                      ++ show k
+               ) id $ m !? k
+
 
 -- | Función para chequear si es una función externa.
 extCall :: Label -> Bool
-extCall l = all ((== l) . pack) ["print", "flush", "getchar"]
+extCall l = or $ fmap ((== l) . pack) ["print", "flush", "getchar"]
 
 -- | Llamada externa a print.
 -- Dada una dirección de memoria |i : Int| buscamos a que
--- label | mblab : Label | hace referencias y luego buscamos la
--- cadena de caracteres | mbstr : String | y lo concatenamos en
+-- label | mblab : Label | hace referencias y la concatenamos en
 -- output (que sería la salida estandard)
 printExec :: Int -> RC Int
 printExec i = trace ("Llamada a print con argumento: " ++ show i) $ do
   env <- get
-  let mblab = wat env ! i
-  let mbstr = dat env ! getStr mblab
-  put (env { output = output env ++ [getStr mbstr] })
+  let mblab = wat env !! i
+  -- let mbstr = dat env !! getStr mblab
+  put (env { output = output env ++ [getStr mblab] })
   return 1
 
 -- | Dispatcher de funciones externas.
@@ -96,13 +111,14 @@ compare _  = error "TODO"
 -- Ejecución de expresiones, son instrucciones que retornan un entero.
 iexp :: Exp -> RC Int
 -- | Una expresión |Const i| retorna a |i|
-iexp (Const i     ) = return i
+iexp (Const i     ) = trace "Const" $ return i
 -- | |Name l| representa lo que tenga asignado la label |l|, es decir, hay que buscarlo en memoria.
-iexp (Name  n     ) = trace ("NAME") $ get >>= \e -> return $ getInt (dat e ! n)
+iexp (Name  n     ) = trace ("NAME " ++ show n) $
+                      get >>= \e -> return $ getInt ((dat e) !! n)
 -- | Devolvemos lo que tenga el temporario.
-iexp (Temp  t     ) = get >>= \e -> return $ mem e ! t
+iexp (Temp  t     ) = trace "Temp" $ get >>= \e -> return $ mem e !! t
 -- | Computamos la operación |op|, viendo que valor toman los argumentos.
-iexp (Binop op x y) = do
+iexp (Binop op x y) = trace "Binop" $ do
   -- Evaluamos a |x|
   x' <- iexp x
   -- Evaluamos a |y|
@@ -110,18 +126,18 @@ iexp (Binop op x y) = do
   -- Computamos op con |x'| e |y'|
   return $ compute op x' y'
 -- | Básicamente desreferenciamos a lo que apunte |e|
-iexp (Mem e) = do
+iexp (Mem e) = trace "Mem" $ do
   e'  <- iexp e
   env <- get
-  return $ getInt $ wat env ! e'
+  return $ getInt $ wat env !! e'
 -- | LLamada a función |f| con argumentos |es|.
 -- Esto no está implementado totalmente, y posiblemente tampoco correctamente.
-iexp (Call (Name f) es) = do
+iexp (Call (Name f) es) = trace "Call" $ do
   -- Evaluamos cada uno de los argumentos.
   es'  <- mapM iexp es
   dats <- gets dat
   -- Chequeamos si es externa
-  if (extCall f)
+  if extCall f
     -- En el caso que sea llamamos al dispatcher.
     then extDispatcher f es'
     else do
@@ -131,7 +147,7 @@ iexp (Call (Name f) es) = do
     -- definir correctamente la convención de llamada.
     -- TODO: completar
     -- Buscamos la info de |f| cargada en la CPU. Esto nos da un |acc| y el |body|.
-      let (acc, body) = getFBody $ dats ! f
+      let (acc, body) = getFBody $ dats !! f
       -- Deberíamos preparar bien la info de los argumentos, los access de estos
       -- con los argumentos reales que están en |es'|.
       ----------------------------------------
@@ -142,32 +158,32 @@ iexp (Call (Name f) es) = do
       -- TODO: Ejecutar el main?
       -- Buscar el resultado en rv y devolverlo.
       mems <- gets mem
-      return $ mems ! rv
+      return $ mems !! rv
 -- En ppio no puede pasar otra cosa. A menos que estemos en un leng funcional ;)
 iexp (Call _ _) = error "Puede pasar?"
 -- | |Eseq| es la ejecución secuencial de los pasos.
-iexp (Eseq s e) = step s >> iexp e
+iexp (Eseq s e) = trace "Eseq" $ step s >> iexp e
 
 -- | Cada paso de la máquina es la ejecución de un |Stm| que puede derivar en la
 -- necesidad de continuar ejecutando aún más |[Stm]|
 step :: Stm -> RC [Stm]
 -- Un label no hace nada.
-step (Label _              ) = return []
+step (Label _              ) = trace "Label" $ return []
 -- Ejecutamos primeo a |l| y dsp |r|
-step (Seq  l        r      ) = return [l, r]
+step (Seq  l        r      ) = trace "Seq" $ return [l, r]
 -- | Assm load
-step (Move (Temp t) (Mem m)) = do
+step (Move (Temp t) (Mem m)) = trace "Move" $ do
   -- Búscamos que entero representa a |m|
   dir  <- iexp m
   -- Desreferenciamos esa dirección
   wats <- gets wat
-  let info = (getInt $ wats ! dir)
+  let info = (getInt $ wats !! dir)
   -- Lo movemos a |t|
   modify $ \env -> env { mem = M.insert t info (mem env) }
   return []
 -- El casogeneral del |Move| (en el que __no__ tenemos que desreferencias memoria),
 -- es más sencillo.
-step (Move (Temp t) src) = do
+step (Move (Temp t) src) = trace "Move" $ do
   -- Ejecutamos |src|
   val <- iexp src
   -- y movemos el resultado a |t|
@@ -176,7 +192,7 @@ step (Move (Temp t) src) = do
 -- | Assm store
 -- Igual que antes hacer un |Move| a una memoria
 -- es lo mismo que hacer un /Store/ en assembler. Y por ende un cambia el mapa que usamos.
-step (Move (Mem t) src) = do
+step (Move (Mem t) src) = trace "Move" $ do
   -- Búscamos que dirección de memoria representa |t|
   dir <- iexp t
   -- ejecutamos |src|
@@ -185,7 +201,7 @@ step (Move (Mem t) src) = do
   modify $ \env -> env { wat = M.insert dir (DInt val) (wat env) }
   return []
 -- Move en el caso que no sea a memoria.
-step (Move dst src) = do
+step (Move dst src) = trace "Move" $ do
   -- Computamos |dst| y |src|
   src' <- iexp src
   dst' <- iexp dst
@@ -193,11 +209,11 @@ step (Move dst src) = do
   modify (\env -> env { wat = M.insert dst' (wat env ! src') (wat env) })
   return []
 -- Ejecutar una expresión tirando el resultado.
-step (ExpS e) = iexp e >> return []
+step (ExpS e) = trace "ExpS" $ iexp e >> return []
 -- El |Jump| queda sencillo, es simplemente búscar el código a ejecutar, y devolverlo.
-step (Jump _ l) = gets dat >>= \dats -> return $ snd $ getFBody $ dats ! l
+step (Jump _ l) = trace "Jump" $ gets dat >>= \dats -> return $ snd $ getFBody $ dats !! l
 -- |CJump| es un jump condicional, no creo que lo usen pero es fácil de implementar.
-step (CJump bop x y tt ff) = do
+step (CJump bop x y tt ff) = trace "CJump" $ do
   x' <- iexp x
   y' <- iexp y
   return
