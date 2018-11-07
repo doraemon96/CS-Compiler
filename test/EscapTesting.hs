@@ -16,11 +16,11 @@ main =
   test "./test/test_code" (const redfail) (const bluenice) tester "intro.tig" >>
   putStrLn "\n======= Good loc =======" >>
   testDir good_loc (testSTDGood tester) >>
-  putStrLn "Type:" >>
+  putStrLn "========= Type Loc =======" >>
   testDir type_loc (testGood type_loc tester) >>
   putStrLn "\n======= Test FIN ======="
 
-tester :: String -> Either Errores Exp
+tester :: String -> Either Symbol Exp
 tester = either (fail $ "Testing Escapes: Parser error")
                 calcularEEsc
          . parse
