@@ -181,6 +181,16 @@ step (Move (Temp t) (Mem m)) = trace "Move" $ do
   -- Lo movemos a |t|
   modify $ \env -> env { mem = M.insert t info (mem env) }
   return []
+step (Move (Temp t) (Name l)) = trace "Move" $ do
+  -- Búscamos que entero representa a |m|
+  dats <- gets dat
+  let dir = getInt $ dats !! l
+  -- Desreferenciamos esa dirección
+  wats <- gets wat
+  let info = (getInt $ wats !! dir)
+  -- Lo movemos a |t|
+  modify $ \env -> env { mem = M.insert t info (mem env) }
+  return []
 -- El casogeneral del |Move| (en el que __no__ tenemos que desreferencias memoria),
 -- es más sencillo.
 step (Move (Temp t) src) = trace "Move" $ do
