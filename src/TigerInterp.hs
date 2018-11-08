@@ -244,8 +244,15 @@ runPc (x        : xs) = step x >>= \ys -> runPc (ys ++ xs)
 --------------------------------------------------------------------------------
 
 -- | Estado inicial de la CPU.
+-- fp, sp, rv = 0.
 emptyCPU :: CPU
-emptyCPU = CPU M.empty M.empty M.empty [] []
+emptyCPU = CPU 
+            (M.fromlist
+                    [ (fp , 0)
+                    , (sp , 0)
+                    , (rv , 0)
+                    ])
+            M.empty M.empty [] []
 
 -- | Dada una |CPU| y una lista de |[Stm]| ejecutamos dicha lista y obtenemos la
 -- |CPU| resultante.
@@ -271,6 +278,23 @@ splitLbls :: [Stm] -> (Label, [Stm]) -> [(Label, [Stm])]
 splitLbls []               ts      = [second reverse ts]
 splitLbls ((Label l) : ts) rs      = (second reverse rs) : splitLbls ts (l, [])
 splitLbls (t         : ts) (l, rs) = splitLbls ts (l, t : rs)
+
+-- TODO: Terminar la unificación entre Dat y Wat!!
+-- loadLabels :: [(Label, Symbol)] -> CPU -> CPU
+-- loadLabels' :: [(Label, Symbol)] -> State Int CPU -> State Int CPU
+-- getDir :: State Int Int
+-- getDir = do
+--     i <- get
+--     put (i+1)
+--     return i
+--
+-- loadLabels' [] st = st
+-- loadLabels' ((lbl, sym) : defs) st = do 
+--     st' <- st
+--     dir <- getDir
+--     let dat' = M.insert lbl (Str sym) (dat st')
+--     let mem' = M.insert 
+
 
 -- TODO: Asignarle realmente una dirección de memoria con los datos cargados
 -- a cada una de las Labels... Es decir, mantener bien la idea
