@@ -182,7 +182,7 @@ step (Move (Temp t) (Mem m)) = trace "Move" $ do
   modify $ \env -> env { mem = M.insert t info (mem env) }
   return []
 step (Move (Temp t) (Name l)) = trace "Move" $ do
-  -- Búscamos que entero representa a |m|
+  -- Búscamos la dirección a la que apunta "l"
   dats <- gets dat
   let dir = getInt $ dats !! l
   -- Desreferenciamos esa dirección
@@ -272,6 +272,11 @@ splitLbls []               ts      = [second reverse ts]
 splitLbls ((Label l) : ts) rs      = (second reverse rs) : splitLbls ts (l, [])
 splitLbls (t         : ts) (l, rs) = splitLbls ts (l, t : rs)
 
+-- TODO: Asignarle realmente una dirección de memoria con los datos cargados
+-- a cada una de las Labels... Es decir, mantener bien la idea
+-- que cada label me define una direccón de memoria en la cpu...
+-- TODO: Armar la CPU inicial desde la info que tenemos en TigerFrame.
+-- Es decir, ponele cargar la variable RV, FP, etc...
 -- | Preparamos la CPU para que corra desde un estado inicial.
 loadCPU
   ::
