@@ -252,9 +252,7 @@ runPc (x        : xs) = step x >>= \ys -> runPc (ys ++ xs)
 -- | Estado inicial de la CPU.
 -- fp, sp, rv = 0.
 emptyCPU :: CPU
-emptyCPU = CPU
-            M.empty
-            M.empty M.empty [] []
+emptyCPU = CPU M.empty M.empty M.empty [] []
 
 -- | Dada una |CPU| y una lista de |[Stm]| ejecutamos dicha lista y obtenemos la
 -- |CPU| resultante.
@@ -293,27 +291,27 @@ newDir = do
 
 loadLabels :: [(Label, Symbol)] -> State Int CPU -> State Int CPU
 loadLabels [] st = st
-loadLabels ((lbl, sym) : defs) st = do
-    st' <- st
+loadLabels ((lbl, sym) : defs) st = trace ("STR:agregamos " ++ show lbl) $ do
+    st' <- loadLabels defs st
     dir <- newDir
     return (st'{dat = M.insert lbl dir (dat st')
                , wat = M.insert dir (Str sym) (wat st')})
 
 loadLabCod :: [(Label, [Stm])] -> State Int CPU -> State Int CPU
 loadLabCod [] cpu = cpu
-loadLabCod ((lbl, cod) : res) cpu = do
-  st' <- cpu
+loadLabCod ((lbl, cod) : res) cpu = trace ("Cod:agregamos " ++ show lbl) $ do
+  st' <- loadLabCod res cpu
   dir <- newDir
   return (st'{dat = M.insert lbl dir (dat st')
              , wat = M.insert dir (FBody ([], cod)) (wat st')})
 
 loadProcs :: [(Frame, [Stm])] -> State Int CPU -> State Int CPU
 loadProcs [] cpu = cpu
-loadProcs ((fr , fbody) : procs) cpu = do
+loadProcs ((fr , fbody) : procs) cpu = trace ("Proc: agregamos " ++ show (name fr)) $ do
   let fname = name fr
       (factBody, rests) = splitStms fbody
   fdir <- newDir
-  cpu' <- loadLabCod rests cpu
+  cpu' <- loadProcs procs $ loadLabCod rests cpu
   return (cpu'{
                dat = M.insert fname fdir (dat cpu')
              , wat = M.insert fdir (FBody (prepFormals fr , fbody)) (wat cpu')
