@@ -12,7 +12,7 @@ import           TigerSymbol
 import           TigerTemp
 import           TigerTree
 
-import           Data.Map                      as M
+import           Data.Map                      as M hiding (null)
 
 import           Control.Arrow
 import           Control.Monad.State
@@ -52,13 +52,19 @@ data CPU = CPU
       mem    :: M.Map Temp Int
       -- | Representa la memoria RAM, mapea direcciones de memoria a datos.
     , wat    :: M.Map Int Dato
-      -- | Mapea Labels en Datos, en una CPU normal, Wat y Dat son lo mismo.
-    , dat    :: M.Map Label Dato
+      -- | Mapea Labels a direcciones de memoria.
+    , dat    :: M.Map Label Int
       -- | Buffer de salida, a donde imprime la llamada a print.
     , output :: [Symbol]
       -- | Buffer de entrada, de donde sacamos la entrada cuando thacemos getchar.
     , input  :: [Symbol]
     } deriving Show
+
+getDat :: Label -> CPU -> Dato
+getDat l cpu = wat cpu !! (dat cpu !! l)
+
+uTemp :: Temp -> Int -> CPU -> CPU
+uTemp t i cpu = cpu{mem = M.insert t i (mem cpu)}
 
 printCpu :: CPU -> String
 printCpu cpu =
@@ -114,7 +120,7 @@ iexp :: Exp -> RC Int
 iexp (Const i     ) = trace "Const" $ return i
 -- | |Name l| representa lo que tenga asignado la label |l|, es decir, hay que buscarlo en memoria.
 iexp (Name  n     ) = trace ("NAME " ++ show n) $
-                      get >>= \e -> return $ getInt ((dat e) !! n)
+                      get >>= \e -> return $ (dat e) !! n
 -- | Devolvemos lo que tenga el temporario.
 iexp (Temp  t     ) = trace "Temp" $ get >>= \e -> return $ mem e !! t
 -- | Computamos la operación |op|, viendo que valor toman los argumentos.
@@ -135,7 +141,7 @@ iexp (Mem e) = trace "Mem" $ do
 iexp (Call (Name f) es) = trace "Call" $ do
   -- Evaluamos cada uno de los argumentos.
   es'  <- mapM iexp es
-  dats <- gets dat
+  cpu <- get
   -- Chequeamos si es externa
   if extCall f
     -- En el caso que sea llamamos al dispatcher.
@@ -147,7 +153,7 @@ iexp (Call (Name f) es) = trace "Call" $ do
     -- definir correctamente la convención de llamada.
     -- TODO: completar
     -- Buscamos la info de |f| cargada en la CPU. Esto nos da un |acc| y el |body|.
-      let (acc, body) = getFBody $ dats !! f
+      let (acc, body) = getFBody $ getDat f cpu
       -- Deberíamos preparar bien la info de los argumentos, los access de estos
       -- con los argumentos reales que están en |es'|.
       ----------------------------------------
@@ -157,8 +163,7 @@ iexp (Call (Name f) es) = trace "Call" $ do
       ----------------------------------------
       -- TODO: Ejecutar el main?
       -- Buscar el resultado en rv y devolverlo.
-      mems <- gets mem
-      return $ mems !! rv
+      return $ mem cpu !! rv
 -- En ppio no puede pasar otra cosa. A menos que estemos en un leng funcional ;)
 iexp (Call _ _) = error "Puede pasar?"
 -- | |Eseq| es la ejecución secuencial de los pasos.
@@ -181,16 +186,16 @@ step (Move (Temp t) (Mem m)) = trace "Move" $ do
   -- Lo movemos a |t|
   modify $ \env -> env { mem = M.insert t info (mem env) }
   return []
-step (Move (Temp t) (Name l)) = trace "Move" $ do
-  -- Búscamos la dirección a la que apunta "l"
-  dats <- gets dat
-  let dir = getInt $ dats !! l
-  -- Desreferenciamos esa dirección
-  wats <- gets wat
-  let info = (getInt $ wats !! dir)
-  -- Lo movemos a |t|
-  modify $ \env -> env { mem = M.insert t info (mem env) }
-  return []
+-- step (Move (Temp t) (Name l)) = trace "Move" $ do
+--   -- Búscamos la dirección a la que apunta "l"
+--   dats <- gets dat
+--   let dir = getInt $ dats !! l
+--   -- Desreferenciamos esa dirección
+--   wats <- gets wat
+--   let info = (getInt $ wats !! dir)
+--   -- Lo movemos a |t|
+--   modify $ \env -> env { mem = M.insert t info (mem env) }
+--   return []
 -- El casogeneral del |Move| (en el que __no__ tenemos que desreferencias memoria),
 -- es más sencillo.
 step (Move (Temp t) src) = trace "Move" $ do
@@ -221,7 +226,8 @@ step (Move dst src) = trace "Move" $ do
 -- Ejecutar una expresión tirando el resultado.
 step (ExpS e) = trace "ExpS" $ iexp e >> return []
 -- El |Jump| queda sencillo, es simplemente búscar el código a ejecutar, y devolverlo.
-step (Jump _ l) = trace "Jump" $ gets dat >>= \dats -> return $ snd $ getFBody $ dats !! l
+step (Jump _ l) = trace "Jump"
+                  $ gets (getDat l) >>= (return . snd . getFBody)
 -- |CJump| es un jump condicional, no creo que lo usen pero es fácil de implementar.
 step (CJump bop x y tt ff) = trace "CJump" $ do
   x' <- iexp x
@@ -246,12 +252,8 @@ runPc (x        : xs) = step x >>= \ys -> runPc (ys ++ xs)
 -- | Estado inicial de la CPU.
 -- fp, sp, rv = 0.
 emptyCPU :: CPU
-emptyCPU = CPU 
-            (M.fromlist
-                    [ (fp , 0)
-                    , (sp , 0)
-                    , (rv , 0)
-                    ])
+emptyCPU = CPU
+            M.empty
             M.empty M.empty [] []
 
 -- | Dada una |CPU| y una lista de |[Stm]| ejecutamos dicha lista y obtenemos la
@@ -279,28 +281,46 @@ splitLbls []               ts      = [second reverse ts]
 splitLbls ((Label l) : ts) rs      = (second reverse rs) : splitLbls ts (l, [])
 splitLbls (t         : ts) (l, rs) = splitLbls ts (l, t : rs)
 
--- TODO: Terminar la unificación entre Dat y Wat!!
--- loadLabels :: [(Label, Symbol)] -> CPU -> CPU
--- loadLabels' :: [(Label, Symbol)] -> State Int CPU -> State Int CPU
--- getDir :: State Int Int
--- getDir = do
---     i <- get
---     put (i+1)
---     return i
---
--- loadLabels' [] st = st
--- loadLabels' ((lbl, sym) : defs) st = do 
---     st' <- st
---     dir <- getDir
---     let dat' = M.insert lbl (Str sym) (dat st')
---     let mem' = M.insert 
 
+----------------------------------------
+-- | Función que genera una nueva dirección de memoria. Lo usamos
+-- para la asignación de direcciones a nombres en la CPU.
+newDir :: State Int Int
+newDir = do
+    i <- get
+    put (i+1)
+    return i
 
--- TODO: Asignarle realmente una dirección de memoria con los datos cargados
--- a cada una de las Labels... Es decir, mantener bien la idea
--- que cada label me define una direccón de memoria en la cpu...
--- TODO: Armar la CPU inicial desde la info que tenemos en TigerFrame.
--- Es decir, ponele cargar la variable RV, FP, etc...
+loadLabels :: [(Label, Symbol)] -> State Int CPU -> State Int CPU
+loadLabels [] st = st
+loadLabels ((lbl, sym) : defs) st = do
+    st' <- st
+    dir <- newDir
+    return (st'{dat = M.insert lbl dir (dat st')
+               , wat = M.insert dir (Str sym) (wat st')})
+
+loadLabCod :: [(Label, [Stm])] -> State Int CPU -> State Int CPU
+loadLabCod [] cpu = cpu
+loadLabCod ((lbl, cod) : res) cpu = do
+  st' <- cpu
+  dir <- newDir
+  return (st'{dat = M.insert lbl dir (dat st')
+             , wat = M.insert dir (FBody ([], cod)) (wat st')})
+
+loadProcs :: [(Frame, [Stm])] -> State Int CPU -> State Int CPU
+loadProcs [] cpu = cpu
+loadProcs ((fr , fbody) : procs) cpu = do
+  let fname = name fr
+      (factBody, rests) = splitStms fbody
+  fdir <- newDir
+  cpu' <- loadLabCod rests cpu
+  return (cpu'{
+               dat = M.insert fname fdir (dat cpu')
+             , wat = M.insert fdir (FBody (prepFormals fr , fbody)) (wat cpu')
+              })
+
+----------------------------------------
+----------------------------------------
 -- | Preparamos la CPU para que corra desde un estado inicial.
 loadCPU
   ::
@@ -313,33 +333,10 @@ loadCPU
   -> CPU
 loadCPU fs ss tmain
   = let
-      -- Cargamos las strings a una Cpu vacía.
-      loadStrings =
-        (Prelude.foldl (\r (l, s) -> r { dat = M.insert l (Str s) (dat r) })
-                       emptyCPU
-                       ss
-        )
-      -- Sobre la CPU cargada con las strings, cargamos las funciones.
-      loadProcs = Prelude.foldl
-        (\r (f, body) ->
-          let (factBody, lbls) = splitStms body
-          in
-            r
-              { dat =
-                Prelude.foldl
-                  (\datos (l, s) -> M.insert l (FBody ([], s)) datos)
-                  (M.insert (name f) (FBody (prepFormals f, factBody)) (dat r))
-                  lbls
-              }
-        )
-        loadStrings
-        fs
-      -- Separamos los primeros Statements hasta el primer label, que lo separamos.
-      (main, restLabels) = splitStms tmain
-      -- Agregamos los nuevos lbls que encontramos en el main.
-      inCpu              = Prelude.foldl
-        (\r (l, s) -> r { dat = M.insert l (FBody ([], s)) (dat r) })
-        loadProcs
-        restLabels
-    in
-      runInitial inCpu (snd $ head $ restLabels)
+       (factMain , rests ) = splitStms tmain
+       (cpuInit' , me) = runState (loadProcs fs $ loadLabels ss $ loadLabCod rests $ return emptyCPU ) 0
+       -- Esto huele a caca infinito
+       cpuInit = uTemp rv me $ uTemp fp me $ uTemp sp me cpuInit'
+    in if null factMain
+       then runInitial cpuInit (snd $ head rests)
+       else runInitial cpuInit factMain
