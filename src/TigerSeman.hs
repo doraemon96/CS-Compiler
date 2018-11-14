@@ -88,7 +88,7 @@ class (Demon w, Monad w) => Manticore w where
     tiposIguales (RefRecord _) TNil = return True
     tiposIguales (RefRecord _) _ = E.internal $ pack "No son tipos iguales... 123+3"
     tiposIguales  e (RefRecord s) = E.internal $ pack $ "No son tipos iguales... 123+4" ++ (show e ++ show s)
-    tiposIguales a b = return (equivTipo a b)
+    tiposIguales a b = return ((?=) a b)
     --
     -- | Generador de uniques.
     --
@@ -138,7 +138,7 @@ cmpZip [] [] = return ()
 cmpZip [] _ = derror $ pack "Diferencia en la cantidad. 1"
 cmpZip _ [] = derror $ pack "Diferencia en la cantidad. 2"
 cmpZip ((sl,tl):xs) ((sr,tr,p):ys) =
-        if (equivTipo tl tr && sl == sr)
+        if ((?=) tl tr && sl == sr)
         then cmpZip xs ys
         else errorTipos tl tr
 
@@ -198,11 +198,14 @@ transDecs [] m = m
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
                                                         insertValV nm et (transDecs xs m)
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
-                                                         wt     <- getTipoT t
+                                                         wt     <- addpos (getTipoT t) p
                                                          bt     <- tiposIguales et wt
-                                                         if bt then insertValV nm wt (transDecs xs m) 
+                                                         if bt then addpos (insertValV nm wt (transDecs xs m)) p
                                                          else addpos (derror (pack "Tipos no compatibles #1")) p
-transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf (mapM_ inserte fs >> transDecs xs m) fs
+transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_ , _) -> nm) fs in
+                                                --TODO: agregar pos a la dup dec
+                                                if P.length fs' /= P.length (nub fs') then derror (pack "Declaracion duplicada") else
+                                                P.foldr insertf (mapM_ inserte fs >> transDecs xs m) fs
                                                    where
                                                     -- Primer pasada: inserto la interfaz de funciones
                                                     insertf (nm,args,Nothing,_,p)  m' =
@@ -210,22 +213,27 @@ transDecs ((FunctionDec fs) : xs)           m = P.foldr insertf (mapM_ inserte f
                                                            insertFunV nm (0, genlab nm p, largs, TUnit, Propia) m'
                                                     insertf (nm,args,Just s,_,p) m' = 
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
-                                                           t     <- getTipoT s
+                                                           t     <- addpos (getTipoT s) p
                                                            insertFunV nm (0, genlab nm p, largs, t, Propia) m'
+
+                                                    --aux :: (Manticore w) => [Symbol] -> [Tipo] -> w a -> w a
+                                                    aux []     []     m'' = m''
+                                                    aux (n:ns) (t:ts) m'' = insertValV n t (aux ns ts m'')
 
                                                     genlab t p = pack $ show t ++ "_" ++ show p
 
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
-                                                    inserte (_,_,Nothing,exp,p) =
-                                                        do (_,et) <- transExp exp
-                                                           bt     <- tiposIguales TUnit et
-                                                           unless bt $ addpos (derror (pack "Tipo de exp no es Unit")) p
-                                                    inserte (_,_,Just s,exp,p) =
-                                                        do (_,et) <- transExp exp
-                                                           t      <- getTipoT s
+                                                    inserte (_,args,Nothing,exp,p) =
+                                                        do largs <- mapM (\(n,_,t) -> (n,) <$> fromTy t) args
+                                                           (_, et) <- P.foldr (uncurry insertValV) (transExp exp) largs
+                                                           unless (TUnit ?= et) $ addpos (derror (pack "Tipo de exp no es Unit")) p
+                                                    inserte (_,args,Just s,exp,p) =
+                                                        do largs <- mapM (\(n,_,t) -> (n,) <$> fromTy t) args
+                                                           (_, et) <- P.foldr (uncurry insertValV) (transExp exp) largs
+                                                           t      <- addpos (getTipoT s) p
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRefs sorted $ transDecs xss m
+transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRefs sorted $ transDecs xss (trace "Pase un typedec" m)
                                                     -- insertar todos los xs con posibles referencias
                                                     -- insertar todos los xs limpiando las referencias
                                                     -- continuar analizando las declaraciones (xss)
@@ -256,7 +264,8 @@ transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRefs sort
 
                                                     aux1 :: (Manticore w) => [(Symbol,Ty)] -> Symbol -> [Symbol] -> w a -> w a
                                                     aux1 flds s nicos m = 
-                                                        do flds' <- mapM (getTipoT . fst) flds
+                                                        do flds' <- mapM (\case (_ , NameTy t) -> getTipoT t
+                                                                                _ -> derror (pack "Field no permitido")) flds
                                                            uNicos <- ugen
                                                            insertTipoT s (t' uNicos flds') $ propagarS s (t' uNicos flds') nicos m
                                                                where syms   = P.map fst flds
@@ -306,9 +315,9 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (_ , el) <- transExp el'
         (_ , er) <- transExp er'
         case oper of
-          EqOp -> if tiposComparables el er EqOp then oOps el er
+          EqOp -> if tiposComparables el er EqOp then bOps el er
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
-          NeqOp ->if tiposComparables el er EqOp then oOps el er
+          NeqOp ->if tiposComparables el er EqOp then bOps el er
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
           -- Los unifico en esta etapa porque solo chequeamos los tipos, en la próxima
           -- tendrán que hacer algo más interesante.
@@ -316,14 +325,18 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
           MinusOp -> oOps el er
           TimesOp -> oOps el er
           DivideOp -> oOps el er
-          LtOp -> oOps el er
-          LeOp -> oOps el er
-          GtOp -> oOps el er
-          GeOp -> oOps el er
-          where oOps l r = if equivTipo l r -- Chequeamos que son el mismo tipo
-                              && equivTipo l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
+          LtOp -> bOps el er
+          LeOp -> bOps el er
+          GtOp -> bOps el er
+          GeOp -> bOps el er
+          where oOps l r = if (?=) l r -- Chequeamos que son el mismo tipo
+                              && (?=) l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
                            then return ((), TInt RO)
-                           else addpos (derror (pack "Error en el chequeo de una comparación.")) p
+                           else addpos (derror (pack "Error en el chequeo de una comparación entera.")) p
+                bOps l r = if (?=) l r -- Chequeamos que son el mismo tipo
+                           then return ((), TBool)
+                           else addpos (derror (pack "Error en el chequeo de una comparación no entera.")) p
+
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
 -- Donde el primer argumento son los campos del records, y el segundo es
 -- el texto plano de un tipo (que ya debería estar definido). Una expresión
@@ -362,17 +375,17 @@ transExp(IfExp co th Nothing p) = do
   -- Analizamos el tipo de la condición
         (_ , co') <- transExp co
   -- chequeamos que sea un entero.
-        unless (equivTipo co' TBool) $ errorTiposMsg p "En la condición del if->" co' TBool -- Claramente acá se puede dar un mejor error.
+        unless ((?=) co' TBool) $ errorTiposMsg p "En la condición del if->" co' TBool -- Claramente acá se puede dar un mejor error.
         -- ** (cth , th') <- transExp th
   -- Analizamos el tipo del branch.
         (() , th') <- transExp th
   -- chequeamos que sea de tipo Unit.
-        unless (equivTipo th' TUnit) $ errorTiposMsg p "En el branch del if->" th' TUnit
+        unless ((?=) th' TUnit) $ errorTiposMsg p "En el branch del if->" th' TUnit
   -- Si todo fue bien, devolvemos que el tipo de todo el 'if' es de tipo Unit.
         return (() , TUnit)
 transExp(IfExp co th (Just el) p) = do
   (_ , condType) <- transExp co
-  unless (equivTipo condType TBool) $ errorTiposMsg p "En la condición del if ->" condType TBool
+  unless ((?=) condType TBool) $ errorTiposMsg p "En la condición del if ->" condType TBool
   (_, ttType) <- transExp th
   (_, ffType) <- transExp el
   C.unlessM (tiposIguales ttType ffType) $ errorTiposMsg p "En los branches." ttType ffType
@@ -380,9 +393,9 @@ transExp(IfExp co th (Just el) p) = do
   return ((), ttType)
 transExp(WhileExp co body p) = do
   (_ , coTy) <- transExp co
-  unless (equivTipo coTy TBool) $ errorTiposMsg p "Error en la condición del While" coTy TBool
+  unless ((?=) coTy TBool) $ errorTiposMsg p "Error en la condición del While" coTy TBool
   (_ , boTy) <- transExp body
-  unless (equivTipo boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
+  unless ((?=) boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
   return ((), TUnit)
 transExp(ForExp nv mb lo hi bo p) = do (_,lo') <- transExp lo
                                        unless (esInt lo') $ addpos (derror (pack "Limite inferior no es entero.")) p
@@ -394,7 +407,7 @@ transExp(ForExp nv mb lo hi bo p) = do (_,lo') <- transExp lo
                                        return ((),TUnit)
 transExp(LetExp dcs body p) = transDecs dcs (transExp body)
 transExp(BreakExp p) = return ((), TUnit)
-transExp(ArrayExp sn cant init p) = do t <- getTipoValV sn
+transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                        case t of
                                            (TArray t' _) -> do (_,cant') <- transExp cant
                                                                unless (esInt cant') $ addpos (derror (pack "Tamanio no es entero.")) p
@@ -485,19 +498,19 @@ instance Manticore Monada where
   --   getTipoFunV :: Symbol -> w FunEntry
     getTipoFunV sym = do
       est <- get
-      maybe (derror (pack "No se encontro la funcion en el map.")) 
+      maybe (derror (pack ("No se encontro el tipo de la fun "++ show sym ++ " en el map."))) 
             (\(Func f) -> return f) (M.lookup sym (vEnv est))
   -- | Busca una variable en el entorno. Ver [1]
   --   getTipoValV :: Symbol -> w ValEntry
     getTipoValV sym = do
       est <- get
-      maybe (derror (pack "No se encontro el valor en el map.")) 
+      maybe (derror (pack ("No se encontro el tipo de la var " ++ show sym ++ " en el map."))) 
             (\(Var f) -> return f) (M.lookup sym (vEnv est))
   -- | Busca un tipo en el entorno
   --   getTipoT :: Symbol -> w Tipo
     getTipoT sym = do
       est <- get
-      maybe (derror (pack "No se encontro el tipo en el map.")) 
+      maybe (derror (pack ("No se encontro el tipo "++ show sym ++ " en el map."))) 
             (\t -> return t) (M.lookup sym (tEnv est))
   -- | Funciones de Debugging!
   --   showVEnv :: w a -> w a

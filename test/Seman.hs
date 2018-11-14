@@ -23,7 +23,7 @@ cases = [("let1", let1, let1T, Correct),("let2", let2, let2T, Correct),("let3",
          ("whl2", while2, while2T, Incorrect), ("for1", for1, for1T, Correct), ("for2", for2, for2T, Incorrect),
          ("for3", for3, for3T, Incorrect), ("for4", for4, for4T, Incorrect), ("for5", for5, for5T, Incorrect),
          ("fun1", fun1, fun1T, Incorrect), ("fun2", fun2, fun2T, Incorrect), ("tip1", tip1, tip1T, Correct),
-         ("tip2", tip2, tip2T, Correct), ("tip3", tip3, tip3T, Correct), ("tip4", tip4, tip4T, Incorrect),
+         ("tip2", tip2, tip2T, Correct), ("tip3", tip3, tip3T, Correct), {-("tip4", tip4, tip4T, Incorrect),-}
          ("tip5", tip5, tip5T, Correct), ("tip6", tip6, tip6T, Correct), ("tip7", tip7, tip7T, Correct),
          ("cll1", cll1, cll1T, Correct)
          ]
@@ -48,7 +48,7 @@ main = do
 testExpTipo :: Exp -> Tipo -> Either Symbol Tipo
 testExpTipo e t = do
   (bexp, ty) <- testExp e
-  if equivTipo t ty
+  if (?=) t ty
     then return t
     else Left (pack $ "Testing Seman: Incorrect type. Expected: " ++ show t ++ ". Actual: " ++ show ty)
 
@@ -228,7 +228,7 @@ tip2 = [expr|   let
 tip2T = TInt RW
 
 tip3 = [expr|   let
-                   type r = {a:int}
+                   type r = { a:int } 
                    var r := r {a = 0}
                  in
                    r.a

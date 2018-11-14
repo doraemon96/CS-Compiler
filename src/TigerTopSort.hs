@@ -7,6 +7,8 @@ import           TigerSymbol         (Symbol)
 import           Control.Monad.State
 import           Data.List
 
+import Debug.Trace
+
 import qualified Data.Map            as M
 
 type DepMap = M.Map Symbol [Symbol]
@@ -18,12 +20,15 @@ data GraphRet = GR { deps :: DepMap
 addT :: Symbol -> State GraphRet ()
 addT x = modify (\st -> st{ret = x : ret st})
 
+seen :: Symbol -> DepMap -> DepMap
+seen s = M.insertWith (++) s []
+
 buildDepMap :: [(Symbol , Ty)] -> DepMap
 buildDepMap [] = M.empty
-buildDepMap ((sTy, NameTy s) : xs) = M.insertWith (++) sTy [s] (M.insertWith (++) s [] (buildDepMap xs))
+buildDepMap ((sTy, NameTy s) : xs) = seen s $ M.insertWith (++) sTy [s] (buildDepMap xs)
 buildDepMap ((sTy, RecordTy ss) : xs) = M.insertWith (++) sTy [] (buildDepMap xs)
 --buildDepMap ((sTy, RecordTy ss) : xs) = buildDepMap (zip (repeat sTy) (fmap snd ss) ++ xs)
-buildDepMap ((sTy, ArrayTy s) : xs) = M.insertWith (++) sTy [s] (buildDepMap xs)
+buildDepMap ((sTy, ArrayTy s) : xs) = seen s $ M.insertWith (++) sTy [s] (buildDepMap xs)
 
 removeSym :: Symbol -> DepMap -> DepMap
 removeSym s = M.delete s
@@ -62,5 +67,6 @@ kahnSort xs = ret $ execState (iterador initialSyms) (GR initialDeps [])
     initialSyms = filter (not . flip checkIncoming initialDeps) $ map fst xs
 
 kahnSorter :: [(Symbol,Ty)] -> [(Symbol,Ty)]
-kahnSorter xs = let ks = kahnSort xs
-                in  map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks
+kahnSorter xs = let ks  = kahnSort xs
+                    ks' = filter (\k -> elem k (map fst xs)) ks 
+                in  map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks'

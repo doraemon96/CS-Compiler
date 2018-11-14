@@ -52,17 +52,17 @@ pattern TBool <- (TInt RW)
 
 -- | Hay ciertos tipos que semánticamente son equivalentes, implementamos
 -- una función que nos indica cuando son equivalentes.
-equivTipo :: Tipo -> Tipo -> Bool -- optimizar?
-equivTipo TRecord{} TNil                = True
-equivTipo TNil TRecord{}                = True
-equivTipo (TRecord _ u1) (TRecord _ u2) = u1 == u2
-equivTipo (TArray _ u1) (TArray _ u2)   = u1 == u2
-equivTipo (TInt _) (TInt _)             = True
+(?=) :: Tipo -> Tipo -> Bool -- optimizar?
+(?=) TRecord{} TNil                = True
+(?=) TNil TRecord{}                = True
+(?=) (TRecord _ u1) (TRecord _ u2) = u1 == u2
+(?=) (TArray _ u1) (TArray _ u2)   = u1 == u2
+(?=) (TInt _) (TInt _)             = True
 -- TTipo es una referencia a otro tipo, no deberíamos
 -- encontrarnos ninguno de estos tipos.
-equivTipo (TTipo _) _                   = error "Referencia a un tipo.[1]"
-equivTipo _ (TTipo _)                   = error "Referencia a un tipo.[2]"
-equivTipo a b                           = a == b -- Eq
+(?=) (TTipo _) _                   = error "Referencia a un tipo.[1]"
+(?=) _ (TTipo _)                   = error "Referencia a un tipo.[2]"
+(?=) a b                           = a == b -- Eq
 
 -- | Función /linda/ para mostrar un error de tipos.
 errorTipos :: Demon w => Tipo -> Tipo -> w a
