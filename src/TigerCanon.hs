@@ -14,6 +14,7 @@ import           TigerUnique
 import           TigerTree
 
 import           TigerSymbol
+import           TigerUnique
 
 import           Control.Monad.State
 import           Data.Map.Strict     as M
@@ -139,43 +140,20 @@ class Monad w => Trackable w where
     enterBlock _ = return ()
     getBlock :: Label -> w (Maybe [Stm])
 
-data Obus = O {mapLS :: M.Map Label [Stm], lgen :: Integer , tgen :: Integer}
+-- [TAM](https://es.wikipedia.org/wiki/Tanque_Argentino_Mediano)
+type TAM = M.Map Label [Stm]
 
-firstTank :: Obus
-firstTank = O {mapLS = M.empty, lgen = 0, tgen = 0}
+firstTank :: TAM
+firstTank = M.empty
 
-type Tank = State Obus
-
--- instance Environmental Tank where
---     data Mapper Tank a b = M (Map a b)
---     lookupI a (M m) = lookup a m
---     insertI k v (M m) = M $ insert k v m
---     intersecI f (M m1) (M m2) = M $intersectionWith f m1 m2
---     updateI k v (M m) = M $ insert k v m
---     emptyI = M empty
-
-instance TLGenerator Tank where
-    newTemp = do
-        st <- get
-        let i = tgen st
-        let temp = detgenTemp i
-        put st{tgen=i+1}
-        return temp
-    newLabel = do
-        st <- get
-        let i = lgen st
-        let label = detgenLabel i
-        put st{lgen=i+1}
-        return label
+-- Recuerden que StGen nos da gratis el generador de temporales y labels.
+type Tank = StateT TAM StGen
 
 instance Trackable Tank where
     enterBlock' l b = do
         st <- get
-        let nmap = insert l b (mapLS st)
-        put st{mapLS=nmap}
-    getBlock l = do
-        st <- get
-        return $ lookup l (mapLS st)
+        put $ insert l b st
+    getBlock l = gets $ lookup l
 
 splitlast :: [a] -> ([a] , a)
 splitlast ls = (init ls, last ls)
@@ -200,7 +178,7 @@ traceR b@(Label lab : _)  rs = do
                     rest' <- getnext rs
                     return $ most ++ [CJump p x y t l', Label l', Jump (Name f) f] ++ rest'
         (_ , Jump _ _) -> do {t <- getnext rs; return $ b ++ t}
-        _ -> error "Derbería ser imposible"
+        _ -> error "Debería ser imposible"
 traceR _ _ = error "Debería ser imposible"
 
 getnext :: (Trackable w, TLGenerator w) => [[Stm]] -> w [Stm]
@@ -223,12 +201,3 @@ canonM st = do
     lin <- linearize st
     lss <- basicBlocks lin
     traceSchedule lss
-
--- canon :: Int -> Int -> [(Stm,a)] -> ([([Stm],a)], Int, Int)
--- canon tseed lseed frs = let
---     fsTank = firstTank {lgen = lseed, tgen = tseed}
---     (res,est) = runState (
---                     mapM (\(st,fr) -> do
---                             ss <- canonM st
---                             return (ss,fr)) frs) fsTank
---     in (res, tgen est, lgen est)

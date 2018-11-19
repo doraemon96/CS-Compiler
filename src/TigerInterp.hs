@@ -1,44 +1,58 @@
-{-# Language LambdaCase #-}
-{-# Language OverloadedStrings #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
 module TigerInterp where
 
-import Prelude hiding (compare, EQ)
+import           Prelude             hiding (EQ, compare)
 
-import TigerTree
-import TigerFrame
-import TigerTemp
-import TigerSymbol
+import           TigerFrame
+import           TigerSymbol
+import           TigerTemp
+import           TigerTree
 
-import Data.Map as M
+import           Data.Map            as M
 
-import Control.Monad.State
+import           Control.Arrow
+import           Control.Monad.State
 
-import Debug.Trace
+import           Debug.Trace
 
+-- | Datos a almacenar en memoria.
 data Dato
-    = Str Symbol -- | String constante. Ej: str: "Hola"
-    | FBody ([Access], [Stm]) -- | Función, lista de acceso de los argumentos y el body
-    | GG Int
+    -- | String constantes.
+    = Str Symbol
+    -- | Cuerpos de funciones constantes.
+    | FBody (
+        -- | Lista de acceso de los posibles argumentos.
+        [Access]
+        -- | Body de la función.
+        , [Stm])
+    -- | O puedo almacenar un entero.
+    | DInt Int
     deriving (Show)
 
 getInt :: Dato -> Int
-getInt (GG i) = i
-getInt _ = error "NOT AN INT"
+getInt (DInt i) = i
+getInt _        = error "NOT AN INT"
 
 getStr :: Dato -> Symbol
 getStr (Str s) = s
-getStr _ = error "NOT A Symbol?"
+getStr _       = error "NOT A Symbol?"
 
 getFBody :: Dato -> ([Access] , [Stm])
 getFBody (FBody sts) = sts
-getFBody _ = error "NOT A FUN"
+getFBody _           = error "NOT A FUN"
 
 data CPU = CPU
-    { mem :: M.Map Temp Int
-    , wat :: M.Map Int Dato
-    , dat :: M.Map Label Dato
+    { -- | Mem representa la memoria del CPU, básicamente los registros.
+      mem    :: M.Map Temp Int
+      -- | Representa la memoria RAM, mapea direcciones de memoria a datos.
+    , wat    :: M.Map Int Dato
+      -- | Mapea Labels en Datos, en una CPU normal, Wat y Dat son lo mismo.
+    , dat    :: M.Map Label Dato
+      -- | Buffer de salida, a donde imprime la llamada a print.
     , output :: [Symbol]
-    , input :: [Symbol]
+      -- | Buffer de entrada, de donde sacamos la entrada cuando thacemos getchar.
+    , input  :: [Symbol]
     } deriving Show
 
 type RC = State CPU
@@ -59,11 +73,11 @@ extDispatcher "print" (x : _ ) = printExec x
 
 compute :: BOp -> Int -> Int -> Int
 compute Plus = (+)
-compute _ = error "TODO"
+compute _    = error "TODO"
 
 compare :: Relop -> Int -> Int -> Bool
 compare EQ = (==)
-compare _ = error "TODO"
+compare _  = error "TODO"
 
 -- | Exp :: TInt
 iexp :: Exp -> RC Int
@@ -109,7 +123,7 @@ step (Move (Temp t) src) = do
 step (Move (Mem t) src) = do
   dir <- iexp t
   val <- iexp src
-  modify $ \env -> env{wat = M.insert dir (GG val) (wat env)}
+  modify $ \env -> env{wat = M.insert dir (DInt val) (wat env)}
   return []
 step (Move dst src) = do
   src' <- iexp src
@@ -127,9 +141,9 @@ step (CJump bop x y tt ff) = do
     [Jump (Const 0) ff]
 
 runPc :: [Stm] -> RC ()
-runPc [] = return ()
+runPc []             = return ()
 runPc (l@Jump{} : _) = step l >>= runPc
-runPc (x : xs) = step x >>= \ys -> runPc (ys ++ xs)
+runPc (x : xs)       = step x >>= \ys -> runPc (ys ++ xs)
 
 emptyCPU :: CPU
 emptyCPU = CPU M.empty M.empty M.empty [] []
@@ -137,18 +151,67 @@ emptyCPU = CPU M.empty M.empty M.empty [] []
 runInitial :: CPU -> [Stm] -> CPU
 runInitial cpu prog = execState (runPc prog) cpu
 
-loadCPU :: [(Frame, [Stm])] -- | Datos
+-- | Función que búsca los posibles labels dentro de una sequencia de stms.
+splitStms :: [Stm]
+          ->
+          -- | Lista de stms hasta encontrar un Label.
+             ([Stm]
+          -- | Segmentos Lable lista de Stmts debajo de él.
+             , [(Label, [Stm])])
+splitStms []               = ([],[])
+splitStms ((Label l) : ts) = ([], splitLbls ts (l , []))
+splitStms (t : ts)         = let (res, lbls) = splitStms ts in (t : res, lbls)
+
+-- | Función auxiliar que claramente hace todo el trabajo. Básicamente va
+-- acumulando hasta encontrar un Label, lo agrega al final de la lista, y pasa a
+-- acumular otro label.
+splitLbls :: [Stm] -> (Label, [Stm]) -> [(Label, [Stm])]
+splitLbls [] ts               = [ second reverse ts]
+splitLbls ((Label l) : ts) rs = (second reverse rs) : splitLbls ts (l,[])
+splitLbls (t : ts) (l, rs)    = splitLbls ts (l, t : rs)
+
+-- | Preparamos la CPU para que corra desde un estado inicial.
+loadCPU ::
+        -- | Fragmentos de funciones ya definidas. (fuera del main)
+         [(Frame, [Stm])]
+        -- | Strings.
         -> [(Label , Symbol)]
-        -> [Stm]  -- | TigerMain
+        -- | Básicamente el main.
+        -> [Stm]
         -> CPU
-loadCPU fs ss = runInitial
-                (Prelude.foldl (\r (f, body) ->
-                                  r{dat = M.insert (name f)
-                                           (FBody ( prepFormals f , body))
-                                           (dat r)
+loadCPU fs ss tmain =
+  let
+    -- Cargamos las strings a una Cpu vacía.
+    loadStrings = (Prelude.foldl (\r (l, s) ->
+                                  r{dat = M.insert l (Str s) (dat r)}
+                                  ) emptyCPU ss)
+    -- Sobre la CPU cargada con las strings, cargamos las funciones.
+    loadProcs = Prelude.foldl (\r (f, body) ->
+                                  let (factBody, lbls) = splitStms body in
+                                  r{dat =
+                                       Prelude.foldl
+                                       (\ datos (l, s)
+                                        -> M.insert l (FBody ([], s)) datos)
+                                       (M.insert (name f)
+                                           (FBody (prepFormals f , factBody ))
+                                           (dat r)) lbls
                                     }
                                )
-                (Prelude.foldl (\r (l, s) ->
-                                  r{dat = M.insert l (Str s) (dat r)}
-                                  ) emptyCPU ss) fs )
+                 loadStrings fs
+    -- Separamos los primeros Statements hasta el primer label, que lo separamos.
+    (main, restLabels) = splitStms tmain
+    -- Agregamos los nuevos lbls que encontramos en el main.
+    inCpu = Prelude.foldl (\ r (l,s) -> r{dat = M.insert l (FBody ([], s))
+                                               (dat r)} ) loadProcs restLabels
+  in
+    runInitial inCpu (snd $ head $ restLabels)
 
+test = [ Label "L0"
+       , Move (Temp rv) (Const 1)
+       , Jump (Name "L1") "L1"
+       , Label "L1"
+       , Move (Temp fp) (Const 2)
+       ]
+
+ll :: Label
+ll = "L8"

@@ -143,6 +143,15 @@ cmpZip ((sl,tl):xs) ((sr,tr,p):ys) =
         then cmpZip xs ys
         else errorTipos tl tr
 
+-- Función auxiliar que utilizaremos para separar una lista utilizando una
+-- función que separe los elementos en pares.
+splitWith :: (a -> Either b c) -> [a] -> ([b], [c])
+addIzq :: ([a], [b]) -> a -> ([a],[b])
+addDer :: ([a], [b]) -> b -> ([a],[b])
+splitWith f = P.foldr (\x rs -> either (addIzq rs) (addDer rs) (f x)) ([] , [])
+addIzq (as,bs) a = (a : as, bs)
+addDer (as,bs) b = (as, b : bs)
+
 buscarM :: Symbol -> [(Symbol, Tipo, Int)] -> Maybe Tipo
 buscarM s [] = Nothing
 buscarM s ((s',t,_):xs) | s == s' = Just t
@@ -166,10 +175,10 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 
 -- | __Completar__ 'TransTy'
 -- El objetivo de esta función es dado un tipo
--- que proviene de la gramatica, dar una representación
+-- que proviene de la gramática, dar una representación
 -- de tipo interna del compilador
 
--- | Nota para cuando se generte código intermedio
+-- | Nota para cuando se generarte código intermedio
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
@@ -303,6 +312,7 @@ snd3 :: (a,b,c) -> b
 snd3 (_,y,_) = y
 thd3 :: (a,b,c) -> c
 thd3 (_,_,z) = z
+
 
 -- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
 transExp :: (Manticore w) => Exp -> w (() , Tipo)
@@ -472,8 +482,6 @@ instance Manticore Monada where
       put oldEst
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
-    -- ugen :: w Unique
-    ugen = mkUnique
   -- TODO: Parte del estudiante
   -- | Inserta una Función al entorno
   --   insertFunV :: Symbol -> FunEntry -> w a -> w a

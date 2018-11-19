@@ -35,7 +35,7 @@ data Tipo = TUnit
           -- | Referencia a un record y a un Tipo.
           -- Estos elementos son útiles en el proceso de detección de ciclos,
           -- pero no deberían verse una vez realizada la detección.
-          | RefRecord Symbol | TTipo Symbol
+          | RefRecord Symbol
     deriving (Show,Eq)
 
 -- | Internamente capaz que es mejor usar esta construcción.

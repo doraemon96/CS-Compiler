@@ -12,7 +12,7 @@ main =
   either (const rednice)  (const bluefail) (calcularEEsc ejemplo1) >>
   either (const redfail) (const bluenice) (calcularEEsc ejemplo2) >>
   putStrLn "\n======= [escapa.tig, intro.tig] =======" >>
-  test "./test/test_code" (const bluefail) (const rednice ) tester "escapa.tig" >>
+  test "./test/test_code" (const bluefail) (const rednice) tester "escapa.tig" >>
   test "./test/test_code" (const redfail) (const bluenice) tester "intro.tig" >>
   putStrLn "\n======= Good loc =======" >>
   testDir good_loc (testSTDGood tester) >>

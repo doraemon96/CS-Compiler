@@ -118,5 +118,10 @@ data Dec where
 data Ty = NameTy Symbol | RecordTy [(Symbol, Ty)] | ArrayTy Symbol
     deriving (Show, Typeable, Data)
 
+-- | En TigerSeman deberemos saber cuando un |Ty| es un Record.
+splitRecordTy :: Ty -> Either Ty Ty
+splitRecordTy t@(RecordTy _) = Left t
+splitRecordTy t = Right t
+
 data Oper = PlusOp | MinusOp | TimesOp | DivideOp | EqOp | NeqOp | LtOp | LeOp | GtOp | GeOp
     deriving (Show, Typeable, Data)
