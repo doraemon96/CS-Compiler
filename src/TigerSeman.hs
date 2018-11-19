@@ -302,7 +302,6 @@ transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ der
                                                                                           in  TRecord (zip3 syms undone poss) u
                                                     undoRef sym dummy r@(RefRecord sym') | sym == sym' = dummy
                                                                                          | otherwise   =  r
-                                                    undoRef _ _ (TTipo _ ) = error "TTipo ..."
                                                     undoRef _ _ a                = a
 
 
@@ -528,6 +527,7 @@ instance Manticore Monada where
   -- | Funciones de Debugging!
   --   showVEnv :: w a -> w a
   --   showTEnv :: w a -> w a
+    ugen = mkUnique
 
 
 runMonada :: Monada ((), Tipo)-> StGen (Either Symbol ((), Tipo))

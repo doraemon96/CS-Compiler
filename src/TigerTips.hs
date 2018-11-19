@@ -58,10 +58,6 @@ pattern TBool <- (TInt RW)
 (?=) (TRecord _ u1) (TRecord _ u2) = u1 == u2
 (?=) (TArray _ u1) (TArray _ u2)   = u1 == u2
 (?=) (TInt _) (TInt _)             = True
--- TTipo es una referencia a otro tipo, no deberíamos
--- encontrarnos ninguno de estos tipos.
-(?=) (TTipo _) _                   = error "Referencia a un tipo.[1]"
-(?=) _ (TTipo _)                   = error "Referencia a un tipo.[2]"
 (?=) a b                           = a == b -- Eq
 
 -- | Función /linda/ para mostrar un error de tipos.

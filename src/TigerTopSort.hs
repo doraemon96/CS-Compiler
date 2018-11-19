@@ -1,6 +1,6 @@
 {-# Language OverloadedStrings #-}
 
-module TigerTopSort (kahnSort) where
+module TigerTopSort (kahnSorter) where
 
 import           TigerAbs
 import           TigerSymbol         (Symbol)
