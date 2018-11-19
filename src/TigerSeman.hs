@@ -22,6 +22,7 @@ import           Control.Monad.Trans.Except
 import           Data.List                  as List
 import           Data.Map                   as M
 import           Data.Ord                   as Ord
+import           Data.Maybe
 
 -- Le doy nombre al Preludio.
 import           Prelude                    as P
@@ -233,14 +234,18 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                            t      <- addpos (getTipoT s) p
                                                            bt     <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-transDecs ((TypeDec xs) : xss)               m = makeRefs sorted $ undoRefs sorted $ transDecs xss (trace "Pase un typedec" m)
+transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ derror (pack "Se ha encontrado un ciclo.")
+                                                    makeRefs sorted' $ undoRefs sorted' $ transDecs xss m
                                                     -- insertar todos los xs con posibles referencias
                                                     -- insertar todos los xs limpiando las referencias
                                                     -- continuar analizando las declaraciones (xss)
                                                    where
                                                     ltipos = P.map (\(x,y,_)->(x,y)) xs
                                                     -- Ordenamos los tipos segun kahnSort
-                                                    sorted = kahnSorter ltipos --TODO: que devuelva MAYBE!!!
+                                                    sorted = kahnSorter ltipos
+                                                    sorted' = case sorted of
+                                                                    Just x -> x
+                                                                    _ -> []
                                                     -- Ponemos para insertar primero los records (as refrecords) y luego el resto
                                                     --  que potencialmente use records (y los veran como refrecords)
                                                     -- Los records se insertan "primero" porque khanSort los ve sin dependencias

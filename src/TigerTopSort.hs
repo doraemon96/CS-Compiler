@@ -17,7 +17,7 @@ data GraphRet = GR { deps :: DepMap
                    , ret  :: [Symbol]
                    }
 
-addT :: Symbol -> State GraphRet ()
+addT :: Symbol -> StateT GraphRet Maybe ()
 addT x = modify (\st -> st{ret = x : ret st})
 
 seen :: Symbol -> DepMap -> DepMap
@@ -45,12 +45,14 @@ noEdges :: DepMap -> Bool
 noEdges = M.foldl (\b rs -> b && null rs) True
 
 iterador :: [Symbol] -- Símbolos sin dependencias. Aka no incoming edges.
-         -> State GraphRet ()
+         -> StateT GraphRet Maybe ()
+         -- ^ANTES: -> State GraphRet ()
 iterador [] = do -- Si no tenemos que insertar nada nuevo
   depMap <- gets deps
   if noEdges depMap -- Chequeamos que ya no haya nada en el grafo.
     then return () -- Todo listo
-    else error "Ciclo" -- Quedaron cosas, y eso significa ciclo!
+    else lift Nothing -- Quedaron cosas, y eso significa ciclo!
+    -- ^ANTES: else error "Ciclo!"
 iterador (s:ss) = do
   addT s -- Metemos a [s] a la lista de resultado
   ds <- gets ( flip (M.!) s . deps) -- Lista de dependencias de [s]
@@ -60,13 +62,13 @@ iterador (s:ss) = do
   iterador (s' ++ ss) -- Y lo metemos
 
 -- La idea es implementar el algoritmo de Kahn que pueden encontrar en la web
-kahnSort :: [(Symbol, Ty)] -> [Symbol]
-kahnSort xs = ret $ execState (iterador initialSyms) (GR initialDeps [])
+kahnSort :: [(Symbol, Ty)] -> Maybe [Symbol]
+kahnSort xs = fmap ret $ execStateT (iterador initialSyms) (GR initialDeps [])
   where
     initialDeps = buildDepMap xs
     initialSyms = filter (not . flip checkIncoming initialDeps) $ map fst xs
 
-kahnSorter :: [(Symbol,Ty)] -> [(Symbol,Ty)]
-kahnSorter xs = let ks  = kahnSort xs
-                    ks' = filter (\k -> elem k (map fst xs)) ks 
-                in  map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks'
+kahnSorter :: [(Symbol,Ty)] -> Maybe [(Symbol,Ty)]
+kahnSorter xs = do ks  <- kahnSort xs
+                   ks' <- return $ filter (\k -> elem k (map fst xs)) ks 
+                   return $ map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks'
