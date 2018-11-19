@@ -6,21 +6,38 @@ import           TigerSymbol
 
 import           Tools
 
+-- Ejemplo de cómo testear...
+
+-- Hay varios ejemplos acá.
+
+-- Dos ejemplos concretos escritos en el archivo directamente :
+-- + |ejemplo1| escrito usando el modulo TigerQQ.
+-- + |ejemplo2| escrito directamente escribiendo el AST.
+
+-- Dos ejemplos donde tenemos que leerlos y pasamos la url,
+-- como mostrar los mensajes, el tester y el nombre del archivo.
+-- + escapa.tig, __debe fallar__ y por ende se pone azul al fallar y rojo al no detectar el fallo.
+-- + intro.tig, debe ejecutar normalmente y por ende se pasa rojo y azul dsp.
+
+-- Testea toda la carpeta de Good Loc
+-- Testea toda la carpeta de Type Loc
+-- y termina.
+
 main :: IO ()
 main =
   putStrLn "\n======= Test ESCAPES in progress =======" >>
   either (const rednice)  (const bluefail) (calcularEEsc ejemplo1) >>
   either (const redfail) (const bluenice) (calcularEEsc ejemplo2) >>
-  putStrLn "\n======= [escapa.tig, intro.tig] =======" >>
+  putStrLn "\n==== [escapa.tig, intro.tig] ====" >>
   test "./test/test_code" (const bluefail) (const rednice) tester "escapa.tig" >>
   test "./test/test_code" (const redfail) (const bluenice) tester "intro.tig" >>
-  putStrLn "\n======= Good loc =======" >>
+  putStrLn "\n==== Good loc ====" >>
   testDir good_loc (testSTDGood tester) >>
-  putStrLn "Type:" >>
+  putStrLn "\n==== Type Loc ====" >>
   testDir type_loc (testGood type_loc tester) >>
-  putStrLn "\n======= Test FIN ======="
+  putStrLn "\n======= Test ESCAPES FIN ======="
 
-tester :: String -> Either Errores Exp
+tester :: String -> Either Symbol Exp
 tester = either (fail $ "Testing Escapes: Parser error")
                 calcularEEsc
          . parse

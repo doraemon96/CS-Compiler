@@ -13,7 +13,7 @@ import           TigerSymbol
 
 import           Control.Arrow        (second)
 import           Control.Monad        (when)
-import           Control.Monad.Except
+import           Control.Monad.Trans.Except
 import           Control.Monad.State  (get, put)
 import qualified Control.Monad.State  as ST
 
@@ -150,20 +150,6 @@ travDecs ((VarDec name esc typ init p) : xs) m = do
   insert name esc (travDecs xs m)
 travDecs (l : xs) m = travDecs xs m
 
--- Una vez que tenemos el algoritmo funcionando, ahora necesitamos
--- una instancia de la clase para hacerlo andar...
-
-data Errores =  NotFound Symbol
-                | Interno Symbol
-
-instance Show Errores where
-    show (NotFound e) = "No se encuentra la variable "++ show e
-    show (Interno e)  = "Error interno " ++ show e
-
-eappend :: Errores -> Symbol -> Errores
-eappend (NotFound e) e1 = NotFound (append e e1)
-eappend (Interno e) e1  = Interno (append e e1)
-
 -- La profundidad es claramente un simple entero
 type Depth = Int
 
@@ -188,7 +174,7 @@ data Estado = S { lvl :: Int, env :: Env}
 data SEstado = Step { lvlP :: Int, envP :: Env, msgP :: [String]}
     deriving Show
 
-type Mini = ST.StateT Estado (Either Errores)
+type Mini = ExceptT Symbol (ST.State Estado)
 
 addMsg :: SEstado -> String -> SEstado
 addMsg e msg = e{msgP = msg : msgP e}
@@ -197,8 +183,8 @@ addMsgM :: String -> Stepper ()
 addMsgM str = ST.modify (`addMsg` str)
 
 instance Demon Mini where
-  derror = throwError . Interno
-  adder w s = catchError w (throwError . flip eappend s)
+  derror = throwE
+  adder w s = catchE w (throwE . flip append s)
 
 instance Escapator Mini where
   depth = lvl <$> get
@@ -224,17 +210,17 @@ instance Escapator Mini where
 initSt :: Estado
 initSt = S 1 M.empty
 
-calcularEEsc :: Exp -> Either Errores Exp
-calcularEEsc e = ST.evalStateT (travExp e) initSt
+calcularEEsc :: Exp -> Either Symbol Exp
+calcularEEsc e = ST.evalState (runExceptT (travExp e)) initSt
 
 -- La implementacion de Stepper es lo mismo, pero vamos a ir guardando en
 -- una lista los diferentes entornos usados.
 
-type Stepper = ST.StateT SEstado (Either Errores)
+type Stepper = ExceptT Symbol (ST.State SEstado)
 
 instance Demon Stepper where
-  derror = throwError . Interno
-  adder w s = catchError w (throwError . flip eappend s)
+  derror = throwE
+  adder w s = catchE w (throwE . flip append s)
 
 instance Escapator Stepper where
   -- Las operaciones de manejo de niveles no modifican el
@@ -272,5 +258,7 @@ initStepper = Step 1 M.empty []
 -- Ahora vamos a tener una función donde además
 -- obtendremos toda la progresiones de los diferentes entorno!
 
-calcularEscStepper :: Exp -> Either Errores (Exp, (Env, [String]))
-calcularEscStepper exp = second (\(Step _ e ms) -> (e, reverse ms)) <$> ST.runStateT (travExp exp) initStepper
+calcularEscStepper :: Exp -> Either Symbol (Exp, (Env, [String]))
+calcularEscStepper exp =
+  let (e , es) = ST.runState (runExceptT (travExp exp)) initStepper
+  in (\ res -> (res , ( envP es, msgP es ))) <$> e

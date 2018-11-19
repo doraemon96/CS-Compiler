@@ -3,7 +3,7 @@
 module TigerTopSort (kahnSorter) where
 
 import           TigerAbs
-import           TigerSymbol         (Symbol)
+import           TigerSymbol                    ( Symbol )
 
 import           Control.Monad.State
 import           Data.List
@@ -35,7 +35,7 @@ seen s = M.insertWith (++) s []
 -- encuentra en el camino están definidos previamente. Notar además que también
 -- computa las dependencias generadas por los |RecordTy| que es lo que en el
 -- compilador deberíamos evitar.
-buildDepMap :: [(Symbol , Ty)] -> DepMap
+buildDepMap :: [(Symbol, Ty)] -> DepMap
 buildDepMap [] = M.empty
 buildDepMap ((sTy, NameTy s) : xs) = seen s $ M.insertWith (++) sTy [s] (buildDepMap xs)
 buildDepMap ((sTy, RecordTy ss) : xs) = M.insertWith (++) sTy [] (buildDepMap xs)
@@ -44,9 +44,10 @@ buildDepMap ((sTy, ArrayTy s) : xs) = seen s $ M.insertWith (++) sTy [s] (buildD
 
 -- | removeSym saca complementamente un |Symbol| del mapa de dependencias
 removeSym :: Symbol -> DepMap -> DepMap
-removeSym s = M.delete s
+removeSym s =
+  M.delete s
               -- ^ Borramos la lista de deps de s. No creo que sea necesario
-              . M.map (delete s)
+             . M.map (delete s)
               -- ^ Sacamos las deps sobre s
 
 -- | Chequeamos que un nodo (a.k.a. |Symbol|) tenga o no una arista entrante
@@ -70,8 +71,8 @@ iterador [] = do -- Si no tenemos que insertar nada nuevo
     -- ^ANTES: else error "Ciclo!"
 iterador (s:ss) = do
   addT s -- Metemos a [s] a la lista de resultado
-  ds <- gets ( flip (M.!) s . deps) -- Lista de dependencias de [s]
-  modify (\st -> st{deps = M.delete s (deps st)}) -- Borramos la lista de dependencias.
+  ds <- gets (flip (M.!) s . deps) -- Lista de dependencias de [s]
+  modify (\st -> st { deps = M.delete s (deps st) }) -- Borramos la lista de dependencias.
   dps <- gets deps -- Vemos si quedó algún símbolo sin dependencias
   let s' = filter (not . flip checkIncoming dps) ds
   iterador (s' ++ ss) -- Y lo metemos
@@ -90,3 +91,4 @@ kahnSorter :: [(Symbol,Ty)] -> Maybe [(Symbol,Ty)]
 kahnSorter xs = do ks  <- kahnSort xs
                    ks' <- return $ filter (\k -> elem k (map fst xs)) ks 
                    return $ map (\k -> maybe (error "WTF") (k,) (lookup k xs)) ks'
+

@@ -16,12 +16,12 @@ data Escapa = Escapa | NoEscapa
     deriving (Show, Typeable, Data)
 
 posToLabel :: Pos -> String
-posToLabel (Simple l r) = show l ++ '.': show r
-posToLabel (Range l r)  = posToLabel l ++ '.' : posToLabel r
+posToLabel (Simple l r) = show l ++ '.' : show r
+posToLabel (Range  l r) = posToLabel l ++ '.' : posToLabel r
 
 printPos :: Pos -> String
-printPos (Simple l c) = "[L:" ++ show l ++".C:"++ show c++"]"
-printPos (Range b e)  = "Entre --" ++ printPos b ++ " | " ++ printPos e
+printPos (Simple l c) = "[L:" ++ show l ++ ".C:" ++ show c ++ "]"
+printPos (Range  b e) = "Entre --" ++ printPos b ++ " | " ++ printPos e
 
 -- | Representamos las variables
 data Var where
@@ -121,7 +121,7 @@ data Ty = NameTy Symbol | RecordTy [(Symbol, Ty)] | ArrayTy Symbol
 -- | En TigerSeman deberemos saber cuando un |Ty| es un Record.
 splitRecordTy :: Ty -> Either Ty Ty
 splitRecordTy t@(RecordTy _) = Left t
-splitRecordTy t = Right t
+splitRecordTy t              = Right t
 
 data Oper = PlusOp | MinusOp | TimesOp | DivideOp | EqOp | NeqOp | LtOp | LeOp | GtOp | GeOp
     deriving (Show, Typeable, Data)
