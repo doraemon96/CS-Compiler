@@ -23,7 +23,7 @@ import           TigerTree
 import           Control.Monad
 import qualified Data.Foldable                 as Fold
 import           Data.List                     as List
-import           Data.Ord                hiding ( EQ
+import           Data.Ord                      as Ord hiding ( EQ
                                                 , GT
                                                 , LT
                                                 )
@@ -276,12 +276,21 @@ instance (MemM w) => IrGen w where
                   IsFun  -> Move (Temp rv) <$> unEx bd
         procEntryExit lvl (Nx body)
         return $ Ex $ Const 0
-    simpleVar acc level = P.error "COMPLETAR"
+    -- simpleVar :: Access -> Int -> w BExp
+    simpleVar acc lvl = return $ Ex $ exp acc lvl
     varDec acc = do { i <- getActualLevel; simpleVar acc i}
     unitExp = return $ Ex (Const 0)
     nilExp = return $ Ex (Const 0)
     intExp i = return $ Ex (Const i)
-    fieldVar be i = P.error "COMPLETAR"
+    -- fieldVar :: BExp -> Int -> w BExp
+    fieldVar be i = do
+        ebe <- unEx be
+        tbe <- newTemp
+        return $ Ex $
+            Eseq
+                (seq    [Move (Temp tbe) ebe
+                        ,ExpS $ externalCall "_checkNil" [Temp tbe]])
+                (Mem $ Binop Plus (Temp tbe) (Binop Mul (Const i) (Const wSz)))
     -- subscriptVar :: BExp -> BExp -> w BExp
     subscriptVar var ind = do
         evar <- unEx var
@@ -295,7 +304,16 @@ instance (MemM w) => IrGen w where
                         ,ExpS $ externalCall "_checkIndex" [Temp tvar, Temp tind]])
                 (Mem $ Binop Plus (Temp tvar) (Binop Mul (Temp tind) (Const wSz)))
     -- recordExp :: [(BExp,Int)]  -> w BExp
-    recordExp flds = P.error "COMPLETAR"
+    recordExp flds = do
+        sz    <- unEx . Ex $ Const (List.length flds)
+        let ordered = List.sortBy (Ord.comparing snd) flds 
+        eflds <- mapM (unEx . fst) flds
+        t     <- newTemp
+        return $ Ex $ 
+            Eseq 
+                (seq    [ExpS $ externalCall "_allocRecord" (sz : eflds)
+                        , Move (Temp t) (Temp rv)]) 
+                (Temp t)
     -- callExp :: Label -> Externa -> Bool -> Level -> [BExp] -> w BExp
     callExp name external isproc lvl args = P.error "COMPLETAR"
     -- letExp :: [BExp] -> BExp -> w BExp
@@ -356,13 +374,56 @@ instance (MemM w) => IrGen w where
                     , cbody
                     , Jump (Name test) test
                     , Label done]
-            _ -> internal $ pack "no label in salida"
+            _ -> internal $ pack "no hay label de salida del while"
     -- forExp :: BExp -> BExp -> BExp -> BExp -> w BExp
-    forExp lo hi var body = P.error "COMPLETAR"
+    forExp lo hi var body = do
+        elo    <- unEx lo
+        ehi    <- unEx hi
+        evar   <- unEx var
+        nbody  <- unNx body
+        lsigue <- newLabel
+        lastM  <- topSalida
+        case lastM of
+            Just done -> 
+                return $ Nx $
+                    seq    [Move evar elo
+                           , CJump GT evar ehi done lsigue
+                           , Label lsigue
+                           , nbody
+                           , Move evar (Binop Plus evar (Const 1))
+                           , CJump GE evar ehi done lsigue
+                           , Label done]
+            _ -> internal $ pack "no hay label de salida del for"
     -- ifThenExp :: BExp -> BExp -> w BExp
-    ifThenExp cond bod = P.error "COMPLETAR"
+    ifThenExp cond body = do
+        ccond <- unCx cond
+        nbody <- unNx body
+        lbody <- newLabel
+        lexit <- newLabel
+        return $ Nx $
+            seq    [ccond (lbody,lexit)
+                   , Label lbody
+                   , nbody
+                   , Label lexit]
     -- ifThenElseExp :: BExp -> BExp -> BExp -> w BExp
-    ifThenElseExp cond bod els = P.error "COMPLETAR"
+    ifThenElseExp cond bod els = do
+        ccond <- unCx cond
+        ethen <- unEx bod
+        eelse <- unEx els
+        lthen <- newLabel
+        lelse <- newLabel
+        lexit <- newLabel
+        tres  <- newTemp
+        return $ Ex $
+            Eseq
+                (seq   [ccond (lthen,lelse)
+                       , Label lthen
+                       , Move (Temp tres) ethen
+                       , Jump (Name lexit) lexit
+                       , Label lelse
+                       , Move (Temp tres) eelse
+                       , Label lexit])
+                (Temp tres)
     -- ifThenElseExpUnit :: BExp -> BExp -> BExp -> w BExp
     ifThenElseExpUnit _ _ _ = P.error "COmpletaR?"
     -- assignExp :: BExp -> BExp -> w BExp

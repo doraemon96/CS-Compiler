@@ -10,7 +10,7 @@ typedef struct {
 string *consts[256];
 string empty = {0};
 
-long *_initArray(long size, long init)
+long *_allocArray(long size, long init)
 {
     long i;
     long *a = malloc((size+1) * sizeof(long));
