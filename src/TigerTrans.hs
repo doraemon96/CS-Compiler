@@ -329,7 +329,11 @@ instance (MemM w) => IrGen w where
         return $ Ex $ Eseq (seq bes) be
     -- breakExp :: w BExp
     -- | JA! No está implementado
-    breakExp = P.error "COMPLETAR"
+    breakExp = do
+        lastM <- topSalida
+        case lastM of
+            Just done -> return $ Nx $ Jump (Name done) done
+            _         -> internal $ pack "no hay label de salida para el break"
     -- seqExp :: [BExp] -> w BExp
     seqExp [] = return $ Nx $ ExpS $ Const 0
     seqExp bes = case last bes of
@@ -425,7 +429,21 @@ instance (MemM w) => IrGen w where
                        , Label lexit])
                 (Temp tres)
     -- ifThenElseExpUnit :: BExp -> BExp -> BExp -> w BExp
-    ifThenElseExpUnit _ _ _ = P.error "COmpletaR?"
+    ifThenElseExpUnit cond bod els = do
+        ccond <- unCx cond
+        ethen <- unNx bod
+        eelse <- unNx els
+        lthen <- newLabel
+        lelse <- newLabel
+        lexit <- newLabel
+        return $ Nx $
+            seq   [ccond (lthen,lelse)
+                   , Label lthen
+                   , ethen
+                   , Jump (Name lexit) lexit
+                   , Label lelse
+                   , eelse
+                   , Label lexit]
     -- assignExp :: BExp -> BExp -> w BExp
     assignExp cvar cinit = do
         cvara <- unEx cvar
@@ -436,10 +454,35 @@ instance (MemM w) => IrGen w where
                 return $ Nx $ seq [Move (Temp t) cin, Move cvara (Temp t)]
             _ -> return $ Nx $ Move cvara cin
     -- binOpIntExp :: BExp -> Abs.Oper -> BExp -> w BExp
-    binOpIntExp le op re = P.error "COMPLETAR"
+    binOpIntExp le op re = do
+        ele <- unEx le
+        ere <- unEx re
+        case op of
+            Abs.PlusOp   -> return $ Ex $ Binop Plus ele ere
+            Abs.MinusOp  -> return $ Ex $ Binop Minus ele ere
+            Abs.TimesOp  -> return $ Ex $ Binop Mul ele ere
+            Abs.DivideOp -> return $ Ex $ Binop Div ele ere
+            _ -> internal $ pack "BASSSURA JAPISHH #25j"
     -- binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
-    binOpStrExp strl op strr = P.error "COMPLETAR"
-    binOpIntRelExp op strr = P.error "COMPLETAR"
+    binOpStrExp strl op strr = do
+        estrl <- unEx strl
+        estrr <- unEx strr
+        case op of  
+            Abs.EqOp  -> return $ Cx $ (\(t,f) -> CJump EQ estrl estrr t f)
+            Abs.NeqOp -> return $ Cx $ (\(t,f) -> CJump NE estrl estrr t f)
+            _ -> internal $ pack "MASTURBACION ACADEMICA #12n"
+    --binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
+    binOpIntRelExp le op re = do
+        ele <- unEx le
+        ere <- unEx re
+        case op of
+            Abs.EqOp  -> return $ Cx $ (\(t,f) -> CJump EQ ele ere t f)
+            Abs.NeqOp -> return $ Cx $ (\(t,f) -> CJump NE ele ere t f)
+            Abs.LtOp  -> return $ Cx $ (\(t,f) -> CJump LT ele ere t f)
+            Abs.LeOp  -> return $ Cx $ (\(t,f) -> CJump LE ele ere t f)
+            Abs.GtOp  -> return $ Cx $ (\(t,f) -> CJump GT ele ere t f)
+            Abs.GeOp  -> return $ Cx $ (\(t,f) -> CJump GE ele ere t f)
+            _ -> internal $ pack "SEGUIMOS RETRASANDO #24f"
     -- arrayExp :: BExp -> BExp -> w BExp
     arrayExp size init = do
         sz <- unEx size
