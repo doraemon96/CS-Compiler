@@ -10,7 +10,7 @@ import           TigerTopSort
 
 -- Segunda parte imports:
 import           TigerTemp
--- import           TigerTrans
+import           TigerTrans                 as TTr
 
 -- Monads
 import qualified Control.Conditional        as C
@@ -164,9 +164,9 @@ buscarM s ((s',t,_):xs) | s == s' = Just t
 -- | __Completar__ 'transVar'.
 -- El objetivo de esta función es obtener el tipo
 -- de la variable a la que se está __accediendo__.
--- ** transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
+transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
 -- Leer Nota [1] para SimpleVar
-transVar :: (Manticore w) => Var -> w ( () , Tipo)
+-- ** transVar :: (Manticore w) => Var -> w ( () , Tipo)
 transVar (SimpleVar s)      = ((),) <$> getTipoValV s
 transVar (FieldVar v s)     = transVar v >>= \case
                                     (_ , TRecord lt _) -> maybe (derror (pack "Not a record field")) (return . ((),)) (buscarM s lt)
@@ -326,13 +326,13 @@ snd3 (_,y,_) = y
 thd3 :: (a,b,c) -> c
 thd3 (_,_,z) = z
 
--- ** transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
-transExp :: (Manticore w) => Exp -> w (() , Tipo)
+transExp :: (MemM w, Manticore w) => Exp -> w (BExp , Tipo)
+-- ** transExp :: (Manticore w) => Exp -> w (() , Tipo)
 transExp (VarExp v p) = addpos (transVar v) p
-transExp UnitExp{} = return ((), TUnit) -- ** fmap (,TUnit) unitExp
-transExp NilExp{} = return ((), TNil) -- ** fmap (,TNil) nilExp
-transExp (IntExp i _) = return ((), TInt RW) -- ** fmap (,TInt RW) (intExp i)
-transExp (StringExp s _) = return (() , TString) -- ** fmap (,TString) (stringExp (pack s))
+transExp UnitExp{} = (,TUnit) <$> TTr.unitExp
+transExp NilExp{} = (,TNil) <$> TTr.nilExp
+transExp (IntExp i _) = (,TInt RW) <$> (TTr.intExp i)
+transExp (StringExp s _) = (,TString) <$> (TTr.stringExp (pack s))
 transExp (CallExp nm args p) = do (_,_,targs,ret,_) <- getTipoFunV nm
                                   targs' <- mapM transExp args
                                   mbs <- zipWithM tiposIguales targs (P.map snd targs')
@@ -424,16 +424,18 @@ transExp(WhileExp co body p) = do
   (_ , boTy) <- transExp body
   unless ((?=) boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
   return ((), TUnit)
-transExp(ForExp nv mb lo hi bo p) = do (_,lo') <- transExp lo
-                                       unless (esInt lo') $ addpos (derror (pack "Limite inferior no es entero.")) p
-                                       (_,hi') <- transExp hi
-                                       unless (esInt hi') $ addpos (derror (pack "Limite superior no es entero.")) p
-                                       (_,tbo) <- insertVRO nv (transExp bo)
-                                       b3 <- tiposIguales TUnit tbo
-                                       unless b3 $ addpos (derror (pack "El for retorna algo (y no debe).")) p
-                                       return ((),TUnit)
+transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
+                                       unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
+                                       (ehi,thi) <- transExp hi
+                                       unless (esInt thi) $ addpos (derror (pack "Limite superior no es entero.")) p
+				       (env,tnv) <- transVar (SimpleVar nv) --CONSULTAR
+				       TTr.preWhileforExp
+                                       (ebo,tbo) <- insertVRO nv (transExp bo)
+                                       b <- tiposIguales TUnit tbo
+                                       unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p
+                                       (,TUnit) <$> TTr.forExp elo ehi env ebo
 transExp(LetExp dcs body p) = transDecs dcs (transExp body)
-transExp(BreakExp p) = return ((), TUnit)
+transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p
 transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                        case t of
                                            (TArray t' _) -> do (_,cant') <- transExp cant
