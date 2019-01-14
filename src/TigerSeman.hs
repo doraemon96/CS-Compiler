@@ -216,9 +216,8 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --   técnica conocida en la literatura de Haskell conocida como [Tying the
 --   Knot](https://wiki.haskell.org/Tying_the_Knot)
 ----------------------------------------
--- ** transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
-
-transDecs :: (Manticore w) => [Dec] -> w a -> w a
+transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
+--  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
 transDecs [] m = m
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
                                                         insertValV nm et (transDecs xs m)
@@ -339,30 +338,32 @@ transExp (CallExp nm args p) = do (_,_,targs,ret,_) <- getTipoFunV nm
                                   unless (and mbs && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
                                   return ((),ret)
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
-        (_ , el) <- transExp el'
-        (_ , er) <- transExp er'
+        (bl, el) <- transExp el'
+        (br, er) <- transExp er'
         case oper of
-          EqOp -> if tiposComparables el er EqOp then bOps el er
+          EqOp -> if tiposComparables el er EqOp then bOps el er bl br oper
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
-          NeqOp ->if tiposComparables el er EqOp then bOps el er
+          NeqOp ->if tiposComparables el er EqOp then bOps el er bl br oper
                   else addpos (derror (pack "Error de Tipos. Tipos no comparables")) p
           -- Los unifico en esta etapa porque solo chequeamos los tipos, en la próxima
           -- tendrán que hacer algo más interesante.
-          PlusOp -> oOps el er
-          MinusOp -> oOps el er
-          TimesOp -> oOps el er
-          DivideOp -> oOps el er
-          LtOp -> bOps el er
-          LeOp -> bOps el er
-          GtOp -> bOps el er
-          GeOp -> bOps el er
-          where oOps l r = if (?=) l r -- Chequeamos que son el mismo tipo
-                              && (?=) l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
-                           then return ((), TInt RO)
-                           else addpos (derror (pack "Error en el chequeo de una comparación entera.")) p
-                bOps l r = if (?=) l r -- Chequeamos que son el mismo tipo
-                           then return ((), TBool)
-                           else addpos (derror (pack "Error en el chequeo de una comparación no entera.")) p
+          PlusOp -> oOps el er bl br oper
+          MinusOp -> oOps el er bl br oper
+          TimesOp -> oOps el er bl br oper
+          DivideOp -> oOps el er bl br oper
+          LtOp -> bOps el er bl br oper
+          LeOp -> bOps el er bl br oper
+          GtOp -> bOps el er bl br oper
+          GeOp -> bOps el er bl br oper
+          where oOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
+                                       && (?=) l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
+                                    then (, TInt RO) <$> (TTr.binOpIntExp bl op br) 
+                                    else addpos (derror (pack "Error en el chequeo de una operacion entera.")) p
+                bOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
+                                    then case l of
+					TInt _  -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
+					TString -> (, TBool) <$> (TTr.binOpStrExp bl op br)   
+                                    else addpos (derror (pack "Error en el chequeo de una comparacion.")) p
 
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
 -- Donde el primer argumento son los campos del records, y el segundo es
@@ -380,50 +381,49 @@ transExp(RecordExp flds rt p) =
         -- Lo que resta es chequear que los tipos  sean los mismos, entre los que el programador dio
         -- y los que tienen que ser según la definición del record.
         let ordered = List.sortBy (Ord.comparing fst) fldsTys
+            fldsBs = zip (P.map (fst . snd) ordered) [0..]
         -- asumiendo que no nos interesan como el usuario ingresa los campos los ordenamos.
         _ <- flip addpos p $ cmpZip ( (\(s,(c,t)) -> (s,t)) <$> ordered) fldsTy -- Demon corta la ejecución.
-        return ((), trec) -- Si todo fue bien devolvemos trec.
+        (, trec) <$> (TTr.recordExp fldsBs) -- Si todo fue bien devolvemos trec.
     _ -> flip addpos p $ derror (pack "Error de tipos.")
-transExp(SeqExp es p) = fmap last (mapM transExp es)
-  -- last <$> mapM transExp es
--- ^ Notar que esto queda así porque no nos interesan los
--- units intermedios. Eventualmente vamos a coleccionar los códigos intermedios y se verá algo similar a:
--- do
---       es' <- mapM transExp es
---       return ( () , snd $ last es')
-transExp(AssignExp var val p) = do (_ , tvar) <- transVar var
+transExp(SeqExp es p) = do
+       es' <- mapM transExp es
+       (, snd $ last es') <$> (TTr.seqExp (P.map fst es'))
+transExp(AssignExp var val p) = do (bvar , tvar) <- transVar var
                                    when (tvar == TInt RO) $ addpos (derror (pack ("Int " ++ show var ++ " es read-only."))) p
-                                   (_ , tval) <- transExp val
+                                   (bval , tval) <- transExp val
                                    bt <- tiposIguales tvar tval
                                    unless bt $ addpos (derror (pack "Tipos no compatibles #4.")) p
-                                   return ((),TUnit)
+                                   (,TUnit) <$> (TTr.assignExp bvar bval)
 transExp(IfExp co th Nothing p) = do
         -- ** (ccond , co') <- transExp co
   -- Analizamos el tipo de la condición
-        (_ , co') <- transExp co
+        (bco, co') <- transExp co
   -- chequeamos que sea un entero.
         unless ((?=) co' TBool) $ errorTiposMsg p "En la condición del if->" co' TBool -- Claramente acá se puede dar un mejor error.
         -- ** (cth , th') <- transExp th
   -- Analizamos el tipo del branch.
-        (() , th') <- transExp th
+        (bth, th') <- transExp th
   -- chequeamos que sea de tipo Unit.
         unless ((?=) th' TUnit) $ errorTiposMsg p "En el branch del if->" th' TUnit
   -- Si todo fue bien, devolvemos que el tipo de todo el 'if' es de tipo Unit.
-        return (() , TUnit)
+        (, TUnit) <$> (TTr.ifThenExp bco bth)
 transExp(IfExp co th (Just el) p) = do
-  (_ , condType) <- transExp co
+  (bco, condType) <- transExp co
   unless ((?=) condType TBool) $ errorTiposMsg p "En la condición del if ->" condType TBool
-  (_, ttType) <- transExp th
-  (_, ffType) <- transExp el
+  (bth, ttType) <- transExp th
+  (bel, ffType) <- transExp el
   C.unlessM (tiposIguales ttType ffType) $ errorTiposMsg p "En los branches." ttType ffType
   -- Si todo fue bien devolvemos el tipo de una de las branches.
-  return ((), ttType)
+  if (?=) ttType TUnit
+  then (, ttType) <$> (TTr.ifThenElseExpUnit bco bth bel)
+  else (, ttType) <$> (TTr.ifThenElseExp bco bth bel)
 transExp(WhileExp co body p) = do
-  (_ , coTy) <- transExp co
+  (bco, coTy) <- transExp co
   unless ((?=) coTy TBool) $ errorTiposMsg p "Error en la condición del While" coTy TBool
-  (_ , boTy) <- transExp body
+  (bbody, boTy) <- transExp body
   unless ((?=) boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
-  return ((), TUnit)
+  (, TUnit) <$> (TTr.whileExp bco bbody)
 transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
                                        (ehi,thi) <- transExp hi
@@ -433,17 +433,17 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        (ebo,tbo) <- insertVRO nv (transExp bo)
                                        b <- tiposIguales TUnit tbo
                                        unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p
-                                       (,TUnit) <$> TTr.forExp elo ehi env ebo
+                                       (,TUnit) <$> (TTr.forExp elo ehi env ebo)
 transExp(LetExp dcs body p) = transDecs dcs (transExp body)
 transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p
 transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                        case t of
-                                           (TArray t' _) -> do (_,cant') <- transExp cant
+                                           (TArray t' _) -> do (bcant,cant') <- transExp cant
                                                                unless (esInt cant') $ addpos (derror (pack "Tamanio no es entero.")) p
-                                                               (_,init') <- transExp init
+                                                               (binit,init') <- transExp init
                                                                b2 <- tiposIguales t' init'
                                                                unless b2 $ addpos (derror (pack "Valores iniciales incompatibles.")) p
-                                                               return ((),t)
+                                                               (,t) <$> (TTr.arrayExp bcant binit)
                                            _             -> addpos (derror (pack "El array no tiene tipo ahrey")) p
 
 -- Un ejemplo de estado que alcanzaría para realizar todas la funciones es:
