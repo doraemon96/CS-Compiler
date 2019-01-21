@@ -455,20 +455,22 @@ data Estado = Est {vEnv :: M.Map Symbol EnvEntry, tEnv :: M.Map Symbol Tipo}
 -- Estado Inicial con los entornos
 -- * int y string como tipos básicos. -> tEnv
 -- * todas las funciones del *runtime* disponibles. -> vEnv
+--
+-- CONSULTAR: Encontrar un Level inicial para agregar a las funciones de Runtime
 initConf :: Estado
 initConf = Est
            { tEnv = M.insert (pack "int") (TInt RW) (M.singleton (pack "string") TString)
            , vEnv = M.fromList
-                    [(pack "print", Func (1,pack "print",[TString], TUnit, Runtime))
-                    ,(pack "flush", Func (1,pack "flush",[],TUnit, Runtime))
-                    ,(pack "getchar",Func (1,pack "getchar",[],TString,Runtime))
-                    ,(pack "ord",Func (1,pack "ord",[TString],TInt RW,Runtime))
-                    ,(pack "chr",Func (1,pack "chr",[TInt RW],TString,Runtime))
-                    ,(pack "size",Func (1,pack "size",[TString],TInt RW,Runtime))
-                    ,(pack "substring",Func (1,pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
-                    ,(pack "concat",Func (1,pack "concat",[TString,TString],TString,Runtime))
-                    ,(pack "not",Func (1,pack "not",[TBool],TBool,Runtime))
-                    ,(pack "exit",Func (1,pack "exit",[TInt RW],TUnit,Runtime))
+                    [(pack "print", Func ([],pack "print",[TString], TUnit, Runtime))
+                    ,(pack "flush", Func ([],pack "flush",[],TUnit, Runtime))
+                    ,(pack "getchar",Func ([],pack "getchar",[],TString,Runtime))
+                    ,(pack "ord",Func ([],pack "ord",[TString],TInt RW,Runtime))
+                    ,(pack "chr",Func ([],pack "chr",[TInt RW],TString,Runtime))
+                    ,(pack "size",Func ([],pack "size",[TString],TInt RW,Runtime))
+                    ,(pack "substring",Func ([],pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
+                    ,(pack "concat",Func ([],pack "concat",[TString,TString],TString,Runtime))
+                    ,(pack "not",Func ([],pack "not",[TBool],TBool,Runtime))
+                    ,(pack "exit",Func ([],pack "exit",[TInt RW],TUnit,Runtime))
                     ]
            }
 
@@ -506,10 +508,10 @@ instance Manticore Monada where
       put oldEst
       return a
   -- | Inserta una Variable de sólo lectura al entorno
-  --   insertVRO :: Symbol -> w a -> w a
-    insertVRO sym m = do
+  --   insertVRO :: Symbol -> Access -> w a -> w a
+    insertVRO sym acc lev m = do
       oldEst <- get
-      put (oldEst{ vEnv = M.insert sym (Var (TInt RO)) (vEnv oldEst)})
+      put (oldEst{ vEnv = M.insert sym (Var (TInt RO,acc,lev)) (vEnv oldEst)})
       a <- m
       put oldEst
       return a
@@ -547,7 +549,7 @@ instance Manticore Monada where
     ugen = mkUnique
 
 
-runMonada :: Monada ((), Tipo)-> StGen (Either Symbol ((), Tipo))
+runMonada :: Monada ((), Tipo) -> StGen (Either Symbol ((), Tipo))
 runMonada =  flip evalStateT initConf . runExceptT
 
 runSeman :: Exp -> StGen (Either Symbol ((), Tipo))

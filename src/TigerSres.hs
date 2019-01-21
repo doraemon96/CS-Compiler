@@ -10,10 +10,11 @@ import           TigerUnique
 data Externa = Runtime | Propia
     deriving Show
 
-type FunEntry = (Unique, Label, [Tipo], Tipo, Externa)
--- type FunEntry = (Level, Label, [Tipo], Tipo, Bool)
+-- ** type FunEntry = (Unique, Label, [Tipo], Tipo, Externa)
+type FunEntry = (Level, Label, [Tipo], Tipo, Externa)
 
-type ValEntry = Tipo -- Entrega2 -> = (Tipo, Access, Int)
+-- ** type ValEntry = Tipo
+type ValEntry = (Tipo, Access, Int)
 
 data EnvEntry =
     Var ValEntry | Func FunEntry
