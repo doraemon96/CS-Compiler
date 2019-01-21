@@ -27,6 +27,7 @@ import           Data.Ord                      as Ord hiding ( EQ
                                                 , GT
                                                 , LT
                                                 )
+import           Data.Text
 
 
 import           Debug.Trace
@@ -315,8 +316,25 @@ instance (MemM w) => IrGen w where
                         , Move (Temp t) (Temp rv)]) 
                 (Temp t)
     -- callExp :: Label -> Externa -> Bool -> Level -> [BExp] -> w BExp
-    -- CONSULTA: isproc es para no devolver nada? external es simplemente un externalCall_? lovl?
-    callExp name external isproc lvl args = do
+    -- CONSULTA: isproc es para no devolver nada? external es simplemente un externalCall_? lvl?
+    callExp name Runtime isproc lvl args = do
+        targs <- mapM (\arg -> do earg <- unEx arg
+                                  tmp  <- newTemp
+                                  return (Temp tmp,Move (Temp tmp) earg) ) args
+        t     <- newTemp
+        let args' = map fst targs
+            ins   = map snd targs
+	if isproc
+	then
+	    return $ Nx $
+		ExpS $ externalCall ("_" ++ Data.Text.unpack name) args'
+	else
+	    return $ Ex $
+		Eseq
+		    (seq    (ins ++ [ExpS $ externalCall ("_" ++ Data.Text.unpack name) args')
+				    , Move (Temp t) (Temp rv)]))
+		    (Temp t)
+    callExp name Propia isproc lvl args = do
         targs <- mapM (\arg -> do earg <- unEx arg
                                   tmp  <- newTemp
                                   return (Temp tmp,Move (Temp tmp) earg) ) args
@@ -328,6 +346,8 @@ instance (MemM w) => IrGen w where
                 (seq    (ins ++ [ExpS (Call (Name name) args')
                                 , Move (Temp t) (Temp rv)]))
                 (Temp t)
+
+
     -- letExp :: [BExp] -> BExp -> w BExp
     letExp [] e = do
       -- Des-empaquetar y empaquetar como un |Ex| puede generar
