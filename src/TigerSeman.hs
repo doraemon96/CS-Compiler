@@ -156,9 +156,9 @@ splitWith f = P.foldr (\x rs -> either (addIzq rs) (addDer rs) (f x)) ([] , [])
 addIzq (as,bs) a = (a : as, bs)
 addDer (as,bs) b = (as, b : bs)
 
-buscarM :: Symbol -> [(Symbol, Tipo, Int)] -> Maybe Tipo
+buscarM :: Symbol -> [(Symbol, Tipo, Int)] -> Maybe (Tipo, Int)
 buscarM s [] = Nothing
-buscarM s ((s',t,_):xs) | s == s' = Just t
+buscarM s ((s', t, i):xs) | s == s' = Just (t, i)
                         | otherwise = buscarM s xs
 
 -- | __Completar__ 'transVar'.
@@ -167,13 +167,17 @@ buscarM s ((s',t,_):xs) | s == s' = Just t
 transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
 -- Leer Nota [1] para SimpleVar
 -- ** transVar :: (Manticore w) => Var -> w ( () , Tipo)
-transVar (SimpleVar s)      = ((),) <$> getTipoValV s
+transVar (SimpleVar s)      = do 
+                                (ty, acc, lev) <- getTipoValV s
+                                (,ty) <$> TTr.simpleVar acc lev
 transVar (FieldVar v s)     = transVar v >>= \case
-                                    (_ , TRecord lt _) -> maybe (derror (pack "Not a record field")) (return . ((),)) (buscarM s lt)
-                                    _                  -> derror $ pack "Not a record var"
+                                    (brec , TRecord lt _) -> maybe (derror (pack "Not a record field")) 
+                                                                   (\(t, i) -> (,t) <$> TTr.fieldVar brec i) --chequear i
+                                                                   (buscarM s lt)
+                                    _                     -> derror $ pack "Not a record var"
 transVar (SubscriptVar v e) = transVar v >>= \case
-                                    (_ , TArray t _) -> transExp e >>= \case
-                                                            (() , TInt _) -> return ((),t)
+                                    (barr , TArray t _) -> transExp e >>= \case
+                                                            (be , TInt _) -> (,t) <$> TTr.subscriptVar barr be
                                                             _             -> derror $ pack "Not a valid index"
                                     _                -> derror $ pack "Not an array var"
 
@@ -186,7 +190,7 @@ transVar (SubscriptVar v e) = transVar v >>= \case
 -- que 'TransTy ' no necesita ni 'MemM ' ni devuelve 'BExp'
 -- porque no se genera código intermedio en la definición de un tipo.
 transTy :: (Manticore w) => Ty -> w Tipo
-transTy (NameTy s)      = getTipoT s --TODO chequear (esta bien? Siempre tengo a s en mi manticore?)
+transTy (NameTy s)      = getTipoT s
 transTy (RecordTy flds) = do fldsTys <- mapM (\(nm, cod) -> (nm,) <$> transTy cod) flds
                              let ordered = List.sortBy (Ord.comparing fst) fldsTys
                                  ziplist = List.zipWith (curry triplar) ordered [0..]
@@ -218,9 +222,10 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 ----------------------------------------
 transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 --  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
+-- CONSULTAR: transDecs de VarDec. Donde usamos bv? Donde sacamos lev y acc?
 transDecs [] m = m
-transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
-                                                        insertValV nm et (transDecs xs m)
+transDecs ((VarDec nm escap Nothing init p): xs) m = do (bv,et) <- transExp init
+                                                        insertValV nm (et,acc?,lev?) (transDecs xs m)
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
                                                          wt     <- addpos (getTipoT t) p
                                                          bt     <- tiposIguales et wt
@@ -240,12 +245,13 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                            t     <- addpos (getTipoT s) p
                                                            insertFunV nm (0, genlab nm p, largs, t, Propia) m'
 
-                                                    --aux :: (Manticore w) => [Symbol] -> [Tipo] -> w a -> w a
-                                                    aux []     []     m'' = m''
-                                                    aux (n:ns) (t:ts) m'' = insertValV n t (aux ns ts m'')
+                                                    -- TODO: BORRAR ESTO
+                                                    -- aux :: (Manticore w) => [Symbol] -> [Tipo] -> w a -> w a
+                                                    -- aux []     []     m'' = m''
+                                                    -- aux (n:ns) (t:ts) m'' = insertValV n t (aux ns ts m'')
 
                                                     genlab t p = pack $ show t ++ "_" ++ show p
-
+                                                      
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (_,args,Nothing,exp,p) =
                                                         do largs <- mapM (\(n,_,t) -> (n,) <$> fromTy t) args
@@ -548,9 +554,8 @@ instance Manticore Monada where
     showTEnv w = gets tEnv >>= flip trace w . show
     ugen = mkUnique
 
-
-runMonada :: Monada ((), Tipo) -> StGen (Either Symbol ((), Tipo))
+runMonada :: Monada (BExp, Tipo) -> StGen (Either Symbol (BExp, Tipo))
 runMonada =  flip evalStateT initConf . runExceptT
 
-runSeman :: Exp -> StGen (Either Symbol ((), Tipo))
+runSeman :: Exp -> StGen (Either Symbol (BExp, Tipo))
 runSeman = runMonada . transExp

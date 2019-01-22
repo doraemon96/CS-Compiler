@@ -3,8 +3,8 @@ module TigerSres where
 import           TigerTips
 import           TigerTemp
 import           TigerUnique
--- import TigerTrans
--- import TigerFrame
+-- import           TigerTrans (Level) --CONSULTAR
+import           TigerFrame
 
 -- | 'Externa' representa la idea si una función pertenece al /runtime/ o no.
 data Externa = Runtime | Propia
