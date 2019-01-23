@@ -11,6 +11,7 @@ import           TigerTopSort
 -- Segunda parte imports:
 import           TigerTemp
 import           TigerTrans                 as TTr
+import           TigerFrame
 
 -- Monads
 import qualified Control.Conditional        as C
@@ -50,7 +51,7 @@ class (Demon w, Monad w) => Manticore w where
   -- | Inserta una Función al entorno
     insertFunV :: Symbol -> FunEntry -> w a -> w a
   -- | Inserta una Variable de sólo lectura al entorno
-    insertVRO :: Symbol -> w a -> w a
+    insertVRO :: Symbol -> Access -> Int -> w a -> w a
   -- | Inserta una variable de tipo al entorno
     insertTipoT :: Symbol -> Tipo -> w a -> w a
   -- | Busca una función en el entorno
@@ -220,16 +221,18 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --   técnica conocida en la literatura de Haskell conocida como [Tying the
 --   Knot](https://wiki.haskell.org/Tying_the_Knot)
 ----------------------------------------
-transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 --  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
--- CONSULTAR: transDecs de VarDec. Donde usamos bv? Donde sacamos lev y acc?
+transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
 transDecs [] m = m
-transDecs ((VarDec nm escap Nothing init p): xs) m = do (bv,et) <- transExp init
-                                                        insertValV nm (et,acc?,lev?) (transDecs xs m)
+-- CONSULTAR: transDecs de VarDec. Necesitamos el bexp?
+transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
+                                                        (_,acc,lev) <- getTipoValV nm
+                                                        insertValV nm (et,acc,lev) (transDecs xs m)
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
                                                          wt     <- addpos (getTipoT t) p
                                                          bt     <- tiposIguales et wt
-                                                         if bt then addpos (insertValV nm wt (transDecs xs m)) p
+                                                         (_,acc,lev) <- getTipoValV nm
+                                                         if bt then addpos (insertValV nm (wt,acc,lev) (transDecs xs m)) p
                                                          else addpos (derror (pack "Tipos no compatibles #1")) p
 transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_ , _) -> nm) fs in
                                                 --TODO: agregar pos a la dup dec
@@ -239,11 +242,13 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                     -- Primer pasada: inserto la interfaz de funciones
                                                     insertf (nm,args,Nothing,_,p)  m' =
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
-                                                           insertFunV nm (0, genlab nm p, largs, TUnit, Propia) m'
+                                                           lvl   <- TTr.topLevel
+                                                           insertFunV nm (lvl, genlab nm p, largs, TUnit, Propia) m'
                                                     insertf (nm,args,Just s,_,p) m' = 
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            t     <- addpos (getTipoT s) p
-                                                           insertFunV nm (0, genlab nm p, largs, t, Propia) m'
+                                                           lvl   <- TTr.topLevel
+                                                           insertFunV nm (lvl, genlab nm p, largs, t, Propia) m'
 
                                                     -- TODO: BORRAR ESTO
                                                     -- aux :: (Manticore w) => [Symbol] -> [Tipo] -> w a -> w a
@@ -254,14 +259,16 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                       
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (_,args,Nothing,exp,p) =
-                                                        do largs <- mapM (\(n,_,t) -> (n,) <$> fromTy t) args
-                                                           (_, et) <- P.foldr (uncurry insertValV) (transExp exp) largs
+                                                        do largs   <- mapM (\(n,esc,t) -> (n,,) <$> fromTy t <*> TTr.allocArg esc) args
+                                                           i       <- getActualLevel
+                                                           (_, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
                                                            unless (TUnit ?= et) $ addpos (derror (pack "Tipo de exp no es Unit")) p
                                                     inserte (_,args,Just s,exp,p) =
-                                                        do largs <- mapM (\(n,_,t) -> (n,) <$> fromTy t) args
-                                                           (_, et) <- P.foldr (uncurry insertValV) (transExp exp) largs
-                                                           t      <- addpos (getTipoT s) p
-                                                           bt     <- tiposIguales et t
+                                                        do largs   <- mapM (\(n,esc,t) -> (n,,) <$> fromTy t <*> TTr.allocArg esc) args
+                                                           i       <- getActualLevel
+                                                           (_, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
+                                                           t       <- addpos (getTipoT s) p
+                                                           bt      <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
 transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ derror (pack "Se ha encontrado un ciclo.")
                                                     makeRefs sorted' $ undoRefs sorted' $ transDecs xss m
@@ -338,11 +345,11 @@ transExp UnitExp{} = (,TUnit) <$> TTr.unitExp
 transExp NilExp{} = (,TNil) <$> TTr.nilExp
 transExp (IntExp i _) = (,TInt RW) <$> (TTr.intExp i)
 transExp (StringExp s _) = (,TString) <$> (TTr.stringExp (pack s))
-transExp (CallExp nm args p) = do (_,_,targs,ret,_) <- getTipoFunV nm
+transExp (CallExp nm args p) = do (lvl,lab,targs,ret,ext) <- getTipoFunV nm
                                   targs' <- mapM transExp args
                                   mbs <- zipWithM tiposIguales targs (P.map snd targs')
                                   unless (and mbs && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
-                                  return ((),ret)
+                                  (,ret) <$> TTr.callExp lab ext (if ret == TUnit then IsProc else IsFun) lvl (P.map fst targs')
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (bl, el) <- transExp el'
         (br, er) <- transExp er'
@@ -367,8 +374,8 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
                                     else addpos (derror (pack "Error en el chequeo de una operacion entera.")) p
                 bOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
                                     then case l of
-					TInt _  -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
-					TString -> (, TBool) <$> (TTr.binOpStrExp bl op br)   
+                                        TInt _  -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
+                                        TString -> (, TBool) <$> (TTr.binOpStrExp bl op br)   
                                     else addpos (derror (pack "Error en el chequeo de una comparacion.")) p
 
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
@@ -434,9 +441,11 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
                                        (ehi,thi) <- transExp hi
                                        unless (esInt thi) $ addpos (derror (pack "Limite superior no es entero.")) p
-				       (env,tnv) <- transVar (SimpleVar nv) --CONSULTAR
-				       TTr.preWhileforExp
-                                       (ebo,tbo) <- insertVRO nv (transExp bo)
+                                       (env,tnv) <- transVar (SimpleVar nv) --CONSULTAR
+                                       TTr.preWhileforExp
+                                       acc <- TTr.allocLocal mb
+                                       lev <- TTr.getActualLevel
+                                       (ebo,tbo) <- insertVRO nv acc lev (transExp bo)
                                        b <- tiposIguales TUnit tbo
                                        unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p
                                        (,TUnit) <$> (TTr.forExp elo ehi env ebo)
@@ -467,16 +476,16 @@ initConf :: Estado
 initConf = Est
            { tEnv = M.insert (pack "int") (TInt RW) (M.singleton (pack "string") TString)
            , vEnv = M.fromList
-                    [(pack "print", Func ([],pack "print",[TString], TUnit, Runtime))
-                    ,(pack "flush", Func ([],pack "flush",[],TUnit, Runtime))
-                    ,(pack "getchar",Func ([],pack "getchar",[],TString,Runtime))
-                    ,(pack "ord",Func ([],pack "ord",[TString],TInt RW,Runtime))
-                    ,(pack "chr",Func ([],pack "chr",[TInt RW],TString,Runtime))
-                    ,(pack "size",Func ([],pack "size",[TString],TInt RW,Runtime))
-                    ,(pack "substring",Func ([],pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
-                    ,(pack "concat",Func ([],pack "concat",[TString,TString],TString,Runtime))
-                    ,(pack "not",Func ([],pack "not",[TBool],TBool,Runtime))
-                    ,(pack "exit",Func ([],pack "exit",[TInt RW],TUnit,Runtime))
+                    [(pack "print", Func (TTr.outermost,pack "print",[TString], TUnit, Runtime))
+                    ,(pack "flush", Func (TTr.outermost,pack "flush",[],TUnit, Runtime))
+                    ,(pack "getchar",Func (TTr.outermost,pack "getchar",[],TString,Runtime))
+                    ,(pack "ord",Func (TTr.outermost,pack "ord",[TString],TInt RW,Runtime))
+                    ,(pack "chr",Func (TTr.outermost,pack "chr",[TInt RW],TString,Runtime))
+                    ,(pack "size",Func (TTr.outermost,pack "size",[TString],TInt RW,Runtime))
+                    ,(pack "substring",Func (TTr.outermost,pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
+                    ,(pack "concat",Func (TTr.outermost,pack "concat",[TString,TString],TString,Runtime))
+                    ,(pack "not",Func (TTr.outermost,pack "not",[TBool],TBool,Runtime))
+                    ,(pack "exit",Func (TTr.outermost,pack "exit",[TInt RW],TUnit,Runtime))
                     ]
            }
 
@@ -514,7 +523,7 @@ instance Manticore Monada where
       put oldEst
       return a
   -- | Inserta una Variable de sólo lectura al entorno
-  --   insertVRO :: Symbol -> Access -> w a -> w a
+  --   insertVRO :: Symbol -> Access -> Int -> w a -> w a
     insertVRO sym acc lev m = do
       oldEst <- get
       put (oldEst{ vEnv = M.insert sym (Var (TInt RO,acc,lev)) (vEnv oldEst)})

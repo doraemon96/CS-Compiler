@@ -15,7 +15,7 @@ import           TigerAbs                       ( Escapa(..) )
 import qualified TigerAbs                      as Abs
 import           TigerErrores
 import           TigerFrame                    as F
-import           TigerSres                      ( Externa(..) )
+--import           TigerSres                      ( Externa(..) )
 import           TigerSymbol                   as T
 import           TigerTemp
 import           TigerTree
@@ -37,6 +37,11 @@ type TransFrag = Frag
 
 -- | Tipo de datos representando si es un procedimiento o una función
 data IsProc = IsProc | IsFun
+    deriving (Show,Eq)
+
+-- | 'Externa' representa la idea si una función pertenece al /runtime/ o no.
+data Externa = Runtime | Propia
+    deriving (Show,Eq)
 
 -- | Empaquetadores de expresiones
 -- Esto pasa ya que la información de contexto, es decir, donde están cada
@@ -121,10 +126,10 @@ type Level = [LevelI]
 
 -- | Helpers de niveles.
 getFrame :: Level -> Frame
-getFrame = getFrame' . head
+getFrame = getFrame' . List.head
 
 getNlvl :: Level -> Int
-getNlvl = getNlvl' . head
+getNlvl = getNlvl' . List.head
 
 setFrame :: Frame -> Level -> Level
 setFrame f (MkLI _ l : xs) = MkLI f l : xs
@@ -315,32 +320,32 @@ instance (MemM w) => IrGen w where
                 (seq    [ExpS $ externalCall "_allocRecord" (sz : eflds)
                         , Move (Temp t) (Temp rv)]) 
                 (Temp t)
-    -- callExp :: Label -> Externa -> Bool -> Level -> [BExp] -> w BExp
+    -- callExp :: Label -> Externa -> IsProc -> Level -> [BExp] -> w BExp
     -- CONSULTA: isproc es para no devolver nada? external es simplemente un externalCall_? lvl?
     callExp name Runtime isproc lvl args = do
         targs <- mapM (\arg -> do earg <- unEx arg
                                   tmp  <- newTemp
                                   return (Temp tmp,Move (Temp tmp) earg) ) args
         t     <- newTemp
-        let args' = map fst targs
-            ins   = map snd targs
-	if isproc
-	then
-	    return $ Nx $
-		ExpS $ externalCall ("_" ++ Data.Text.unpack name) args'
-	else
-	    return $ Ex $
-		Eseq
-		    (seq    (ins ++ [ExpS $ externalCall ("_" ++ Data.Text.unpack name) args')
-				    , Move (Temp t) (Temp rv)]))
-		    (Temp t)
+        let args' = List.map fst targs
+            ins   = List.map snd targs
+        if isproc == IsProc
+        then
+            return $ Nx $
+            ExpS $ externalCall ("_" ++ Data.Text.unpack name) args'
+        else -- isproc == IsFun
+            return $ Ex $
+            Eseq
+                (seq    (ins ++ [ExpS (externalCall ("_" ++ Data.Text.unpack name) args')
+                                , Move (Temp t) (Temp rv)]))
+                (Temp t)
     callExp name Propia isproc lvl args = do
         targs <- mapM (\arg -> do earg <- unEx arg
                                   tmp  <- newTemp
                                   return (Temp tmp,Move (Temp tmp) earg) ) args
         t     <- newTemp
-        let args' = map fst targs
-            ins   = map snd targs
+        let args' = List.map fst targs
+            ins   = List.map snd targs
         return $ Ex $
             Eseq
                 (seq    (ins ++ [ExpS (Call (Name name) args')
@@ -368,10 +373,10 @@ instance (MemM w) => IrGen w where
             _         -> internal $ pack "no hay label de salida para el break"
     -- seqExp :: [BExp] -> w BExp
     seqExp [] = return $ Nx $ ExpS $ Const 0
-    seqExp bes = case last bes of
+    seqExp bes = case List.last bes of
             Nx _ -> Nx . seq <$> mapM unNx bes
             Ex e' -> do
-                    let bfront = init bes
+                    let bfront = List.init bes
                     ess <- mapM unNx bfront
                     return $ Ex $ Eseq (seq ess) e'
             _ -> internal $ pack "WAT!123"
