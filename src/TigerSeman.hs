@@ -471,7 +471,6 @@ data Estado = Est {vEnv :: M.Map Symbol EnvEntry, tEnv :: M.Map Symbol Tipo}
 -- * int y string como tipos básicos. -> tEnv
 -- * todas las funciones del *runtime* disponibles. -> vEnv
 --
--- CONSULTAR: Encontrar un Level inicial para agregar a las funciones de Runtime
 initConf :: Estado
 initConf = Est
            { tEnv = M.insert (pack "int") (TInt RW) (M.singleton (pack "string") TString)
