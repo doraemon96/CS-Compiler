@@ -321,38 +321,31 @@ instance (MemM w) => IrGen w where
                         , Move (Temp t) (Temp rv)]) 
                 (Temp t)
     -- callExp :: Label -> Externa -> IsProc -> Level -> [BExp] -> w BExp
-    -- CONSULTA: isproc es para no devolver nada? external es simplemente un externalCall_? lvl?
-    callExp name Runtime isproc lvl args = do
+    callExp name externa isproc lvl args = do
         targs <- mapM (\arg -> do earg <- unEx arg
                                   tmp  <- newTemp
                                   return (Temp tmp,Move (Temp tmp) earg) ) args
         t     <- newTemp
+        alev  <- getActualLevel
         let args' = List.map fst targs
             ins   = List.map snd targs
-        if isproc == IsProc
-        then
-            return $ Nx $
-            ExpS $ externalCall ("_" ++ Data.Text.unpack name) args'
-        else -- isproc == IsFun
-            return $ Ex $
-            Eseq
-                (seq    (ins ++ [ExpS (externalCall ("_" ++ Data.Text.unpack name) args')
-                                , Move (Temp t) (Temp rv)]))
-                (Temp t)
-    callExp name Propia isproc lvl args = do
-        targs <- mapM (\arg -> do earg <- unEx arg
-                                  tmp  <- newTemp
-                                  return (Temp tmp,Move (Temp tmp) earg) ) args
-        t     <- newTemp
-        let args' = List.map fst targs
-            ins   = List.map snd targs
-        return $ Ex $
-            Eseq
-                (seq    (ins ++ [ExpS (Call (Name name) args')
-                                , Move (Temp t) (Temp rv)]))
-                (Temp t)
-
-
+            call  = case externa of
+                        Runtime -> externalCall ("_" ++ Data.Text.unpack name)
+                        Propia  -> Call (Name name)
+            lev   = getNlvl lvl
+            slink = case compare lev alev of
+                        GT -> Temp fp
+                        _  -> Mem (Binop Plus (Temp fp) (Const fpPrevLev)) --CONSULTAR
+        case isproc of
+            IsProc ->
+                return $ Nx $
+                    ExpS $ call args'
+            IsFun ->
+                return $ Ex $
+                    Eseq
+                        (seq    (ins ++ [ExpS (call args')
+                                        , Move (Temp t) (Temp rv)]))
+                    (Temp t)
     -- letExp :: [BExp] -> BExp -> w BExp
     letExp [] e = do
       -- Des-empaquetar y empaquetar como un |Ex| puede generar
