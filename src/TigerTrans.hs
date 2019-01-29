@@ -333,17 +333,17 @@ instance (MemM w) => IrGen w where
                         Runtime -> externalCall ("_" ++ Data.Text.unpack name)
                         Propia  -> Call (Name name)
             lev   = getNlvl lvl
-            slink = case compare lev alev of
-                        GT -> Temp fp
-                        _  -> Mem (Binop Plus (Temp fp) (Const fpPrevLev)) --CONSULTAR
+            slink = if lev > alev -- lev: callee , alev: caller
+                    then Temp fp
+                    else F.auxexp (alev-lev)
         case isproc of
             IsProc ->
                 return $ Nx $
-                    ExpS $ call args'
+                    ExpS $ call (slink:args')
             IsFun ->
                 return $ Ex $
                     Eseq
-                        (seq    (ins ++ [ExpS (call args')
+                        (seq    (ins ++ [ExpS (call (slink:args'))
                                         , Move (Temp t) (Temp rv)]))
                     (Temp t)
     -- letExp :: [BExp] -> BExp -> w BExp
