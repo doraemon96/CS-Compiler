@@ -222,12 +222,24 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --   Knot](https://wiki.haskell.org/Tying_the_Knot)
 ----------------------------------------
 --  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
-transDecs :: (MemM w, Manticore w) => [Dec] -> w a -> w a
-transDecs [] m = m
--- CONSULTAR: transDecs de VarDec. Necesitamos el bexp?
-transDecs ((VarDec nm escap Nothing init p): xs) m = do (_,et) <- transExp init
-                                                        (_,acc,lev) <- getTipoValV nm
-                                                        insertValV nm (et,acc,lev) (transDecs xs m)
+transDecs :: (MemM w, Manticore w) => [Dec] -> w (BExp,Tipo) -> w ([BExp],Tipo)
+transDecs [] m = do (x,y) <- m
+                    return ([x],y)
+-- CONSULTAR: como llevamos la lista de bexp? y habria que llevar... asignaciones de bexp a algo no?
+transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
+                                                        lev <- TTr.getActualLevel
+                                                        acc <- TTr.allocLocal escap
+                                                        (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
+                                                        return (eb:bexps, tipo)
+-- ..1..
+-- var a = [init]
+-- ..2..
+-- init \in AST
+-- transExp init \mapsto eb \in BExp (IR)
+--
+-- IR(..1..) ++ eb ++ IR(..2..)
+--  En realidad, por cada let voy a tener
+--  CodigoIR inicial de cada variable, seq [eb1,eb2,eb3,...] ++ CodBody
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
                                                          wt     <- addpos (getTipoT t) p
                                                          bt     <- tiposIguales et wt
@@ -441,15 +453,19 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
                                        (ehi,thi) <- transExp hi
                                        unless (esInt thi) $ addpos (derror (pack "Limite superior no es entero.")) p
-                                       (env,tnv) <- transVar (SimpleVar nv) --CONSULTAR
+                                       --(env,tnv) <- transVar (SimpleVar nv) --TODO: testear, si descomentamos deberia romper
                                        TTr.preWhileforExp
                                        acc <- TTr.allocLocal mb
                                        lev <- TTr.getActualLevel
+                                       env <- TTr.simpleVar acc lev 
+                                       -- ^ CONSULTAR si esta bien definido env asi. Segun simpleVar, en su llamada a exp,
+                                       -- lev es la diferencia de niveles... why?
                                        (ebo,tbo) <- insertVRO nv acc lev (transExp bo)
                                        b <- tiposIguales TUnit tbo
                                        unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p
                                        (,TUnit) <$> (TTr.forExp elo ehi env ebo)
-transExp(LetExp dcs body p) = transDecs dcs (transExp body)
+transExp(LetExp dcs body p) = do (bexps,tipo) <- transDecs dcs (transExp body)
+                                 (,tipo) <$> TTr.letExp (init bexps) (last bexps)
 transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p
 transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                        case t of
@@ -462,7 +478,15 @@ transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                            _             -> addpos (derror (pack "El array no tiene tipo ahrey")) p
 
 -- Un ejemplo de estado que alcanzaría para realizar todas la funciones es:
-data Estado = Est {vEnv :: M.Map Symbol EnvEntry, tEnv :: M.Map Symbol Tipo}
+data Estado = Est {
+                vEnv     :: M.Map Symbol EnvEntry 
+                , tEnv   :: M.Map Symbol Tipo
+                -- CONSULTAR level deberia ser Level o [Level]?
+                , level  :: [Level]
+                , salida :: [Maybe Label]
+                , frag   :: [Frag]
+                , maxlvl :: Int
+                }
     deriving Show
 -- data EstadoG = G {vEnv :: [M.Map Symbol EnvEntry], tEnv :: [M.Map Symbol Tipo]}
 --     deriving Show
@@ -486,6 +510,10 @@ initConf = Est
                     ,(pack "not",Func (TTr.outermost,pack "not",[TBool],TBool,Runtime))
                     ,(pack "exit",Func (TTr.outermost,pack "exit",[TInt RW],TUnit,Runtime))
                     ]
+           , level  = [TTr.outermost]
+           , salida = []
+           , frag   = []
+           , maxlvl = -1
            }
 
 -- Utilizando alguna especie de run de la monada definida, obtenemos algo así
@@ -495,7 +523,6 @@ type Monada = ExceptT Symbol (StateT Estado StGen)
 instance Demon Monada where
   -- | 'throwE' de la mónada de excepciones.
   derror =  throwE
-  -- TODO: Parte del estudiante
   -- adder :: w a -> Symbol -> w a
   adder m s = catchE m (throwE . flip append s)
 
@@ -512,7 +539,6 @@ instance Manticore Monada where
       put oldEst
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
-  -- TODO: Parte del estudiante
   -- | Inserta una Función al entorno
   --   insertFunV :: Symbol -> FunEntry -> w a -> w a
     insertFunV sym fentry m = do
@@ -561,6 +587,61 @@ instance Manticore Monada where
   --   showTEnv :: w a -> w a
     showTEnv w = gets tEnv >>= flip trace w . show
     ugen = mkUnique
+
+instance MemM Monada where
+    -- | Level management
+    -- Es un entero que nos indica en qué nivel estamos actualmente.
+    --upLvl :: w () 
+    upLvl = do
+      st <- get
+      put (st{ maxlvl = maxlvl st + 1})
+    --downLvl :: w ()
+    downLvl = do
+      st <- get
+      put (st{ maxlvl = maxlvl st - 1})
+    -- | Salida management.
+    -- Esta etiqueta la necesitamos porque es la que nos va permitir saltar a la
+    -- salida de un while (Ver código intermedio de While). Usada en el break.
+    --pushSalida :: Maybe Label -> w ()
+    pushSalida ml = do
+      st <- get
+      put (st{ salida = ml : (salida st) })
+    --topSalida :: w (Maybe Label)
+    topSalida = do
+      st <- get
+      return $ head $ salida st
+    --popSalida :: w ()
+    popSalida = do
+      st <- get
+      put (st{ salida = tail $ salida st })
+    -- | Level management Cont. El nivel en esta etapa es lo que llamamos el
+    -- marco de activación virtual o dinámico (no me acuerdo). Pero es lo que
+    -- eventualmente va a ser el marco de activación
+    --pushLevel :: Level -> w ()
+    pushLevel lvl = do
+      st <- get
+      put (st{ level = lvl : (level st) })
+    --popLevel  :: w ()
+    popLevel = do
+      st <- get
+      put (st{ level = tail $ level st })
+    --topLevel  :: w Level
+    topLevel = do
+      st <- get
+      return $ head $ level st
+    -- | Frag management
+    -- Básicamente los fragmentos van a ser un efecto lateral de la computación.
+    -- Recuerden que los fragmentos son pedazos de código intermedio que se van
+    -- a ejecutar. Y estos son un efecto lateral porque todavía no sabemos bien
+    -- cómo van a ser ejecutados (eso se decide más adelante)
+    --pushFrag  :: Frag -> w ()
+    pushFrag fr = do
+      st <- get
+      put (st{ frag = fr : (frag st) })
+    --getFrags  :: w [Frag]
+    getFrags = do
+      st <- get
+      return $ frag st
 
 runMonada :: Monada (BExp, Tipo) -> StGen (Either Symbol (BExp, Tipo))
 runMonada =  flip evalStateT initConf . runExceptT
