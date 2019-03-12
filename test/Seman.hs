@@ -52,10 +52,10 @@ testExpTipo e t = do
     then return t
     else Left (pack $ "Testing Seman: Incorrect type. Expected: " ++ show t ++ ". Actual: " ++ show ty)
 
-testExp :: Exp -> Either Symbol ((), Tipo)
+testExp :: Exp -> Either Symbol (BExp, Tipo)
 testExp e = fst $ evalState (runSeman e) 0
 
-tester :: String -> Either Symbol ((), Tipo)
+tester :: String -> Either Symbol (BExp, Tipo)
 tester = either (fail $ "Testing Seman: Parser error")
                 testExp
          . parse

@@ -33,6 +33,7 @@ log2WSz = 2
 fpPrev :: Int
 fpPrev = 0
 -- | Donde se encuentra el FP del nivel anterior (no necesariamente el llamante?)
+-- CONSULTAR que valor toma fpPrevLev
 fpPrevLev :: Int
 fpPrevLev = 0
 

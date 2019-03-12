@@ -227,8 +227,8 @@ transDecs [] m = do (x,y) <- m
                     return ([x],y)
 -- CONSULTAR: como llevamos la lista de bexp? y habria que llevar... asignaciones de bexp a algo no?
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
-                                                        lev <- TTr.getActualLevel
-                                                        acc <- TTr.allocLocal escap
+                                                        lev     <- TTr.getActualLevel
+                                                        acc     <- TTr.allocLocal escap
                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
                                                         return (eb:bexps, tipo)
 -- ..1..
@@ -240,12 +240,22 @@ transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
 -- IR(..1..) ++ eb ++ IR(..2..)
 --  En realidad, por cada let voy a tener
 --  CodigoIR inicial de cada variable, seq [eb1,eb2,eb3,...] ++ CodBody
-transDecs ((VarDec nm escap (Just t) init p): xs) m = do (_,et) <- transExp init
-                                                         wt     <- addpos (getTipoT t) p
-                                                         bt     <- tiposIguales et wt
-                                                         (_,acc,lev) <- getTipoValV nm
-                                                         if bt then addpos (insertValV nm (wt,acc,lev) (transDecs xs m)) p
-                                                         else addpos (derror (pack "Tipos no compatibles #1")) p
+transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp init
+                                                         wt      <- addpos (getTipoT t) p 
+                                                         bt      <- tiposIguales et wt
+                                                         unless bt $ derror (pack "Tipos no compatibles #1")
+                                                         lev     <- TTr.getActualLevel
+                                                         acc     <- TTr.allocLocal escap
+                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
+                                                         return (eb:bexps, tipo)
+
+--                                                      do (_,et) <- transExp init
+--                                                         wt     <- addpos (getTipoT t) p
+--                                                         bt     <- tiposIguales et wt
+--                                                         --RLY? : (_,acc,lev) <- addpos (getTipoValV nm) p
+--
+--                                                         if bt then addpos (insertValV nm (wt,acc,lev) (transDecs xs m)) p
+--                                                         else addpos (derror (pack "Tipos no compatibles #1")) p
 transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_ , _) -> nm) fs in
                                                 --TODO: agregar pos a la dup dec
                                                 if P.length fs' /= P.length (nub fs') then derror (pack "Declaracion duplicada") else
@@ -444,11 +454,14 @@ transExp(IfExp co th (Just el) p) = do
   then (, ttType) <$> (TTr.ifThenElseExpUnit bco bth bel)
   else (, ttType) <$> (TTr.ifThenElseExp bco bth bel)
 transExp(WhileExp co body p) = do
-  (bco, coTy) <- transExp co
+  (bco, coTy) <- addpos (transExp co) p
   unless ((?=) coTy TBool) $ errorTiposMsg p "Error en la condición del While" coTy TBool
-  (bbody, boTy) <- transExp body
+  (bbody, boTy) <- addpos (transExp body) p
   unless ((?=) boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
-  (, TUnit) <$> (TTr.whileExp bco bbody)
+  TTr.preWhileforExp
+  wex <- TTr.whileExp bco bbody
+  TTr.posWhileforExp
+  return (wex, TUnit)
 transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
                                        (ehi,thi) <- transExp hi
@@ -461,9 +474,11 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        -- ^ CONSULTAR si esta bien definido env asi. Segun simpleVar, en su llamada a exp,
                                        -- lev es la diferencia de niveles... why?
                                        (ebo,tbo) <- insertVRO nv acc lev (transExp bo)
-                                       b <- tiposIguales TUnit tbo
+                                       b   <- tiposIguales TUnit tbo
                                        unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p
-                                       (,TUnit) <$> (TTr.forExp elo ehi env ebo)
+                                       fex <- TTr.forExp elo ehi env ebo
+                                       TTr.posWhileforExp
+                                       return (fex,TUnit)
 transExp(LetExp dcs body p) = do (bexps,tipo) <- transDecs dcs (transExp body)
                                  (,tipo) <$> TTr.letExp (init bexps) (last bexps)
 transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p

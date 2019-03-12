@@ -494,12 +494,17 @@ instance (MemM w) => IrGen w where
             Abs.DivideOp -> return $ Ex $ Binop Div ele ere
             _ -> internal $ pack "BASSSURA JAPISHH #25j"
     -- binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
+    -- CONSULTAR: Permitimos comparaciones <, > en strings?
     binOpStrExp strl op strr = do
         estrl <- unEx strl
         estrr <- unEx strr
         case op of  
             Abs.EqOp  -> return $ Cx $ (\(t,f) -> CJump EQ estrl estrr t f)
             Abs.NeqOp -> return $ Cx $ (\(t,f) -> CJump NE estrl estrr t f)
+            Abs.LtOp  -> return $ Cx $ (\(t,f) -> CJump LT estrl estrr t f)
+            Abs.LeOp  -> return $ Cx $ (\(t,f) -> CJump LE estrl estrr t f)
+            Abs.GtOp  -> return $ Cx $ (\(t,f) -> CJump GT estrl estrr t f)
+            Abs.GeOp  -> return $ Cx $ (\(t,f) -> CJump GE estrl estrr t f)
             _ -> internal $ pack "MASTURBACION ACADEMICA #12n"
     --binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
     binOpIntRelExp le op re = do
