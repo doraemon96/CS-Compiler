@@ -246,7 +246,7 @@ transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp ini
                                                          unless bt $ derror (pack "Tipos no compatibles #1")
                                                          lev     <- TTr.getActualLevel
                                                          acc     <- TTr.allocLocal escap
-                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
+                                                         (bexps,tipo) <- insertValV nm (wt,acc,lev) (transDecs xs m)
                                                          return (eb:bexps, tipo)
 
 --                                                      do (_,et) <- transExp init
@@ -396,8 +396,11 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
                                     else addpos (derror (pack "Error en el chequeo de una operacion entera.")) p
                 bOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
                                     then case l of
-                                        TInt _  -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
-                                        TString -> (, TBool) <$> (TTr.binOpStrExp bl op br)   
+                                        TInt _    -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
+                                        TString   -> (, TBool) <$> (TTr.binOpStrExp bl op br)
+                                        TRecord{} -> addpos (derror (pack "Error en el chequeo de una comparacion1.")) p
+                                        TNil      -> addpos (derror (pack "Error en el chequeo de una comparacion2.")) p
+                                        TArray{}  -> addpos (derror (pack "Error en el chequeo de una comparacion3.")) p
                                     else addpos (derror (pack "Error en el chequeo de una comparacion.")) p
 
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
@@ -456,9 +459,9 @@ transExp(IfExp co th (Just el) p) = do
 transExp(WhileExp co body p) = do
   (bco, coTy) <- addpos (transExp co) p
   unless ((?=) coTy TBool) $ errorTiposMsg p "Error en la condición del While" coTy TBool
+  TTr.preWhileforExp
   (bbody, boTy) <- addpos (transExp body) p
   unless ((?=) boTy TUnit) $ errorTiposMsg p "Error en el cuerpo del While" boTy TBool
-  TTr.preWhileforExp
   wex <- TTr.whileExp bco bbody
   TTr.posWhileforExp
   return (wex, TUnit)

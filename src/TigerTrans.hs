@@ -367,12 +367,16 @@ instance (MemM w) => IrGen w where
     -- seqExp :: [BExp] -> w BExp
     seqExp [] = return $ Nx $ ExpS $ Const 0
     seqExp bes = case List.last bes of
-            Nx _ -> Nx . seq <$> mapM unNx bes
+            Nx _  -> Nx . seq <$> mapM unNx bes
             Ex e' -> do
                     let bfront = List.init bes
                     ess <- mapM unNx bfront
                     return $ Ex $ Eseq (seq ess) e'
-            _ -> internal $ pack "WAT!123"
+            Cx g  -> do
+                    exp <- unEx (Cx g)
+                    let bfront = List.init bes
+                    ess <- mapM unNx bfront
+                    return $ Ex $ Eseq (seq ess) exp
     -- preWhileforExp :: w ()
     preWhileforExp = newLabel >>= pushSalida . Just
     -- posWhileforExp :: w ()
