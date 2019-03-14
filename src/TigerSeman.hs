@@ -24,6 +24,7 @@ import           Data.List                  as List
 import           Data.Map                   as M
 import           Data.Ord                   as Ord
 import           Data.Maybe
+import           Data.Text                  as T (append, pack)
 
 -- Le doy nombre al Preludio.
 import           Prelude                    as P
@@ -227,6 +228,7 @@ transDecs [] m = do (x,y) <- m
                     return ([x],y)
 -- CONSULTAR: como llevamos la lista de bexp? y habria que llevar... asignaciones de bexp a algo no?
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
+                                                        when (et == TNil) $ addpos (derror (pack "No se puede inferir tipo de record inicializado a nil.")) p
                                                         lev     <- TTr.getActualLevel
                                                         acc     <- TTr.allocLocal escap
                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
@@ -248,14 +250,6 @@ transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp ini
                                                          acc     <- TTr.allocLocal escap
                                                          (bexps,tipo) <- insertValV nm (wt,acc,lev) (transDecs xs m)
                                                          return (eb:bexps, tipo)
-
---                                                      do (_,et) <- transExp init
---                                                         wt     <- addpos (getTipoT t) p
---                                                         bt     <- tiposIguales et wt
---                                                         --RLY? : (_,acc,lev) <- addpos (getTipoValV nm) p
---
---                                                         if bt then addpos (insertValV nm (wt,acc,lev) (transDecs xs m)) p
---                                                         else addpos (derror (pack "Tipos no compatibles #1")) p
 transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_ , _) -> nm) fs in
                                                 --TODO: agregar pos a la dup dec
                                                 if P.length fs' /= P.length (nub fs') then derror (pack "Declaracion duplicada") else
@@ -272,12 +266,7 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                            lvl   <- TTr.topLevel
                                                            insertFunV nm (lvl, genlab nm p, largs, t, Propia) m'
 
-                                                    -- TODO: BORRAR ESTO
-                                                    -- aux :: (Manticore w) => [Symbol] -> [Tipo] -> w a -> w a
-                                                    -- aux []     []     m'' = m''
-                                                    -- aux (n:ns) (t:ts) m'' = insertValV n t (aux ns ts m'')
-
-                                                    genlab t p = pack $ show t ++ "_" ++ show p
+                                                    genlab t p = pack $ show t ++ "_" ++ show (line p)
                                                       
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (_,args,Nothing,exp,p) =
@@ -586,13 +575,13 @@ instance Manticore Monada where
     getTipoFunV sym = do
       est <- get
       maybe (derror (pack ("No se encontro el tipo de la fun "++ show sym ++ " en el map."))) 
-            (\(Func f) -> return f) (M.lookup sym (vEnv est))
+            (\case (Func f) -> return f ; _ -> (derror (pack "Undefined Fun"))) (M.lookup sym (vEnv est))
   -- | Busca una variable en el entorno. Ver [1]
   --   getTipoValV :: Symbol -> w ValEntry
     getTipoValV sym = do
       est <- get
       maybe (derror (pack ("No se encontro el tipo de la var " ++ show sym ++ " en el map."))) 
-            (\(Var f) -> return f) (M.lookup sym (vEnv est))
+            (\case (Var f) -> return f ; _ -> (derror (pack "Undefined Var"))) (M.lookup sym (vEnv est))
   -- | Busca un tipo en el entorno
   --   getTipoT :: Symbol -> w Tipo
     getTipoT sym = do
@@ -627,7 +616,9 @@ instance MemM Monada where
     --topSalida :: w (Maybe Label)
     topSalida = do
       st <- get
-      return $ head $ salida st
+      case salida st of
+        [] -> derror (pack "Unethical break.")
+        _  -> return $ head $ salida st
     --popSalida :: w ()
     popSalida = do
       st <- get

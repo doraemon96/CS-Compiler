@@ -68,8 +68,10 @@ iterador [] = do -- Si no tenemos que insertar nada nuevo
     else lift Nothing -- Quedaron cosas, y eso significa ciclo!
     -- ^ANTES: else error "Ciclo!"
 iterador (s:ss) = do
-  addT s -- Metemos a [s] a la lista de resultado
-  ds <- gets (flip (M.!) s . deps) -- Lista de dependencias de [s]
+  addT s -- Metemos a [s] a la lista de resultado 
+  maybe_ds <- gets (M.lookup s . deps) -- Lista de dependencias de [s]
+  ds <- lift maybe_ds
+  -- ^ANTES: ds <- gets (flip (M.!) s . deps) -- Lista de dependencias de [s]
   modify (\st -> st { deps = M.delete s (deps st) }) -- Borramos la lista de dependencias.
   dps <- gets deps -- Vemos si quedó algún símbolo sin dependencias
   let s' = filter (not . flip checkIncoming dps) ds
