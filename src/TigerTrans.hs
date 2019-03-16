@@ -245,6 +245,7 @@ class IrGen w where
     binOpIntExp :: BExp -> Abs.Oper -> BExp -> w BExp
     binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
     binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
+    binOpPtrExp :: BExp -> Abs.Oper -> BExp -> w BExp
     arrayExp :: BExp -> BExp -> w BExp
 
 instance (MemM w) => IrGen w where
@@ -522,6 +523,13 @@ instance (MemM w) => IrGen w where
             Abs.GtOp  -> return $ Cx $ (\(t,f) -> CJump GT ele ere t f)
             Abs.GeOp  -> return $ Cx $ (\(t,f) -> CJump GE ele ere t f)
             _ -> internal $ pack "SEGUIMOS RETRASANDO #24f"
+    binOpPtrExp le op re = do
+        ele <- unEx le
+        ere <- unEx re
+        case op of
+            Abs.EqOp  -> return $ Cx $ (\(t,f) -> CJump EQ ele ere t f)
+            Abs.NeqOp -> return $ Cx $ (\(t,f) -> CJump NE ele ere t f)
+            _ -> internal $ pack "SEGUIMOS RETRASANDO #01m"
     -- arrayExp :: BExp -> BExp -> w BExp
     arrayExp size init = do
         sz <- unEx size

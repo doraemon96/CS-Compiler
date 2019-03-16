@@ -64,6 +64,7 @@ reorderExp :: (TLGenerator w, Monad w) => ([Exp], [Exp] -> Exp) -> w (Stm, Exp)
 reorderExp (el, build) = do
   (sts, el') <- reorder el
   return (sts, build el')
+
 reorderStm :: (TLGenerator w, Monad w) => ([Exp], [Exp] -> Stm) -> w Stm
 reorderStm (el, build) = do
   (sts, el') <- reorder el

@@ -379,17 +379,26 @@ transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
           LeOp -> bOps el er bl br oper
           GtOp -> bOps el er bl br oper
           GeOp -> bOps el er bl br oper
-          where oOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
+          where oOps l r bl br op = if (?=) l r -- Chequeamos que son comparables
                                        && (?=) l (TInt RO) -- y que además es Entero. [Equiv Tipo es una rel de equiv]
                                     then (, TInt RO) <$> (TTr.binOpIntExp bl op br) 
                                     else addpos (derror (pack "Error en el chequeo de una operacion entera.")) p
-                bOps l r bl br op = if (?=) l r -- Chequeamos que son el mismo tipo
+                bOps l r bl br op = if (?=) l r -- Chequeamos que son comparables
                                     then case l of
                                         TInt _    -> (, TBool) <$> (TTr.binOpIntRelExp bl op br)
                                         TString   -> (, TBool) <$> (TTr.binOpStrExp bl op br)
-                                        TRecord{} -> addpos (derror (pack "Error en el chequeo de una comparacion1.")) p
-                                        TNil      -> addpos (derror (pack "Error en el chequeo de una comparacion2.")) p
-                                        TArray{}  -> addpos (derror (pack "Error en el chequeo de una comparacion3.")) p
+                                        TRecord _ u1 -> case r of
+                                                            TRecord _ u2 -> if u1 == u2 
+                                                                            then (, TBool) <$> (TTr.binOpPtrExp bl op br)
+                                                                            else addpos (derror (pack "Error en comparacion de Records")) p
+                                                            TNil         -> (, TBool) <$> (TTr.binOpPtrExp bl op br)
+                                        TNil         -> case r of
+                                                            TRecord{}    -> (, TBool) <$> (TTr.binOpPtrExp bl op br)
+                                                            TNil         -> addpos (derror (pack "No se puede comparar Nil con Nil")) p
+                                        TArray _ u1  -> case r of
+                                                            TArray _ u2  -> if u1 == u2
+                                                                            then (, TBool) <$> (TTr.binOpPtrExp bl op br)
+                                                                            else addpos (derror (pack "Error en comparacion de Arrays")) p
                                     else addpos (derror (pack "Error en el chequeo de una comparacion.")) p
 
 -- | Recordemos que 'RecordExp :: [(Symbol, Exp)] -> Symbol -> Pos -> Exp'
