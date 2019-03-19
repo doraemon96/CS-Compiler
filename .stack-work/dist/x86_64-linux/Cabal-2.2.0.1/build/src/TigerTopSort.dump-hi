@@ -1,0 +1,295 @@
+
+==================== FINAL INTERFACE ====================
+2019-03-18 19:26:19.773172412 UTC
+
+interface HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerTopSort 8043
+  interface hash: 990ff5847e11d95d17a2807c2598cb01
+  ABI hash: 477592574c1bc700b304e411fe1d24ae
+  export-list hash: feb943acae7c0a869c8b10297ed14313
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: e1108d0f98bfe75ed65c5c2d5fbd7154
+  opt_hash: 14e536840aca4e889cad654e6f9b79c1
+  hpc_hash: 93b885adfe0da089cdf634904fd59f71
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  TigerTopSort.kahnSorter
+module dependencies: TigerAbs TigerSymbol
+package dependencies: array-0.5.2.0 base-4.11.1.0 binary-0.8.5.1
+                      bytestring-0.10.8.2 containers-0.5.11.0 deepseq-1.4.3.0
+                      ghc-prim-0.5.2.0 integer-gmp-1.0.2.0 mtl-2.2.2 syb-0.7 text-1.2.3.0
+                      transformers-0.5.5.0
+orphans: syb-0.7:Data.Generics.Instances text-1.2.3.0:Data.Text
+         binary-0.8.5.1:Data.Binary.Generic
+         bytestring-0.10.8.2:Data.ByteString.Builder
+         text-1.2.3.0:Data.Text.Show
+         transformers-0.5.5.0:Control.Monad.Trans.Error
+         base-4.11.1.0:GHC.Float base-4.11.1.0:GHC.Base
+family instance modules: base-4.11.1.0:Control.Applicative
+                         base-4.11.1.0:Data.Complex base-4.11.1.0:Data.Functor.Compose
+                         base-4.11.1.0:Data.Functor.Const
+                         base-4.11.1.0:Data.Functor.Identity
+                         base-4.11.1.0:Data.Functor.Product base-4.11.1.0:Data.Functor.Sum
+                         base-4.11.1.0:Data.Monoid base-4.11.1.0:Data.Semigroup
+                         base-4.11.1.0:Data.Semigroup.Internal base-4.11.1.0:Data.Version
+                         base-4.11.1.0:Data.Void base-4.11.1.0:GHC.Exts
+                         base-4.11.1.0:GHC.Generics base-4.11.1.0:GHC.IO.Exception
+                         containers-0.5.11.0:Data.IntMap.Internal
+                         containers-0.5.11.0:Data.IntSet.Internal
+                         containers-0.5.11.0:Data.Map.Internal
+                         containers-0.5.11.0:Data.Sequence.Internal
+                         containers-0.5.11.0:Data.Set.Internal containers-0.5.11.0:Data.Tree
+                         text-1.2.3.0:Data.Text
+import  -/  TigerAbs 1d186fe051144908f0c50c683d8be41b
+  exports: 66e1533f82207906d70ea37c53c3d5c6
+  ArrayTy 2a1be44c647db3d72b14f609038cc7da
+  NameTy e3886b3049b9a354fbf122fc327a42eb
+  RecordTy 1b574a1fa2b9fc0ce60170c3d608582b
+  Ty e2bedd26776c3ab2ad028af09643fc49
+import  -/  TigerSymbol 8cdb62767ac36bcd684c9f1304d4a564
+  exports: da94fd004c9146d1f25642212f80c685
+  Symbol 8706b0bbdbf6daae41c5fa34f29c9575
+import  -/  base-4.11.1.0:Data.Foldable 8ed35c38958063956af33c935ea03444
+import  -/  base-4.11.1.0:Data.List 83dc843e47bfc0c5af51e19c6f3476d5
+import  -/  base-4.11.1.0:Data.Maybe 409c3da2b142470b68be39ce1d97a9f7
+import  -/  base-4.11.1.0:Data.OldList 1b35aa3c6805ff7c8887a35a866fe006
+import  -/  base-4.11.1.0:Data.Tuple 3af66f3ac61ed95ba8a3a3f68ebc5003
+import  -/  base-4.11.1.0:Debug.Trace 7d99b5cfd8ae9f4b50938e4fedeaadef
+import  -/  base-4.11.1.0:GHC.Base 604111500e81281298777e721c75643b
+import  -/  base-4.11.1.0:GHC.Err 5e26aa744981f14e0f1e4d29c44ac52e
+import  -/  base-4.11.1.0:GHC.List 1e4357702d8d00cded0703bd293e50e8
+import  -/  base-4.11.1.0:Prelude 0750c25585e2b797cd78291d423d39dd
+import  -/  containers-0.5.11.0:Data.Map f51b9cf04edd738eb6d014be576b3403
+import  -/  containers-0.5.11.0:Data.Map.Internal e02d23495520de11b8e9f3c9c93a4d11
+import  -/  ghc-prim-0.5.2.0:GHC.Classes 122abfcd7450c6c11602933c9ca5f80d
+import  -/  mtl-2.2.2:Control.Monad.State 1f28325cb5ef11b6b40ffadfe4bc2ca3
+import  -/  mtl-2.2.2:Control.Monad.State.Class acc76e93f44ac4486524db1a327e0a0a
+import  -/  transformers-0.5.5.0:Control.Monad.Trans.Class 352c7bdb1604d64f8f438c96bf57066a
+import  -/  transformers-0.5.5.0:Control.Monad.Trans.State.Lazy bb07ba19cd14893d125b163b03c16c98
+ac02a9715c4299eec607dade8bf23d19
+  $tc'GR :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   14839915808414247695##
+                   8847792070843210601##
+                   TigerTopSort.$trModule
+                   TigerTopSort.$tc'GR2
+                   0#
+                   TigerTopSort.$tc'GR1) -}
+90cdf719b78de96d248125cd4fd68650
+  $tc'GR1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+05057517c7a2639f13502206b8e46f4c
+  $tc'GR2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTopSort.$tc'GR3) -}
+1cfe392e8234d114241993a17272a60b
+  $tc'GR3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'GR"#) -}
+2fcc5f68697530a835d308954c8c23f6
+  $tcGraphRet :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   16588216410607814568##
+                   9908110037804310883##
+                   TigerTopSort.$trModule
+                   TigerTopSort.$tcGraphRet1
+                   0#
+                   GHC.Types.krep$*) -}
+977b5df4704e39ab2ec1064fb6c74de6
+  $tcGraphRet1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTopSort.$tcGraphRet2) -}
+4107a39e803182876f5910abc0f8e30d
+  $tcGraphRet2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("GraphRet"#) -}
+7f5d36a5c4dcda01b3da667f23e53cc6
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   TigerTopSort.$trModule3
+                   TigerTopSort.$trModule1) -}
+22f69d142ef1f497029a0ff8acce6e2a
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTopSort.$trModule2) -}
+0baa9ac7290b1949a1b3b5ebefb3198c
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("TigerTopSort"#) -}
+43779bab36ccaade29e5e7853335329b
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTopSort.$trModule4) -}
+23fbe861ce9215a9faf9230edbc584ce
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY"#) -}
+ccda1ed77a3b19562f46c90903106263
+  $w$sgo1 ::
+    (a1 -> a1 -> a1)
+    -> GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+  {- Arity: 6,
+     Strictness: <L,1*C1(C1(U))><L,U><L,U><L,U><L,U><S,1*U>,
+     Inline: [0] -}
+7379d83a33125125bf1a3ee1365116bc
+  $w$sgo13 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+  {- Arity: 4, Strictness: <L,U><L,U><L,U><S,1*U>, Inline: [0] -}
+b01d633c239c5f0f91bad2cf0fb09ba5
+  $witerador ::
+    [TigerSymbol.Symbol]
+    -> TigerTopSort.DepMap
+    -> [TigerSymbol.Symbol]
+    -> GHC.Base.Maybe ((), TigerTopSort.GraphRet)
+  {- Arity: 3, Strictness: <S,1*U><S,U><L,U>, Inline: [0] -}
+b2b56ab26b7a0422164a95aeb9e2862c
+  $wpoly_go13 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a
+    -> GHC.Base.Maybe a
+  {- Arity: 4, HasNoCafRefs, Strictness: <L,U><L,U><L,U><S,1*U>,
+     Inline: [0] -}
+975adfecf7f20e8d04c40df113093609
+  type DepMap =
+    Data.Map.Internal.Map TigerSymbol.Symbol [TigerSymbol.Symbol]
+2c4297326dec890ee84c8a2b731a4aa0
+  data GraphRet
+    = GR {deps :: TigerTopSort.DepMap, ret :: [TigerSymbol.Symbol]}
+9709ed6599933975163f58f9a402e20d
+  buildDepMap ::
+    [(TigerSymbol.Symbol, TigerAbs.Ty)] -> TigerTopSort.DepMap
+  {- Arity: 1, Strictness: <S,1*U> -}
+4ef17c8b01f295a3f8157134be21bfdd
+  checkIncoming ::
+    TigerSymbol.Symbol -> TigerTopSort.DepMap -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U><S,1*U>,
+     Unfolding: (\ (s :: TigerSymbol.Symbol)
+                   (eta :: Data.Map.Internal.Map
+                             TigerSymbol.Symbol [TigerSymbol.Symbol]) ->
+                 letrec {
+                   go1 :: GHC.Types.Bool
+                          -> Data.Map.Internal.Map TigerSymbol.Symbol [TigerSymbol.Symbol]
+                          -> GHC.Types.Bool
+                     {- Arity: 2, Strictness: <S,1*U><S,1*U> -}
+                   = \ (z' :: GHC.Types.Bool)
+                       (ds :: Data.Map.Internal.Map
+                                TigerSymbol.Symbol [TigerSymbol.Symbol]) ->
+                     case ds of wild {
+                       Data.Map.Internal.Bin dt ds1 x l r
+                       -> case go1 z' l of wild1 {
+                            GHC.Types.False
+                            -> go1
+                                 (GHC.List.elem @ TigerSymbol.Symbol Data.Text.$fEqText s x)
+                                 r
+                            GHC.Types.True -> go1 GHC.Types.True r }
+                       Data.Map.Internal.Tip -> z' }
+                 } in
+                 go1 GHC.Types.False eta) -}
+2c4297326dec890ee84c8a2b731a4aa0
+  deps :: TigerTopSort.GraphRet -> TigerTopSort.DepMap
+  RecSel Left TigerTopSort.GraphRet
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(SL),1*U(1*U,A)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerTopSort.GraphRet) ->
+                 case ds of wild { TigerTopSort.GR ds1 ds2 -> ds1 }) -}
+86c731082123ddefa475b16b93abb669
+  kahnSorter ::
+    [(TigerSymbol.Symbol, TigerAbs.Ty)]
+    -> GHC.Base.Maybe [(TigerSymbol.Symbol, TigerAbs.Ty)]
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: (\ (xs :: [(TigerSymbol.Symbol, TigerAbs.Ty)]) ->
+                 let {
+                   initialDeps :: TigerTopSort.DepMap = TigerTopSort.buildDepMap xs
+                 } in
+                 letrec {
+                   go :: [(TigerSymbol.Symbol, TigerAbs.Ty)]
+                         -> [Data.Text.Internal.Text]
+                     {- Arity: 1, Strictness: <S,1*U> -}
+                   = \ (ds :: [(TigerSymbol.Symbol, TigerAbs.Ty)]) ->
+                     case ds of wild {
+                       [] -> GHC.Types.[] @ Data.Text.Internal.Text
+                       : y ys
+                       -> let {
+                            x :: Data.Text.Internal.Text = case y of wild1 { (,) x1 ds1 -> x1 }
+                          } in
+                          case TigerTopSort.checkIncoming x initialDeps of wild1 {
+                            GHC.Types.False -> GHC.Types.: @ Data.Text.Internal.Text x (go ys)
+                            GHC.Types.True -> go ys } }
+                 } in
+                 case TigerTopSort.$witerador
+                        (go xs)
+                        initialDeps
+                        (GHC.Types.[] @ TigerSymbol.Symbol) of wild {
+                   GHC.Base.Nothing
+                   -> GHC.Base.Nothing @ [(TigerSymbol.Symbol, TigerAbs.Ty)]
+                   GHC.Base.Just x
+                   -> GHC.Base.Just
+                        @ [(TigerSymbol.Symbol, TigerAbs.Ty)]
+                        (case x of wild1 { (,) ds1 s' ->
+                         case s' of wild2 { TigerTopSort.GR ds ds2 ->
+                         let {
+                           lvl12 :: [Data.Text.Internal.Text]
+                           = GHC.Base.map
+                               @ (TigerSymbol.Symbol, TigerAbs.Ty)
+                               @ Data.Text.Internal.Text
+                               (Data.Tuple.fst @ TigerSymbol.Symbol @ TigerAbs.Ty)
+                               xs
+                         } in
+                         letrec {
+                           go1 :: [Data.Text.Internal.Text]
+                                  -> [(TigerSymbol.Symbol, TigerAbs.Ty)]
+                             {- Arity: 1, Strictness: <S,1*U> -}
+                           = \ (ds3 :: [Data.Text.Internal.Text]) ->
+                             case ds3 of wild3 {
+                               [] -> GHC.Types.[] @ (TigerSymbol.Symbol, TigerAbs.Ty)
+                               : y ys
+                               -> case GHC.List.elem
+                                         @ TigerSymbol.Symbol
+                                         Data.Text.$fEqText
+                                         y
+                                         lvl12 of wild4 {
+                                    GHC.Types.False -> go1 ys
+                                    GHC.Types.True
+                                    -> GHC.Types.:
+                                         @ (TigerSymbol.Symbol, TigerAbs.Ty)
+                                         (case GHC.List.lookup
+                                                 @ TigerSymbol.Symbol
+                                                 @ TigerAbs.Ty
+                                                 Data.Text.$fEqText
+                                                 y
+                                                 xs of wild5 {
+                                            GHC.Base.Nothing -> TigerTopSort.kahnSorter1
+                                            GHC.Base.Just x1 -> (y, x1) })
+                                         (go1 ys) } }
+                         } in
+                         go1 ds2 } }) }) -}
+b23326a5bd96c00df0c2b89a4b8d8495
+  kahnSorter1 :: (TigerSymbol.Symbol, TigerAbs.Ty)
+  {- Strictness: x -}
+2c4297326dec890ee84c8a2b731a4aa0
+  ret :: TigerTopSort.GraphRet -> [TigerSymbol.Symbol]
+  RecSel Left TigerTopSort.GraphRet
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LS),1*U(A,1*U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerTopSort.GraphRet) ->
+                 case ds of wild { TigerTopSort.GR ds1 ds2 -> ds2 }) -}
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: none
+require own pkg trusted: False
+

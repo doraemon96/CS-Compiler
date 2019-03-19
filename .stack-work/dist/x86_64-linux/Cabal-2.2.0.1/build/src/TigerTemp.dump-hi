@@ -1,0 +1,314 @@
+
+==================== FINAL INTERFACE ====================
+2019-03-18 19:26:19.903644528 UTC
+
+interface HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerTemp 8043
+  interface hash: 676a87a5e0e00a1cfc9cc8db5abe284d
+  ABI hash: 3bc4ed564aeabe58cf535512ec048d33
+  export-list hash: 6b85f77b0bcc6e133222675af91d5259
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: 78ee77044def946ef4a3f1b39c5af7fd
+  opt_hash: 14e536840aca4e889cad654e6f9b79c1
+  hpc_hash: 93b885adfe0da089cdf634904fd59f71
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  TigerTemp.detgenLabel
+  TigerTemp.detgenTemp
+  TigerTemp.makeStringL
+  TigerTemp.makeStringT
+  TigerTemp.Label
+  TigerTemp.TLGenerator{TigerTemp.newLabel TigerTemp.newTemp}
+  TigerTemp.Temp
+module dependencies: State TigerSymbol TigerUnique
+package dependencies: array-0.5.2.0 base-4.11.1.0* binary-0.8.5.1
+                      bytestring-0.10.8.2 containers-0.5.11.0 deepseq-1.4.3.0
+                      ghc-prim-0.5.2.0 integer-gmp-1.0.2.0 mtl-2.2.2 text-1.2.3.0
+                      transformers-0.5.5.0
+orphans: text-1.2.3.0:Data.Text binary-0.8.5.1:Data.Binary.Generic
+         bytestring-0.10.8.2:Data.ByteString.Builder
+         text-1.2.3.0:Data.Text.Show
+         HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerUnique
+         transformers-0.5.5.0:Control.Monad.Trans.Error
+         base-4.11.1.0:GHC.Float base-4.11.1.0:GHC.Base
+family instance modules: base-4.11.1.0:Control.Applicative
+                         base-4.11.1.0:Data.Complex base-4.11.1.0:Data.Functor.Compose
+                         base-4.11.1.0:Data.Functor.Const
+                         base-4.11.1.0:Data.Functor.Identity
+                         base-4.11.1.0:Data.Functor.Product base-4.11.1.0:Data.Functor.Sum
+                         base-4.11.1.0:Data.Monoid base-4.11.1.0:Data.Semigroup
+                         base-4.11.1.0:Data.Semigroup.Internal base-4.11.1.0:Data.Version
+                         base-4.11.1.0:Data.Void base-4.11.1.0:GHC.Exts
+                         base-4.11.1.0:GHC.Generics base-4.11.1.0:GHC.IO.Exception
+                         containers-0.5.11.0:Data.IntMap.Internal
+                         containers-0.5.11.0:Data.IntSet.Internal
+                         containers-0.5.11.0:Data.Map.Internal
+                         containers-0.5.11.0:Data.Sequence.Internal
+                         containers-0.5.11.0:Data.Set.Internal containers-0.5.11.0:Data.Tree
+                         text-1.2.3.0:Data.Text
+import  -/  TigerSymbol 8cdb62767ac36bcd684c9f1304d4a564
+  exports: da94fd004c9146d1f25642212f80c685
+  Symbol 8706b0bbdbf6daae41c5fa34f29c9575
+import  -/  TigerUnique c609db41e14bf4ada457c59538dc0445
+  exports: aa23a62153d42804837397f8b85bb196
+  StGen 600da96a6f5c385280c5ea14e80af84e
+  mkUnique f4de18450c15f44354adf6341f103c30
+import  -/  base-4.11.1.0:Data.Functor f522c3501272159820fd6f242510732f
+import  -/  base-4.11.1.0:GHC.Base 604111500e81281298777e721c75643b
+import  -/  base-4.11.1.0:GHC.Show 73be67392447c974f19c3befd83c46c0
+import  -/  base-4.11.1.0:Prelude 0750c25585e2b797cd78291d423d39dd
+import  -/  integer-gmp-1.0.2.0:GHC.Integer.Type f3d5169c3d3830854b19f6565b265403
+import  -/  mtl-2.2.2:Control.Monad.State 1f28325cb5ef11b6b40ffadfe4bc2ca3
+import  -/  text-1.2.3.0:Data.Text 4f359e32d6f1c9011b171e00ff8fb023
+import  -/  text-1.2.3.0:Data.Text.Show 3b4b6fb2985a731022d67f636682da2b
+import  -/  transformers-0.5.5.0:Control.Monad.Trans.Class 352c7bdb1604d64f8f438c96bf57066a
+0da889271ca392648fe70411a9dd5b23
+  $fTLGeneratorState :: TigerTemp.TLGenerator TigerUnique.StGen
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerUnique.StGen
+                  TigerTemp.$fTLGeneratorState2
+                    `cast`
+                  (Sym (State.N:State[0]
+                            <GHC.Integer.Type.Integer>_R <TigerTemp.Temp>_R))
+                  TigerTemp.$fTLGeneratorState1
+                    `cast`
+                  (Sym (State.N:State[0]
+                            <GHC.Integer.Type.Integer>_R <TigerTemp.Label>_R)) -}
+44af26ecfc54d693f26268fcec1e972b
+  $fTLGeneratorState1 ::
+    GHC.Integer.Type.Integer
+    -> (TigerTemp.Label, GHC.Integer.Type.Integer)
+  {- Arity: 1, Strictness: <L,1*U>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (s' :: GHC.Integer.Type.Integer) ->
+                 let {
+                   s :: GHC.Integer.Type.Integer
+                   = GHC.Integer.Type.plusInteger
+                       s'
+                       TigerUnique.$fUniqueGeneratorState2
+                 } in
+                 (TigerTemp.detgenLabel s, s)) -}
+507b6ed0ce432c980d0cd429561af8cb
+  $fTLGeneratorState2 ::
+    GHC.Integer.Type.Integer
+    -> (TigerTemp.Temp, GHC.Integer.Type.Integer)
+  {- Arity: 1, Strictness: <L,1*U>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (s' :: GHC.Integer.Type.Integer) ->
+                 let {
+                   s :: GHC.Integer.Type.Integer
+                   = GHC.Integer.Type.plusInteger
+                       s'
+                       TigerUnique.$fUniqueGeneratorState2
+                 } in
+                 (TigerTemp.detgenTemp s, s)) -}
+0da889271ca392648fe70411a9dd5b23
+  $fTLGeneratort ::
+    (Control.Monad.Trans.Class.MonadTrans t, TigerTemp.TLGenerator m,
+     GHC.Base.Monad m) =>
+    TigerTemp.TLGenerator (t m)
+  DFunId
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,C(C1(U))><L,U(1*U,1*U)><L,U>m, Inline: CONLIKE,
+     Unfolding: DFun: @ t :: (* -> *) -> * -> *
+                      @ m :: * -> *
+                      (v :: Control.Monad.Trans.Class.MonadTrans t)
+                      (v1 :: TigerTemp.TLGenerator m)
+                      (v2 :: GHC.Base.Monad m).
+                  @ (t m)
+                  (TigerTemp.$fTLGeneratort_$cnewTemp @ t @ m v v1 v2)
+                  (TigerTemp.$fTLGeneratort_$cnewLabel @ t @ m v v1 v2) -}
+0da889271ca392648fe70411a9dd5b23
+  $fTLGeneratort_$cnewLabel ::
+    (Control.Monad.Trans.Class.MonadTrans t, TigerTemp.TLGenerator m,
+     GHC.Base.Monad m) =>
+    t m TigerTemp.Label
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(C(S)),1*C1(C1(U))><L,1*U(A,1*U)><L,U>,
+     Unfolding: InlineRule (3, True, False)
+                (\ @ t :: (* -> *) -> * -> *
+                   @ m :: * -> *
+                   ($dMonadTrans :: Control.Monad.Trans.Class.MonadTrans t)
+                   ($dTLGenerator :: TigerTemp.TLGenerator m)
+                   ($dMonad :: GHC.Base.Monad m) ->
+                 $dMonadTrans
+                   `cast`
+                 (Control.Monad.Trans.Class.N:MonadTrans[0] <t>_N)
+                   @ m
+                   @ TigerTemp.Label
+                   $dMonad
+                   (TigerTemp.newLabel @ m $dTLGenerator)) -}
+0da889271ca392648fe70411a9dd5b23
+  $fTLGeneratort_$cnewTemp ::
+    (Control.Monad.Trans.Class.MonadTrans t, TigerTemp.TLGenerator m,
+     GHC.Base.Monad m) =>
+    t m TigerTemp.Temp
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(C(S)),1*C1(C1(U))><L,1*U(1*U,A)><L,U>,
+     Unfolding: InlineRule (3, True, False)
+                (\ @ t :: (* -> *) -> * -> *
+                   @ m :: * -> *
+                   ($dMonadTrans :: Control.Monad.Trans.Class.MonadTrans t)
+                   ($dTLGenerator :: TigerTemp.TLGenerator m)
+                   ($dMonad :: GHC.Base.Monad m) ->
+                 $dMonadTrans
+                   `cast`
+                 (Control.Monad.Trans.Class.N:MonadTrans[0] <t>_N)
+                   @ m
+                   @ TigerTemp.Temp
+                   $dMonad
+                   (TigerTemp.newTemp @ m $dTLGenerator)) -}
+709bd4f7723ed9aa1480d8a02b1701da
+  $tc'C:TLGenerator :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   9021228652243574398##
+                   15414009333542547308##
+                   TigerTemp.$trModule
+                   TigerTemp.$tc'C:TLGenerator2
+                   1#
+                   TigerTemp.$tc'C:TLGenerator1) -}
+9d6522fb5b736709961fde473a7be82e
+  $tc'C:TLGenerator1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+66f9429b43e3029b216052ff6c94a2aa
+  $tc'C:TLGenerator2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTemp.$tc'C:TLGenerator3) -}
+aed96a2f3a58d871e9c134508cfe822d
+  $tc'C:TLGenerator3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'C:TLGenerator"#) -}
+9359564d08e00a49c49f7c5651f90e7f
+  $tcTLGenerator :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   14338286574974366222##
+                   7586220488743081126##
+                   TigerTemp.$trModule
+                   TigerTemp.$tcTLGenerator2
+                   0#
+                   TigerTemp.$tcTLGenerator1) -}
+ccbfda7fd6015704263663781113c745
+  $tcTLGenerator1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+847a6c7131a258f201803d67e0481241
+  $tcTLGenerator2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTemp.$tcTLGenerator3) -}
+78240137d64d0e822d85a0df78d95f51
+  $tcTLGenerator3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("TLGenerator"#) -}
+ef33636b35ef5d76e717dbb8cf22b32e
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   TigerTemp.$trModule3
+                   TigerTemp.$trModule1) -}
+52c7446e85e184287d9015da857b9298
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTemp.$trModule2) -}
+8f522bac969c962a98977d5e53a739b5
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("TigerTemp"#) -}
+eec2cbb7b5acb191b2dff0540dcd1a56
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTemp.$trModule4) -}
+0743b4bd4e2adc63c11ce8158ccec37a
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY"#) -}
+7d37a7fc983f90ee4d085bd5ad805fcf
+  $wouter ::
+    GHC.Prim.MutableByteArray# GHC.Prim.RealWorld
+    -> GHC.Prim.Int#
+    -> [GHC.Types.Char]
+    -> GHC.Prim.Int#
+    -> GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+          Data.Text.Internal.Text #)
+  {- Arity: 5, Strictness: <L,U><S,U><S,1*U><S,U><S,U>,
+     Inline: [0] -}
+e211b5893645bd99d551cf10a36d620b
+  type Label = TigerSymbol.Symbol
+0da889271ca392648fe70411a9dd5b23
+  class TLGenerator (w :: * -> *) where
+    newTemp :: w TigerTemp.Temp
+    newLabel :: w TigerTemp.Label
+    {-# MINIMAL newTemp, newLabel #-}
+cab6f44f49e691c5c9d3b8607bf3d44a
+  type Temp = TigerSymbol.Symbol
+cd68fae3c0ca23f780e2fa1684e748f0
+  detgenLabel :: GHC.Integer.Type.Integer -> TigerTemp.Label
+  {- Arity: 1, Strictness: <L,U>,
+     Unfolding: (\ (i :: GHC.Integer.Type.Integer) ->
+                 case GHC.CString.unpackAppendCString#
+                        TigerTemp.detgenLabel1
+                        (case GHC.Show.$w$cshowsPrec4
+                                0#
+                                i
+                                (GHC.Types.[] @ GHC.Types.Char) of ww2 { (#,#) ww3 ww4 ->
+                         GHC.Types.: @ GHC.Types.Char ww3 ww4 }) of dt { DEFAULT ->
+                 case GHC.Magic.runRW#
+                        @ ('GHC.Types.TupleRep
+                             '['GHC.Types.TupleRep '[], 'GHC.Types.LiftedRep])
+                        @ (# GHC.Prim.State# GHC.Prim.RealWorld, Data.Text.Internal.Text #)
+                        (\ (s1 :: GHC.Prim.State# GHC.Prim.RealWorld)[OneShot] ->
+                         case GHC.Prim.newByteArray#
+                                @ GHC.Prim.RealWorld
+                                10#
+                                s1 of ds1 { (#,#) ipv ipv1 ->
+                         TigerTemp.$wouter ipv1 4# dt 0# ipv }) of ds1 { (#,#) ipv ipv1 ->
+                 ipv1 } }) -}
+daf2d3cae37722168c06ce8f5ee00f20
+  detgenLabel1 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("L"#) -}
+82a4c3575e5d51876fc7b8239177ec91
+  detgenTemp :: GHC.Integer.Type.Integer -> TigerTemp.Temp
+  {- Arity: 1, Strictness: <L,U>,
+     Unfolding: (\ (i :: GHC.Integer.Type.Integer) ->
+                 case GHC.CString.unpackAppendCString#
+                        TigerTemp.detgenTemp1
+                        (case GHC.Show.$w$cshowsPrec4
+                                0#
+                                i
+                                (GHC.Types.[] @ GHC.Types.Char) of ww2 { (#,#) ww3 ww4 ->
+                         GHC.Types.: @ GHC.Types.Char ww3 ww4 }) of dt { DEFAULT ->
+                 case GHC.Magic.runRW#
+                        @ ('GHC.Types.TupleRep
+                             '['GHC.Types.TupleRep '[], 'GHC.Types.LiftedRep])
+                        @ (# GHC.Prim.State# GHC.Prim.RealWorld, Data.Text.Internal.Text #)
+                        (\ (s1 :: GHC.Prim.State# GHC.Prim.RealWorld)[OneShot] ->
+                         case GHC.Prim.newByteArray#
+                                @ GHC.Prim.RealWorld
+                                10#
+                                s1 of ds1 { (#,#) ipv ipv1 ->
+                         TigerTemp.$wouter ipv1 4# dt 0# ipv }) of ds1 { (#,#) ipv ipv1 ->
+                 ipv1 } }) -}
+92545b719a6a142e6743477b6f8b18d7
+  detgenTemp1 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("T"#) -}
+b25c00e102f3c9a5aa85f638ec3d826c
+  makeStringL :: TigerTemp.Label -> GHC.Base.String
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LSS),1*U(U,U,U)>,
+     Unfolding: InlineRule (0, True, True) Data.Text.Show.unpack -}
+18b04433c70e5bdaf7cfc49d96a0fa85
+  makeStringT :: TigerTemp.Temp -> GHC.Base.String
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LSS),1*U(U,U,U)>,
+     Unfolding: InlineRule (0, True, True) Data.Text.Show.unpack -}
+instance [safe] TigerTemp.TLGenerator [State.State]
+  = TigerTemp.$fTLGeneratorState
+instance [safe] TigerTemp.TLGenerator [.]
+  = TigerTemp.$fTLGeneratort
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: safe
+require own pkg trusted: False
+

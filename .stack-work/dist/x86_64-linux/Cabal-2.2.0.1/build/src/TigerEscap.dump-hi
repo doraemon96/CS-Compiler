@@ -1,0 +1,2727 @@
+
+==================== FINAL INTERFACE ====================
+2018-12-06 21:30:48.323894605 UTC
+
+interface HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerEscap 8043
+  interface hash: 064f4f41e539c95c5438f16325292616
+  ABI hash: 0e699ca9e56c80a68e97ab094092335c
+  export-list hash: 81faac6c8b9847342925ba81b556af19
+  orphan hash: e45d3f0ce5cfd3d998e86d62ac35d18b
+  flag hash: 84a707957232ceed2ddebd5ca4ca265a
+  opt_hash: 14e536840aca4e889cad654e6f9b79c1
+  hpc_hash: 93b885adfe0da089cdf634904fd59f71
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  TigerEscap.addMsg
+  TigerEscap.bulkInsert
+  TigerEscap.calcularEEsc
+  TigerEscap.initSt
+  TigerEscap.lookUpLvl
+  TigerEscap.travDecs
+  TigerEscap.travExp
+  TigerEscap.travF
+  TigerEscap.travVar
+  TigerEscap.Dat
+  TigerEscap.Depth
+  TigerEscap.Env
+  TigerEscap.Escapator{TigerEscap.depth TigerEscap.insert TigerEscap.lookup TigerEscap.printEnv TigerEscap.raise TigerEscap.up TigerEscap.update}
+  TigerEscap.Estado{TigerEscap.S env lvl}
+  TigerEscap.Mini
+  TigerEscap.SEstado{TigerEscap.Step envP lvlP msgP}
+module dependencies: TigerAbs TigerErrores TigerSymbol
+package dependencies: array-0.5.2.0 base-4.11.1.0 binary-0.8.5.1
+                      bytestring-0.10.8.2 containers-0.5.11.0 deepseq-1.4.3.0
+                      ghc-prim-0.5.2.0 integer-gmp-1.0.2.0 mtl-2.2.2 syb-0.7 text-1.2.3.0
+                      transformers-0.5.5.0
+orphans: syb-0.7:Data.Generics.Instances text-1.2.3.0:Data.Text
+         binary-0.8.5.1:Data.Binary.Generic
+         bytestring-0.10.8.2:Data.ByteString.Builder
+         text-1.2.3.0:Data.Text.Show
+         transformers-0.5.5.0:Control.Monad.Trans.Error
+         base-4.11.1.0:GHC.Float base-4.11.1.0:GHC.Base
+family instance modules: base-4.11.1.0:Control.Applicative
+                         base-4.11.1.0:Data.Complex base-4.11.1.0:Data.Functor.Compose
+                         base-4.11.1.0:Data.Functor.Const
+                         base-4.11.1.0:Data.Functor.Identity
+                         base-4.11.1.0:Data.Functor.Product base-4.11.1.0:Data.Functor.Sum
+                         base-4.11.1.0:Data.Monoid base-4.11.1.0:Data.Semigroup
+                         base-4.11.1.0:Data.Semigroup.Internal base-4.11.1.0:Data.Version
+                         base-4.11.1.0:Data.Void base-4.11.1.0:GHC.Exts
+                         base-4.11.1.0:GHC.Generics base-4.11.1.0:GHC.IO.Exception
+                         containers-0.5.11.0:Data.IntMap.Internal
+                         containers-0.5.11.0:Data.IntSet.Internal
+                         containers-0.5.11.0:Data.Map.Internal
+                         containers-0.5.11.0:Data.Sequence.Internal
+                         containers-0.5.11.0:Data.Set.Internal containers-0.5.11.0:Data.Tree
+                         text-1.2.3.0:Data.Text
+import  -/  TigerAbs 1d186fe051144908f0c50c683d8be41b
+  exports: 66e1533f82207906d70ea37c53c3d5c6
+  ArrayExp ac832c47ff0355b402f68a7d03fc4d78
+  AssignExp be679541b1d717312a2c2a09ec9a3aaf
+  CallExp bdb2fb755ac7b2fd23cbaf119516fce6
+  Dec ad89b6e5e364054c22a55dff17ee7887
+  Escapa 201d74a1bfba10a5215d7dd2cd11dba3
+  Escapa c09003e06c2f0977e7facdcf1c6e85a6
+  Exp ad89b6e5e364054c22a55dff17ee7887
+  FieldVar 2582b4c40278c0e2b4485828f2ba9570
+  ForExp cfc6ef9086c19fcb99143da01eb0398d
+  FunctionDec abe3b9b54849272367ca6ff8008292db
+  IfExp b51a5d74a67f44b3371f933b86465370
+  LetExp 59813586689412cb9e9327ec6f076974
+  OpExp a54f729e9b7d06c1c0a3c959d5cdca3b
+  Pos 3e89dee41a00a3bf8c3f5f962e8847c1
+  RecordExp 08c91400b6fd391f1d2d126b5214fa83
+  SeqExp a32c7f72e1cbc842ebedab1075ce4e7f
+  SimpleVar e48867a4abe39f1af5851f8d905b59c9
+  SubscriptVar a3f32f2bd11db53704af22026918ecce
+  Ty e2bedd26776c3ab2ad028af09643fc49
+  Var ad89b6e5e364054c22a55dff17ee7887
+  VarDec ba13b69552df7c2c811f3e90a018e4d8
+  VarExp 1b7379badb86673206c9dd81053083b6
+  WhileExp ee88e6f22b7ed417186fbf1d7c3ada62
+  printPos 0d2e38ae93dacb6e7b5b4bf7986ba490
+import  -/  TigerErrores ff875f1a83e48c3ca0916553f36b96ae
+  exports: 2ac7c458f6129b5b6f9bf98501d600db
+  Demon 5687eb1b772ba3165ee7e2a25282860a
+  adder db973b658185994f4857001982efa471
+  derror 1a2ce25eea34c39497f79a10dc7c3df6
+  internal 5ac2ce9ed3f2553b79c4cfe77b3712f9
+  notfound 6914e72b64407c6b5b0fd70f071a3483
+import  -/  TigerSymbol 8cdb62767ac36bcd684c9f1304d4a564
+  exports: da94fd004c9146d1f25642212f80c685
+  Symbol 8706b0bbdbf6daae41c5fa34f29c9575
+import  -/  base-4.11.1.0:Control.Arrow ce43199b5356a11ee2a8317f0ec30aee
+import  -/  base-4.11.1.0:Control.Monad c5f960c67d822497578bffbd3e4c01cf
+import  -/  base-4.11.1.0:Data.Either 39d922b371c4c52d426e9ee66de8371a
+import  -/  base-4.11.1.0:Data.Foldable 8ed35c38958063956af33c935ea03444
+import  -/  base-4.11.1.0:Data.Functor f522c3501272159820fd6f242510732f
+import  -/  base-4.11.1.0:Data.Maybe 409c3da2b142470b68be39ce1d97a9f7
+import  -/  base-4.11.1.0:Data.Traversable 7ad4edb9184ea1ae8e73f6b94f115c8c
+import  -/  base-4.11.1.0:Data.Tuple 3af66f3ac61ed95ba8a3a3f68ebc5003
+import  -/  base-4.11.1.0:Debug.Trace 7d99b5cfd8ae9f4b50938e4fedeaadef
+import  -/  base-4.11.1.0:GHC.Base 604111500e81281298777e721c75643b
+import  -/  base-4.11.1.0:GHC.Num 8e54b26dce4495382dc4b50cf36ab754
+import  -/  base-4.11.1.0:GHC.Show 73be67392447c974f19c3befd83c46c0
+import  -/  base-4.11.1.0:Prelude 0750c25585e2b797cd78291d423d39dd
+import  -/  containers-0.5.11.0:Data.Map.Internal e02d23495520de11b8e9f3c9c93a4d11
+import  -/  containers-0.5.11.0:Data.Map.Strict 40ac55e8c7db7b7f0f7e3d9769233909
+import  -/  containers-0.5.11.0:Data.Map.Strict.Internal 56d73c08e046f8e159a99dc3860f1033
+import  -/  ghc-prim-0.5.2.0:GHC.Classes 122abfcd7450c6c11602933c9ca5f80d
+import  -/  mtl-2.2.2:Control.Monad.State 1f28325cb5ef11b6b40ffadfe4bc2ca3
+import  -/  mtl-2.2.2:Control.Monad.State.Class acc76e93f44ac4486524db1a327e0a0a
+import  -/  text-1.2.3.0:Data.Text 4f359e32d6f1c9011b171e00ff8fb023
+import  -/  transformers-0.5.5.0:Control.Monad.Trans.Except 1cac4acbba7f36bd732fcc993d3cc20d
+import  -/  transformers-0.5.5.0:Control.Monad.Trans.State.Lazy bb07ba19cd14893d125b163b03c16c98
+0e80419c662adf4988460c29cbb8c881
+  $dmraise ::
+    TigerEscap.Escapator m => forall a. TigerSymbol.Symbol -> m a
+  {- Arity: 1, HasNoCafRefs,
+     Strictness: <S(S(SLLL)LLLLLLLL),1*U(1*U(1*U,A,A,A),A,A,A,A,A,A,A,A)>,
+     Unfolding: InlineRule (0, True, False)
+                (\ @ m :: * -> * ($dEscapator :: TigerEscap.Escapator m) @ a ->
+                 TigerErrores.derror
+                   @ m
+                   (TigerEscap.$p1Escapator @ m $dEscapator)
+                   @ a) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fDemonExceptT :: TigerErrores.Demon TigerEscap.Mini
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerEscap.Mini
+                  TigerEscap.$fDemonExceptT4
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <TigerSymbol.Symbol>_R
+                   ->_R (<TigerEscap.Estado>_R
+                         ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                       <(Data.Either.Either TigerSymbol.Symbol a,
+                                         TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                             <TigerEscap.Estado>_N
+                                                                             <Data.Functor.Identity.Identity>_R
+                                                                             <Data.Either.Either
+                                                                                TigerSymbol.Symbol
+                                                                                a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                                 <TigerSymbol.Symbol>_N
+                                                                                                 <Control.Monad.Trans.State.Lazy.State
+                                                                                                    TigerEscap.Estado>_R
+                                                                                                 <a>_N)))
+                  TigerEscap.$fDemonExceptT3
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <TigerEscap.Mini a>_R
+                   ->_R <TigerSymbol.Symbol>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <TigerEscap.Estado>_N
+                                 <Data.Functor.Identity.Identity>_R
+                                 <Data.Either.Either
+                                    Data.Text.Internal.Text
+                                    a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <Data.Text.Internal.Text>_N
+                                                     <Control.Monad.Trans.State.Lazy.State
+                                                        TigerEscap.Estado>_R
+                                                     <a>_N))
+                  TigerEscap.$fDemonExceptT_$cinternal
+                  TigerEscap.$fDemonExceptT_$cnotfound -}
+84fe2ee4a7e0489f370f777467edcc01
+  $fDemonExceptT1 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Not found:"#) -}
+bccda86eb18f452677cc00876bd82631
+  $fDemonExceptT2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Internal: "#) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fDemonExceptT3 ::
+    TigerEscap.Mini a
+    -> TigerSymbol.Symbol
+    -> TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either Data.Text.Internal.Text a, TigerEscap.Estado)
+  {- Arity: 3,
+     Strictness: <C(S(SL)),1*C1(U(U,U))><L,1*U(U,U,U)><L,U>m,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ @ a
+                   (w :: TigerEscap.Mini a)
+                   (w1 :: TigerSymbol.Symbol)
+                   (w2 :: TigerEscap.Estado) ->
+                 case (w `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <TigerSymbol.Symbol>_N
+                            <Control.Monad.Trans.State.Lazy.State TigerEscap.Estado>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either TigerSymbol.Symbol a>_N)
+                         w2)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either TigerSymbol.Symbol a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left l
+                   -> (Data.Either.Left
+                         @ Data.Text.Internal.Text
+                         @ a
+                         (Data.Text.append l w1),
+                       s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text a,
+                                  TigerEscap.Estado)>_R))
+                   Data.Either.Right r
+                   -> (Data.Either.Right @ Data.Text.Internal.Text @ a r, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text a,
+                                  TigerEscap.Estado)>_R)) } }) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fDemonExceptT4 ::
+    TigerSymbol.Symbol
+    -> TigerEscap.Estado
+    -> (Data.Either.Either TigerSymbol.Symbol a, TigerEscap.Estado)
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U><L,U>m,
+     Unfolding: InlineRule (2, True, False)
+                (\ @ a (x :: TigerSymbol.Symbol) (eta5 :: TigerEscap.Estado) ->
+                 (Data.Either.Left @ TigerSymbol.Symbol @ a x, eta5)) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fDemonExceptT_$cinternal ::
+    TigerSymbol.Symbol -> TigerEscap.Mini a
+  {- Arity: 1, Strictness: <L,1*U(U,U,U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ @ a (x :: TigerSymbol.Symbol) ->
+                 let {
+                   x1 :: TigerSymbol.Symbol
+                   = TigerSymbol.addStr TigerEscap.$fDemonExceptT_g1 x
+                 } in
+                 let {
+                   lvl36 :: Data.Either.Either TigerSymbol.Symbol a
+                   = Data.Either.Left @ TigerSymbol.Symbol @ a x1
+                 } in
+                 (\ (eta5 :: TigerEscap.Estado) -> (lvl36, eta5))
+                   `cast`
+                 ((<TigerEscap.Estado>_R
+                   ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either TigerSymbol.Symbol a,
+                                   TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                       <TigerEscap.Estado>_N
+                                                                       <Data.Functor.Identity.Identity>_R
+                                                                       <Data.Either.Either
+                                                                          TigerSymbol.Symbol
+                                                                          a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                           <TigerSymbol.Symbol>_N
+                                                                                           <Control.Monad.Trans.State.Lazy.State
+                                                                                              TigerEscap.Estado>_R
+                                                                                           <a>_N)))) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fDemonExceptT_$cnotfound ::
+    TigerSymbol.Symbol -> TigerEscap.Mini a
+  {- Arity: 1, Strictness: <L,1*U(U,U,U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ @ a (x :: TigerSymbol.Symbol) ->
+                 let {
+                   x1 :: TigerSymbol.Symbol
+                   = TigerSymbol.addStr TigerEscap.$fDemonExceptT_g4 x
+                 } in
+                 let {
+                   lvl36 :: Data.Either.Either TigerSymbol.Symbol a
+                   = Data.Either.Left @ TigerSymbol.Symbol @ a x1
+                 } in
+                 (\ (eta5 :: TigerEscap.Estado) -> (lvl36, eta5))
+                   `cast`
+                 ((<TigerEscap.Estado>_R
+                   ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either TigerSymbol.Symbol a,
+                                   TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                       <TigerEscap.Estado>_N
+                                                                       <Data.Functor.Identity.Identity>_R
+                                                                       <Data.Either.Either
+                                                                          TigerSymbol.Symbol
+                                                                          a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                           <TigerSymbol.Symbol>_N
+                                                                                           <Control.Monad.Trans.State.Lazy.State
+                                                                                              TigerEscap.Estado>_R
+                                                                                           <a>_N)))) -}
+9ef91719bc68ddbffd33179bdda9cfa7
+  $fDemonExceptT_g1 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerEscap.$fDemonExceptT2) -}
+f89db633a94098c8318ff10d75ccfb08
+  $fDemonExceptT_g4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerEscap.$fDemonExceptT1) -}
+38d087fe5a06f152302c0ea2952b8cde
+  $fEscapatorExceptT :: TigerEscap.Escapator TigerEscap.Mini
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerEscap.Mini
+                  TigerEscap.$fDemonExceptT
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT
+                     @ Data.Text.Internal.Text)
+                  TigerEscap.$fEscapatorExceptT14
+                    `cast`
+                  ((<TigerEscap.Estado>_R
+                    ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                  <(Data.Either.Either Data.Text.Internal.Text GHC.Types.Int,
+                                    TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                        <TigerEscap.Estado>_N
+                                                                        <Data.Functor.Identity.Identity>_R
+                                                                        <Data.Either.Either
+                                                                           Data.Text.Internal.Text
+                                                                           GHC.Types.Int>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                                        <Data.Text.Internal.Text>_N
+                                                                                                        <Control.Monad.Trans.State.Lazy.StateT
+                                                                                                           TigerEscap.Estado
+                                                                                                           Data.Functor.Identity.Identity>_R
+                                                                                                        <GHC.Types.Int>_N)))
+                  TigerEscap.$fEscapatorExceptT13
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <TigerEscap.Mini a>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <TigerEscap.Estado>_N
+                                 <Data.Functor.Identity.Identity>_R
+                                 <Data.Either.Either
+                                    Data.Text.Internal.Text
+                                    a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <Data.Text.Internal.Text>_N
+                                                     <Control.Monad.Trans.State.Lazy.StateT
+                                                        TigerEscap.Estado
+                                                        Data.Functor.Identity.Identity>_R
+                                                     <a>_N))
+                  TigerEscap.$fEscapatorExceptT6
+                    `cast`
+                  (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                            <TigerEscap.Estado>_N
+                            <Data.Functor.Identity.Identity>_R
+                            <Data.Either.Either
+                               Data.Text.Internal.Text
+                               ()>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                 <Data.Text.Internal.Text>_N
+                                                 <Control.Monad.Trans.State.Lazy.StateT
+                                                    TigerEscap.Estado
+                                                    Data.Functor.Identity.Identity>_R
+                                                 <()>_N))
+                  TigerEscap.$fDemonExceptT4
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <TigerSymbol.Symbol>_R
+                   ->_R (<TigerEscap.Estado>_R
+                         ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                       <(Data.Either.Either TigerSymbol.Symbol a,
+                                         TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                             <TigerEscap.Estado>_N
+                                                                             <Data.Functor.Identity.Identity>_R
+                                                                             <Data.Either.Either
+                                                                                TigerSymbol.Symbol
+                                                                                a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                                 <TigerSymbol.Symbol>_N
+                                                                                                 <Control.Monad.Trans.State.Lazy.State
+                                                                                                    TigerEscap.Estado>_R
+                                                                                                 <a>_N)))
+                  TigerEscap.$fEscapatorExceptT4
+                    `cast`
+                  (<TigerSymbol.Symbol>_R
+                   ->_R <TigerAbs.Escapa>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <TigerEscap.Estado>_N
+                                 <Data.Functor.Identity.Identity>_R
+                                 <Data.Either.Either
+                                    Data.Text.Internal.Text
+                                    ()>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                      <Data.Text.Internal.Text>_N
+                                                      <Control.Monad.Trans.State.Lazy.StateT
+                                                         TigerEscap.Estado
+                                                         Data.Functor.Identity.Identity>_R
+                                                      <()>_N))
+                  TigerEscap.$fEscapatorExceptT2
+                    `cast`
+                  (<TigerSymbol.Symbol>_R
+                   ->_R (<TigerEscap.Estado>_R
+                         ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                       <(Data.Either.Either
+                                           Data.Text.Internal.Text (GHC.Base.Maybe TigerEscap.Dat),
+                                         TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                             <TigerEscap.Estado>_N
+                                                                             <Data.Functor.Identity.Identity>_R
+                                                                             <Data.Either.Either
+                                                                                Data.Text.Internal.Text
+                                                                                (GHC.Base.Maybe
+                                                                                   TigerEscap.Dat)>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                                                  <Data.Text.Internal.Text>_N
+                                                                                                                  <Control.Monad.Trans.State.Lazy.StateT
+                                                                                                                     TigerEscap.Estado
+                                                                                                                     Data.Functor.Identity.Identity>_R
+                                                                                                                  <GHC.Base.Maybe
+                                                                                                                     TigerEscap.Dat>_N)))
+                  TigerEscap.$fEscapatorExceptT1
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <TigerSymbol.Symbol>_R
+                   ->_R <TigerAbs.Escapa>_R
+                   ->_R <TigerEscap.Mini a>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <TigerEscap.Estado>_N
+                                 <Data.Functor.Identity.Identity>_R
+                                 <Data.Either.Either
+                                    Data.Text.Internal.Text
+                                    a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <Data.Text.Internal.Text>_N
+                                                     <Control.Monad.Trans.State.Lazy.StateT
+                                                        TigerEscap.Estado
+                                                        Data.Functor.Identity.Identity>_R
+                                                     <a>_N)) -}
+1f183888f82f217dbc10f36d8c106506
+  $fEscapatorExceptT1 ::
+    TigerSymbol.Symbol
+    -> TigerAbs.Escapa
+    -> TigerEscap.Mini a
+    -> TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either Data.Text.Internal.Text a, TigerEscap.Estado)
+  {- Arity: 4,
+     Strictness: <L,U(U,U,U)><L,U><C(S(SL)),1*C1(U(1*U,U(U,U)))><L,U(U,U)>m,
+     Inline: [0],
+     Unfolding: InlineRule (4, True, False)
+                (\ @ a
+                   (w :: TigerSymbol.Symbol)
+                   (w1 :: TigerAbs.Escapa)
+                   (w2 :: TigerEscap.Mini a)
+                   (w3 :: TigerEscap.Estado) ->
+                 case TigerEscap.$w$cinsert @ a w w1 w2 w3 of ww { (#,#) ww1 ww2 ->
+                 (ww1, ww2)
+                   `cast`
+                 (Sym (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either Data.Text.Internal.Text a,
+                             TigerEscap.Estado)>_R)) }) -}
+f34f6d824050711ff0ea382ec5ce97fb
+  $fEscapatorExceptT10 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("lvl = "#) -}
+4b5d93d85ed1e1f91c66a6fa9a01ecb0
+  $fEscapatorExceptT11 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("S {"#) -}
+c95ec0a30d7d655afb05b2d5865d5870
+  $fEscapatorExceptT12 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("PrintEnv "#) -}
+f61185d9db1beb8bc91587187b9bcf79
+  $fEscapatorExceptT13 ::
+    TigerEscap.Mini a
+    -> TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either Data.Text.Internal.Text a, TigerEscap.Estado)
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <C(S(SL)),1*C1(U(U,U(U,U)))><L,U(U(U),U)>m,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ @ a (w :: TigerEscap.Mini a) (w1 :: TigerEscap.Estado) ->
+                 case (w `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <Data.Text.Internal.Text>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either Data.Text.Internal.Text a>_N)
+                         (case w1 of wild { TigerEscap.S ds ds1 ->
+                          TigerEscap.S
+                            (case ds of wild1 { GHC.Types.I# x ->
+                             GHC.Types.I# (GHC.Prim.+# x 1#) })
+                            ds1 }))
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either Data.Text.Internal.Text a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1
+                   -> (Data.Either.Left @ Data.Text.Internal.Text @ a e1, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text a,
+                                  TigerEscap.Estado)>_R))
+                   Data.Either.Right x
+                   -> (Data.Either.Right @ Data.Text.Internal.Text @ a x,
+                       case s' of wild2 { TigerEscap.S ds env1 ->
+                       TigerEscap.S
+                         (case w1 of wild3 { TigerEscap.S ds1 ds2 -> ds1 })
+                         env1 })
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text a,
+                                  TigerEscap.Estado)>_R)) } }) -}
+629fbf63193758850380103b733846fd
+  $fEscapatorExceptT14 ::
+    TigerEscap.Estado
+    -> (Data.Either.Either Data.Text.Internal.Text GHC.Types.Int,
+        TigerEscap.Estado)
+  {- Arity: 1, HasNoCafRefs, Strictness: <L,U(U,U)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (s1 :: TigerEscap.Estado) ->
+                 (Data.Either.Right
+                    @ Data.Text.Internal.Text
+                    @ GHC.Types.Int
+                    (case s1 of wild { TigerEscap.S ds ds1 -> ds }),
+                  s1)) -}
+f821c92f94bd35192518963ec250a7c4
+  $fEscapatorExceptT2 ::
+    TigerSymbol.Symbol
+    -> TigerEscap.Estado
+    -> (Data.Either.Either
+          Data.Text.Internal.Text (GHC.Base.Maybe TigerEscap.Dat),
+        TigerEscap.Estado)
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,1*U(U,U,U)><L,U(U,U)>m,
+     Unfolding: InlineRule (2, True, False)
+                (\ (name :: TigerSymbol.Symbol) (s1 :: TigerEscap.Estado) ->
+                 (Data.Either.Right
+                    @ Data.Text.Internal.Text
+                    @ (GHC.Base.Maybe TigerEscap.Dat)
+                    (case s1 of wild { TigerEscap.S ds ds1 ->
+                     TigerEscap.$fEscapatorExceptT3
+                       @ (GHC.Types.Int, TigerAbs.Escapa)
+                       name
+                       ds1 }),
+                  s1)) -}
+01e8978bb532115b02aaaee099a20ab6
+  $fEscapatorExceptT3 ::
+    TigerSymbol.Symbol
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a -> GHC.Base.Maybe a
+  {- Arity: 2, HasNoCafRefs, Strictness: <S(SSS),1*U(U,U,U)><S,1*U>,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ @ a
+                   (w :: TigerSymbol.Symbol)
+                   (w1 :: Data.Map.Internal.Map TigerSymbol.Symbol a) ->
+                 case w of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                 TigerEscap.$wpoly_go2 @ a ww1 ww2 ww3 w1 }) -}
+1148ab291588f65d266c9323c9fbe123
+  $fEscapatorExceptT4 ::
+    TigerSymbol.Symbol
+    -> TigerAbs.Escapa
+    -> TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either Data.Text.Internal.Text (), TigerEscap.Estado)
+  {- Arity: 3, Strictness: <S(SSS),1*U(U,U,U)><L,U><S(LS),1*U(U,U)>m,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: TigerSymbol.Symbol)
+                   (w1 :: TigerAbs.Escapa)
+                   (w2 :: TigerEscap.Estado) ->
+                 case w of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                 case w2 of ww4 { TigerEscap.S ww5 ww6 ->
+                 case TigerEscap.$wpoly_go2
+                        @ (GHC.Types.Int, TigerAbs.Escapa)
+                        ww1
+                        ww2
+                        ww3
+                        ww6 of wild {
+                   GHC.Base.Nothing
+                   -> (Data.Either.Left
+                         @ Data.Text.Internal.Text
+                         @ ()
+                         (TigerSymbol.addStr
+                            TigerEscap.$fDemonExceptT_g4
+                            (Data.Text.Internal.Text ww1 ww2 ww3)),
+                       TigerEscap.S ww5 ww6)
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text (),
+                                  TigerEscap.Estado)>_R))
+                   GHC.Base.Just x
+                   -> case x of wild1 { (,) lvl36 ds ->
+                      (TigerEscap.$fEscapatorExceptT5,
+                       TigerEscap.S
+                         ww5
+                         (TigerEscap.$w$sgo8
+                            @ (GHC.Types.Int, TigerAbs.Escapa)
+                            ww1
+                            ww2
+                            ww3
+                            (lvl36, w1)
+                            ww6))
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either Data.Text.Internal.Text (),
+                                  TigerEscap.Estado)>_R)) } } } }) -}
+3fced1341192b388e25aefb1aac0ae32
+  $fEscapatorExceptT5 ::
+    Data.Either.Either Data.Text.Internal.Text ()
+  {- HasNoCafRefs, Strictness: m2,
+     Unfolding: (Data.Either.Right
+                   @ Data.Text.Internal.Text
+                   @ ()
+                   GHC.Tuple.()) -}
+34072672ede45e48c2054957abdf3115
+  $fEscapatorExceptT6 ::
+    TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either Data.Text.Internal.Text (), TigerEscap.Estado)
+  {- Arity: 1, Strictness: <L,U(U(U),U)>,
+     Unfolding: (\ (s1 :: TigerEscap.Estado) ->
+                 (Debug.Trace.trace
+                    @ (Control.Monad.Trans.Except.ExceptT
+                         TigerSymbol.Symbol
+                         (Control.Monad.Trans.State.Lazy.State TigerEscap.Estado)
+                         ())
+                    (GHC.CString.unpackAppendCString#
+                       TigerEscap.$fEscapatorExceptT12
+                       (case s1 of ww { TigerEscap.S ww1 ww2 ->
+                        TigerEscap.$w$cshowsPrec
+                          0#
+                          ww1
+                          ww2
+                          (GHC.Types.[] @ GHC.Types.Char) }))
+                    TigerEscap.$fEscapatorExceptT7
+                      `cast`
+                    ((<TigerEscap.Estado>_R
+                      ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                    <(Data.Either.Either Data.Text.Internal.Text (),
+                                      TigerEscap.Estado)>_R)) ; (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                          <TigerEscap.Estado>_N
+                                                                          <Data.Functor.Identity.Identity>_R
+                                                                          <Data.Either.Either
+                                                                             Data.Text.Internal.Text
+                                                                             ()>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                                                               <Data.Text.Internal.Text>_N
+                                                                                               <Control.Monad.Trans.State.Lazy.StateT
+                                                                                                  TigerEscap.Estado
+                                                                                                  Data.Functor.Identity.Identity>_R
+                                                                                               <()>_N))))
+                   `cast`
+                 (Control.Monad.Trans.Except.N:ExceptT[0]
+                      <Data.Text.Internal.Text>_N
+                      <Control.Monad.Trans.State.Lazy.StateT
+                         TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                      <()>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                   <TigerEscap.Estado>_N
+                                   <Data.Functor.Identity.Identity>_R
+                                   <Data.Either.Either Data.Text.Internal.Text ()>_N)
+                   s1) -}
+3056b286c1ea3e77df8db3464fb03a64
+  $fEscapatorExceptT7 ::
+    TigerEscap.Estado
+    -> (Data.Either.Either Data.Text.Internal.Text (),
+        TigerEscap.Estado)
+  {- Arity: 1, HasNoCafRefs, Strictness: <L,U>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (eta5 :: TigerEscap.Estado) ->
+                 (TigerEscap.$fEscapatorExceptT5, eta5)) -}
+9ea91ad87846365be6779a3f30d18935
+  $fEscapatorExceptT8 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("}"#) -}
+4d17e9b153f19033056e47d640e5b518
+  $fEscapatorExceptT9 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("env = "#) -}
+fe03c65e7176d973e48ed8e20aa130a9
+  $fEscapatorExceptT_$s$fApplicativeExceptT ::
+    GHC.Base.Applicative
+      (Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity))
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ e.
+                  @ (Control.Monad.Trans.Except.ExceptT
+                       e
+                       (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity))
+                  (TigerEscap.$fEscapatorExceptT_$s$fFunctorExceptT @ e)
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT_$cpure @ e)
+                  (Control.Monad.Trans.Except.$fApplicativeExceptT_$c<*>
+                     @ (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity)
+                     @ e
+                     (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT
+                        @ TigerEscap.Estado)
+                     (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT
+                        @ TigerEscap.Estado))
+                  (\ @ a
+                     @ b
+                     @ c
+                     (f1 :: a -> b -> c)
+                     (x :: Control.Monad.Trans.Except.ExceptT
+                             e
+                             (Control.Monad.Trans.State.Lazy.StateT
+                                TigerEscap.Estado Data.Functor.Identity.Identity)
+                             a) ->
+                   Control.Monad.Trans.Except.$fApplicativeExceptT_$c<*>
+                     @ (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity)
+                     @ e
+                     (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT
+                        @ TigerEscap.Estado)
+                     (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT @ TigerEscap.Estado)
+                     @ b
+                     @ c
+                     (\ (s1 :: TigerEscap.Estado) ->
+                      let {
+                        ds :: Data.Functor.Identity.Identity
+                                (Data.Either.Either e a, TigerEscap.Estado)
+                        = x `cast`
+                          (Control.Monad.Trans.Except.N:ExceptT[0]
+                               <e>_N
+                               <Control.Monad.Trans.State.Lazy.StateT
+                                  TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                               <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                           <TigerEscap.Estado>_N
+                                           <Data.Functor.Identity.Identity>_R
+                                           <Data.Either.Either e a>_N)
+                            s1
+                      } in
+                      (case ds
+                              `cast`
+                            (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either e a,
+                                   TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                       case a1 of wild1 {
+                         Data.Either.Left x1 -> Data.Either.Left @ e @ (b -> c) x1
+                         Data.Either.Right y -> Data.Either.Right @ e @ (b -> c) (f1 y) } },
+                       case ds
+                              `cast`
+                            (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either e a,
+                                   TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                       s' })
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e (b -> c), TigerEscap.Estado)>_R)))
+                       `cast`
+                     (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <TigerEscap.Estado>_N
+                               <Data.Functor.Identity.Identity>_R
+                               <Data.Either.Either
+                                  e (b -> c)>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                            <e>_N
+                                                            <Control.Monad.Trans.State.Lazy.StateT
+                                                               TigerEscap.Estado
+                                                               Data.Functor.Identity.Identity>_R
+                                                            <b -> c>_N)))
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT_$c*> @ e)
+                  (\ @ a
+                     @ b
+                     (x :: Control.Monad.Trans.Except.ExceptT
+                             e
+                             (Control.Monad.Trans.State.Lazy.StateT
+                                TigerEscap.Estado Data.Functor.Identity.Identity)
+                             a) ->
+                   Control.Monad.Trans.Except.$fApplicativeExceptT_$c<*>
+                     @ (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity)
+                     @ e
+                     (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT
+                        @ TigerEscap.Estado)
+                     (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT @ TigerEscap.Estado)
+                     @ b
+                     @ a
+                     (\ (s1 :: TigerEscap.Estado) ->
+                      let {
+                        ds :: Data.Functor.Identity.Identity
+                                (Data.Either.Either e a, TigerEscap.Estado)
+                        = x `cast`
+                          (Control.Monad.Trans.Except.N:ExceptT[0]
+                               <e>_N
+                               <Control.Monad.Trans.State.Lazy.StateT
+                                  TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                               <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                           <TigerEscap.Estado>_N
+                                           <Data.Functor.Identity.Identity>_R
+                                           <Data.Either.Either e a>_N)
+                            s1
+                      } in
+                      (case ds
+                              `cast`
+                            (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either e a,
+                                   TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                       case a1 of wild1 {
+                         Data.Either.Left x1 -> Data.Either.Left @ e @ (b -> a) x1
+                         Data.Either.Right y
+                         -> Data.Either.Right @ e @ (b -> a) (\ (ds1 :: b) -> y) } },
+                       case ds
+                              `cast`
+                            (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either e a,
+                                   TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                       s' })
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e (b -> a), TigerEscap.Estado)>_R)))
+                       `cast`
+                     (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <TigerEscap.Estado>_N
+                               <Data.Functor.Identity.Identity>_R
+                               <Data.Either.Either
+                                  e (b -> a)>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                            <e>_N
+                                                            <Control.Monad.Trans.State.Lazy.StateT
+                                                               TigerEscap.Estado
+                                                               Data.Functor.Identity.Identity>_R
+                                                            <b -> a>_N))) -}
+e210415b3e68396bd0288378ae277cb0
+  $fEscapatorExceptT_$s$fApplicativeExceptT_$c*> ::
+    Control.Monad.Trans.Except.ExceptT
+      e
+      (Control.Monad.Trans.State.Lazy.StateT
+         TigerEscap.Estado Data.Functor.Identity.Identity)
+      a
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         b
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(S(SL)),1*C1(U(1*U,U))><L,1*C1(U(U,U))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ e
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.Except.ExceptT
+                            e
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity)
+                            a)
+                   (k :: Control.Monad.Trans.Except.ExceptT
+                           e
+                           (Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity)
+                           b)
+                   (s1 :: TigerEscap.Estado) ->
+                 case (m1
+                         `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <e>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either e a>_N)
+                         s1)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either e a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1
+                   -> (Data.Either.Left @ e @ b e1, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e b, TigerEscap.Estado)>_R))
+                   Data.Either.Right x
+                   -> k `cast`
+                      (Control.Monad.Trans.Except.N:ExceptT[0]
+                           <e>_N
+                           <Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                           <b>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                       <TigerEscap.Estado>_N
+                                       <Data.Functor.Identity.Identity>_R
+                                       <Data.Either.Either e b>_N)
+                        s' } })
+                  `cast`
+                (forall (e :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.Except.ExceptT
+                    e
+                    (Control.Monad.Trans.State.Lazy.StateT
+                       TigerEscap.Estado Data.Functor.Identity.Identity)
+                    a>_R
+                 ->_R <Control.Monad.Trans.Except.ExceptT
+                         e
+                         (Control.Monad.Trans.State.Lazy.StateT
+                            TigerEscap.Estado Data.Functor.Identity.Identity)
+                         b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <TigerEscap.Estado>_N
+                               <Data.Functor.Identity.Identity>_R
+                               <Data.Either.Either
+                                  e b>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <e>_N
+                                                     <Control.Monad.Trans.State.Lazy.StateT
+                                                        TigerEscap.Estado
+                                                        Data.Functor.Identity.Identity>_R
+                                                     <b>_N)) -}
+6ac21e8aa49c3ee67fe64cd839bc7ce2
+  $fEscapatorExceptT_$s$fApplicativeExceptT_$cpure ::
+    a
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         a
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U><L,U>m,
+     Inline: (sat-args=1),
+     Unfolding: InlineRule (1, False, False)
+                (\ @ e @ a (a1 :: a) ->
+                 let {
+                   eta5 :: Data.Either.Either e a = Data.Either.Right @ e @ a a1
+                 } in
+                 (\ (eta6 :: TigerEscap.Estado) -> (eta5, eta6))
+                   `cast`
+                 ((<TigerEscap.Estado>_R
+                   ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either e a,
+                                   TigerEscap.Estado)>_R)) ; Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                      <TigerEscap.Estado>_N
+                                                                      <Data.Functor.Identity.Identity>_R
+                                                                      <Data.Either.Either e a>_N)))
+                  `cast`
+                (forall (e :: <*>_N) (a :: <*>_N).
+                 <a>_R
+                 ->_R Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                               <e>_N
+                               <Control.Monad.Trans.State.Lazy.StateT
+                                  TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                               <a>_N)) -}
+25c44d39a14b24ecc4e6f9edc405eea2
+  $fEscapatorExceptT_$s$fApplicativeStateT ::
+    GHC.Base.Applicative
+      (Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity)
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ s.
+                  @ (Control.Monad.Trans.State.Lazy.StateT
+                       s Data.Functor.Identity.Identity)
+                  (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT @ s)
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$cpure @ s)
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$c<*> @ s)
+                  (Control.Monad.Trans.State.Lazy.$fAlternativeStateT2
+                     @ Data.Functor.Identity.Identity
+                     @ s
+                     Data.Functor.Identity.$fFunctorIdentity
+                     Data.Functor.Identity.$fMonadIdentity)
+                    `cast`
+                  (forall (a :: <*>_N) (b :: <*>_N) (c :: <*>_N).
+                   <a -> b -> c>_R
+                   ->_R <Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity a>_R
+                   ->_R <Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity b>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <s>_N <Data.Functor.Identity.Identity>_R <c>_N))
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$c*> @ s)
+                  (\ @ a
+                     @ b
+                     (x :: Control.Monad.Trans.State.Lazy.StateT
+                             s Data.Functor.Identity.Identity a)
+                     (eta5 :: Control.Monad.Trans.State.Lazy.StateT
+                                s Data.Functor.Identity.Identity b)
+                     (eta6 :: s) ->
+                   let {
+                     ds :: Data.Functor.Identity.Identity (a, s)
+                     = x `cast`
+                       (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                            <s>_N <Data.Functor.Identity.Identity>_R <a>_N)
+                         eta6
+                   } in
+                   (case ds
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(a, s)>_R) of wild { (,) a1 s' ->
+                    a1 },
+                    case (eta5
+                            `cast`
+                          (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)
+                            (case ds
+                                    `cast`
+                                  (Data.Functor.Identity.N:Identity[0]
+                                       <(a, s)>_R) of wild { (,) a1 s' ->
+                             s' }))
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(b, s)>_R) of wild { (,) x1 s'' ->
+                    s'' })
+                     `cast`
+                   (Sym (Data.Functor.Identity.N:Identity[0] <(a, s)>_R)))
+                    `cast`
+                  (forall (a :: <*>_N) (b :: <*>_N).
+                   <Control.Monad.Trans.State.Lazy.StateT
+                      s Data.Functor.Identity.Identity a>_R
+                   ->_R <Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity b>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <s>_N <Data.Functor.Identity.Identity>_R <a>_N)) -}
+ce2c274e4fb64125b14bd5f14f4676cc
+  $fEscapatorExceptT_$s$fApplicativeStateT_$c*> ::
+    Control.Monad.Trans.State.Lazy.StateT
+      s Data.Functor.Identity.Identity a
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,1*C1(U(A,1*U))><C(S),1*C1(U(U,U))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ s
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.State.Lazy.StateT
+                            s Data.Functor.Identity.Identity a)
+                   (k :: Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity b)
+                   (s1 :: s) ->
+                 k `cast`
+                 (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                      <s>_N <Data.Functor.Identity.Identity>_R <b>_N)
+                   (case (m1
+                            `cast`
+                          (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <a>_N)
+                            s1)
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(a, s)>_R) of wild { (,) a1 s' ->
+                    s' }))
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.State.Lazy.StateT
+                    s Data.Functor.Identity.Identity a>_R
+                 ->_R <Control.Monad.Trans.State.Lazy.StateT
+                         s Data.Functor.Identity.Identity b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)) -}
+6c17ecbec5fd22ba6aa9c7d87479f3f3
+  $fEscapatorExceptT_$s$fApplicativeStateT_$c<*> ::
+    Control.Monad.Trans.State.Lazy.StateT
+      s Data.Functor.Identity.Identity (a -> b)
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity a
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,1*C1(U(1*C1(U),1*U))><L,1*C1(U(1*U,1*U))><L,U>m,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ s
+                   @ a
+                   @ b
+                   (ds :: Control.Monad.Trans.State.Lazy.StateT
+                            s Data.Functor.Identity.Identity (a -> b))
+                   (ds1 :: Control.Monad.Trans.State.Lazy.StateT
+                             s Data.Functor.Identity.Identity a)
+                   (s1 :: s) ->
+                 let {
+                   ds2 :: Data.Functor.Identity.Identity (a -> b, s)
+                   = ds
+                       `cast`
+                     (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                          <s>_N <Data.Functor.Identity.Identity>_R <a -> b>_N)
+                       s1
+                 } in
+                 let {
+                   ds3 :: Data.Functor.Identity.Identity (a, s)
+                   = ds1
+                       `cast`
+                     (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                          <s>_N <Data.Functor.Identity.Identity>_R <a>_N)
+                       (case ds2
+                               `cast`
+                             (Data.Functor.Identity.N:Identity[0]
+                                  <(a -> b, s)>_R) of wild { (,) f s' ->
+                        s' })
+                 } in
+                 (case ds2
+                         `cast`
+                       (Data.Functor.Identity.N:Identity[0]
+                            <(a -> b, s)>_R) of wild { (,) f s' ->
+                  f (case ds3
+                            `cast`
+                          (Data.Functor.Identity.N:Identity[0]
+                               <(a, s)>_R) of wild1 { (,) x s'' ->
+                     x }) },
+                  case ds3
+                         `cast`
+                       (Data.Functor.Identity.N:Identity[0]
+                            <(a, s)>_R) of wild { (,) x s'' ->
+                  s'' })
+                   `cast`
+                 (Sym (Data.Functor.Identity.N:Identity[0] <(b, s)>_R)))
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.State.Lazy.StateT
+                    s Data.Functor.Identity.Identity (a -> b)>_R
+                 ->_R <Control.Monad.Trans.State.Lazy.StateT
+                         s Data.Functor.Identity.Identity a>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)) -}
+a5693569cf303b955fdeee010c5ca87d
+  $fEscapatorExceptT_$s$fApplicativeStateT_$cpure ::
+    a
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity a
+  {- Arity: 2, HasNoCafRefs, Strictness: <L,U><L,U>m,
+     Inline: (sat-args=1),
+     Unfolding: InlineRule (1, False, True)
+                (\ @ s @ a (a1 :: a) (s1 :: s) -> (a1, s1))
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N).
+                 <a>_R
+                 ->_R (<s>_R
+                       ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                     <(a, s)>_R)) ; Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                             <s>_N
+                                                             <Data.Functor.Identity.Identity>_R
+                                                             <a>_N)) -}
+e1d69b6e5584c814583f48d5465eb900
+  $fEscapatorExceptT_$s$fFunctorExceptT ::
+    GHC.Base.Functor
+      (Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity))
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ e.
+                  @ (Control.Monad.Trans.Except.ExceptT
+                       e
+                       (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity))
+                  (Control.Monad.Trans.Except.$fFunctorExceptT_$cfmap
+                     @ (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity)
+                     @ e
+                     (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT
+                        @ TigerEscap.Estado))
+                  (Control.Monad.Trans.Except.$fFunctorExceptT_$c<$
+                     @ (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity)
+                     @ e
+                     (TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT
+                        @ TigerEscap.Estado)) -}
+1ecbf8719379c979e2a838fa4773e268
+  $fEscapatorExceptT_$s$fFunctorStateT ::
+    GHC.Base.Functor
+      (Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity)
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ s.
+                  @ (Control.Monad.Trans.State.Lazy.StateT
+                       s Data.Functor.Identity.Identity)
+                  (Control.Monad.Trans.State.Lazy.$fFunctorStateT_$cfmap
+                     @ Data.Functor.Identity.Identity
+                     @ s
+                     Data.Functor.Identity.$fFunctorIdentity)
+                  (\ @ a
+                     @ b
+                     (x :: a)
+                     (eta5 :: Control.Monad.Trans.State.Lazy.StateT
+                                s Data.Functor.Identity.Identity b)
+                     (eta6 :: s) ->
+                   (x,
+                    case (eta5
+                            `cast`
+                          (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)
+                            eta6)
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(b, s)>_R) of wild { (,) a1 s' ->
+                    s' }))
+                    `cast`
+                  (forall (a :: <*>_N) (b :: <*>_N).
+                   <a>_R
+                   ->_R <Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity b>_R
+                   ->_R (<s>_R
+                         ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                       <(a,
+                                         s)>_R)) ; Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                            <s>_N
+                                                            <Data.Functor.Identity.Identity>_R
+                                                            <a>_N)) -}
+72ccd3fea39fa5b916776262c23dfa00
+  $fEscapatorExceptT_$s$fMonadExceptT ::
+    GHC.Base.Monad
+      (Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity))
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ e.
+                  @ (Control.Monad.Trans.Except.ExceptT
+                       e
+                       (Control.Monad.Trans.State.Lazy.StateT
+                          TigerEscap.Estado Data.Functor.Identity.Identity))
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT @ e)
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT_$c>>= @ e)
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT_$c>> @ e)
+                  (\ @ a (eta5 :: a) ->
+                   let {
+                     eta6 :: Data.Either.Either e a = Data.Either.Right @ e @ a eta5
+                   } in
+                   (\ (eta7 :: TigerEscap.Estado) -> (eta6, eta7))
+                     `cast`
+                   ((<TigerEscap.Estado>_R
+                     ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                   <(Data.Either.Either e a,
+                                     TigerEscap.Estado)>_R)) ; Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                                        <TigerEscap.Estado>_N
+                                                                        <Data.Functor.Identity.Identity>_R
+                                                                        <Data.Either.Either
+                                                                           e a>_N)))
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <a>_R
+                   ->_R Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                 <e>_N
+                                 <Control.Monad.Trans.State.Lazy.StateT
+                                    TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                                 <a>_N))
+                  (\ @ a (x :: GHC.Base.String) (ds :: TigerEscap.Estado) ->
+                   GHC.Err.errorWithoutStackTrace
+                     @ 'GHC.Types.LiftedRep
+                     @ (Data.Functor.Identity.Identity
+                          (Data.Either.Either e a, TigerEscap.Estado))
+                     x)
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <GHC.Base.String>_R
+                   ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                 <TigerEscap.Estado>_N
+                                 <Data.Functor.Identity.Identity>_R
+                                 <Data.Either.Either
+                                    e a>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                       <e>_N
+                                                       <Control.Monad.Trans.State.Lazy.StateT
+                                                          TigerEscap.Estado
+                                                          Data.Functor.Identity.Identity>_R
+                                                       <a>_N)) -}
+b7f71cae94612a393abc00190b091f3e
+  $fEscapatorExceptT_$s$fMonadExceptT_$c>> ::
+    Control.Monad.Trans.Except.ExceptT
+      e
+      (Control.Monad.Trans.State.Lazy.StateT
+         TigerEscap.Estado Data.Functor.Identity.Identity)
+      a
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         b
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(S(SL)),1*C1(U(1*U,U))><L,1*C1(U(U,U))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ e
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.Except.ExceptT
+                            e
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity)
+                            a)
+                   (k :: Control.Monad.Trans.Except.ExceptT
+                           e
+                           (Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity)
+                           b)
+                   (s1 :: TigerEscap.Estado) ->
+                 case (m1
+                         `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <e>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either e a>_N)
+                         s1)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either e a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1
+                   -> (Data.Either.Left @ e @ b e1, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e b, TigerEscap.Estado)>_R))
+                   Data.Either.Right x
+                   -> k `cast`
+                      (Control.Monad.Trans.Except.N:ExceptT[0]
+                           <e>_N
+                           <Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                           <b>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                       <TigerEscap.Estado>_N
+                                       <Data.Functor.Identity.Identity>_R
+                                       <Data.Either.Either e b>_N)
+                        s' } })
+                  `cast`
+                (forall (e :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.Except.ExceptT
+                    e
+                    (Control.Monad.Trans.State.Lazy.StateT
+                       TigerEscap.Estado Data.Functor.Identity.Identity)
+                    a>_R
+                 ->_R <Control.Monad.Trans.Except.ExceptT
+                         e
+                         (Control.Monad.Trans.State.Lazy.StateT
+                            TigerEscap.Estado Data.Functor.Identity.Identity)
+                         b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <TigerEscap.Estado>_N
+                               <Data.Functor.Identity.Identity>_R
+                               <Data.Either.Either
+                                  e b>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <e>_N
+                                                     <Control.Monad.Trans.State.Lazy.StateT
+                                                        TigerEscap.Estado
+                                                        Data.Functor.Identity.Identity>_R
+                                                     <b>_N)) -}
+15cfcc8dbf4dcb42efdd69a68865444e
+  $fEscapatorExceptT_$s$fMonadExceptT_$c>>= ::
+    Control.Monad.Trans.Except.ExceptT
+      e
+      (Control.Monad.Trans.State.Lazy.StateT
+         TigerEscap.Estado Data.Functor.Identity.Identity)
+      a
+    -> (a
+        -> Control.Monad.Trans.Except.ExceptT
+             e
+             (Control.Monad.Trans.State.Lazy.StateT
+                TigerEscap.Estado Data.Functor.Identity.Identity)
+             b)
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(S(SL)),1*C1(U(1*U,U))><L,1*C1(C1(U(U,U)))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ e
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.Except.ExceptT
+                            e
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity)
+                            a)
+                   (k :: a
+                         -> Control.Monad.Trans.Except.ExceptT
+                              e
+                              (Control.Monad.Trans.State.Lazy.StateT
+                                 TigerEscap.Estado Data.Functor.Identity.Identity)
+                              b)
+                   (s1 :: TigerEscap.Estado) ->
+                 case (m1
+                         `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <e>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either e a>_N)
+                         s1)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either e a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1
+                   -> (Data.Either.Left @ e @ b e1, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e b, TigerEscap.Estado)>_R))
+                   Data.Either.Right x
+                   -> (k x)
+                        `cast`
+                      (Control.Monad.Trans.Except.N:ExceptT[0]
+                           <e>_N
+                           <Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                           <b>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                       <TigerEscap.Estado>_N
+                                       <Data.Functor.Identity.Identity>_R
+                                       <Data.Either.Either e b>_N)
+                        s' } })
+                  `cast`
+                (forall (e :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.Except.ExceptT
+                    e
+                    (Control.Monad.Trans.State.Lazy.StateT
+                       TigerEscap.Estado Data.Functor.Identity.Identity)
+                    a>_R
+                 ->_R <a
+                       -> Control.Monad.Trans.Except.ExceptT
+                            e
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity)
+                            b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <TigerEscap.Estado>_N
+                               <Data.Functor.Identity.Identity>_R
+                               <Data.Either.Either
+                                  e b>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                     <e>_N
+                                                     <Control.Monad.Trans.State.Lazy.StateT
+                                                        TigerEscap.Estado
+                                                        Data.Functor.Identity.Identity>_R
+                                                     <b>_N)) -}
+65c8e31d6fbfaee46578d49c03ab7080
+  $fEscapatorExceptT_$s$fMonadStateT ::
+    GHC.Base.Monad
+      (Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity)
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun: @ s.
+                  @ (Control.Monad.Trans.State.Lazy.StateT
+                       s Data.Functor.Identity.Identity)
+                  (TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT @ s)
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$c>>= @ s)
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$c>> @ s)
+                  (\ @ a (eta5 :: a) (eta6 :: s) -> (eta5, eta6))
+                    `cast`
+                  (forall (a :: <*>_N).
+                   <a>_R
+                   ->_R (<s>_R
+                         ->_R Sym (Data.Functor.Identity.N:Identity[0]
+                                       <(a,
+                                         s)>_R)) ; Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                            <s>_N
+                                                            <Data.Functor.Identity.Identity>_R
+                                                            <a>_N))
+                  (TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$cfail @ s) -}
+8dfcd781ecc903ea2aebea456470cb79
+  $fEscapatorExceptT_$s$fMonadStateT_$c>> ::
+    Control.Monad.Trans.State.Lazy.StateT
+      s Data.Functor.Identity.Identity a
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,1*C1(U(A,1*U))><C(S),1*C1(U(U,U))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ s
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.State.Lazy.StateT
+                            s Data.Functor.Identity.Identity a)
+                   (k :: Control.Monad.Trans.State.Lazy.StateT
+                           s Data.Functor.Identity.Identity b)
+                   (s1 :: s) ->
+                 k `cast`
+                 (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                      <s>_N <Data.Functor.Identity.Identity>_R <b>_N)
+                   (case (m1
+                            `cast`
+                          (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <a>_N)
+                            s1)
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(a, s)>_R) of wild { (,) a1 s' ->
+                    s' }))
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.State.Lazy.StateT
+                    s Data.Functor.Identity.Identity a>_R
+                 ->_R <Control.Monad.Trans.State.Lazy.StateT
+                         s Data.Functor.Identity.Identity b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)) -}
+ca46ad8573fc00e474bd3e6a5e8caad2
+  $fEscapatorExceptT_$s$fMonadStateT_$c>>= ::
+    Control.Monad.Trans.State.Lazy.StateT
+      s Data.Functor.Identity.Identity a
+    -> (a
+        -> Control.Monad.Trans.State.Lazy.StateT
+             s Data.Functor.Identity.Identity b)
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity b
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,1*C1(U(1*U,1*U))><C(C(S)),1*C1(C1(U(U,U)))><L,U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ @ s
+                   @ a
+                   @ b
+                   (m1 :: Control.Monad.Trans.State.Lazy.StateT
+                            s Data.Functor.Identity.Identity a)
+                   (k :: a
+                         -> Control.Monad.Trans.State.Lazy.StateT
+                              s Data.Functor.Identity.Identity b)
+                   (s1 :: s) ->
+                 let {
+                   ds :: Data.Functor.Identity.Identity (a, s)
+                   = m1
+                       `cast`
+                     (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                          <s>_N <Data.Functor.Identity.Identity>_R <a>_N)
+                       s1
+                 } in
+                 (k (case ds
+                            `cast`
+                          (Data.Functor.Identity.N:Identity[0]
+                               <(a, s)>_R) of wild { (,) a1 s' ->
+                     a1 }))
+                   `cast`
+                 (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                      <s>_N <Data.Functor.Identity.Identity>_R <b>_N)
+                   (case ds
+                           `cast`
+                         (Data.Functor.Identity.N:Identity[0]
+                              <(a, s)>_R) of wild { (,) a1 s' ->
+                    s' }))
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N) (b :: <*>_N).
+                 <Control.Monad.Trans.State.Lazy.StateT
+                    s Data.Functor.Identity.Identity a>_R
+                 ->_R <a
+                       -> Control.Monad.Trans.State.Lazy.StateT
+                            s Data.Functor.Identity.Identity b>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <b>_N)) -}
+58cd24c0776c3e5cae51b818f7bf6526
+  $fEscapatorExceptT_$s$fMonadStateT_$cfail ::
+    GHC.Base.String
+    -> Control.Monad.Trans.State.Lazy.StateT
+         s Data.Functor.Identity.Identity a
+  {- Arity: 2, Strictness: <B,U><B,A>x, Inline: (sat-args=1),
+     Unfolding: InlineRule (1, False, True)
+                (\ @ s @ a (str :: GHC.Base.String) (ds :: s) ->
+                 GHC.Err.errorWithoutStackTrace
+                   @ 'GHC.Types.LiftedRep
+                   @ (Data.Functor.Identity.Identity (a, s))
+                   str)
+                  `cast`
+                (forall (s :: <*>_N) (a :: <*>_N).
+                 <GHC.Base.String>_R
+                 ->_R Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                               <s>_N <Data.Functor.Identity.Identity>_R <a>_N)) -}
+81e3570241c7a72626caaa4b049d88fe
+  $fEscapatorExceptT_$s$fShow(,) ::
+    GHC.Show.Show (GHC.Types.Int, TigerAbs.Escapa)
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ (GHC.Types.Int, TigerAbs.Escapa)
+                  (GHC.Show.$fShow(,)_$cshowsPrec
+                     @ GHC.Types.Int
+                     @ TigerAbs.Escapa
+                     GHC.Show.$fShowInt
+                     TigerAbs.$fShowEscapa)
+                  (\ (x :: (GHC.Types.Int, TigerAbs.Escapa)) ->
+                   GHC.Show.$fShow(,)_$cshowsPrec
+                     @ GHC.Types.Int
+                     @ TigerAbs.Escapa
+                     GHC.Show.$fShowInt
+                     TigerAbs.$fShowEscapa
+                     GHC.Show.$fShow(,)1
+                     x
+                     (GHC.Types.[] @ GHC.Types.Char))
+                  (\ (ls :: [(GHC.Types.Int, TigerAbs.Escapa)])
+                     (s :: GHC.Base.String) ->
+                   GHC.Show.showList__
+                     @ (GHC.Types.Int, TigerAbs.Escapa)
+                     (GHC.Show.$fShow(,)_$cshowsPrec
+                        @ GHC.Types.Int
+                        @ TigerAbs.Escapa
+                        GHC.Show.$fShowInt
+                        TigerAbs.$fShowEscapa
+                        GHC.Show.$fShow(,)1)
+                     ls
+                     s) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fShowEstado :: GHC.Show.Show TigerEscap.Estado
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerEscap.Estado
+                  TigerEscap.$fShowEstado_$cshowsPrec
+                  TigerEscap.$fShowEstado_$cshow
+                  TigerEscap.$fShowEstado_$cshowList -}
+7a62ae3e922aa37990beec226dcb044f
+  $fShowEstado1 :: TigerEscap.Estado -> GHC.Show.ShowS
+  {- Arity: 1, Strictness: <S,1*U(U(U),1*U)>,
+     Unfolding: (\ (w :: TigerEscap.Estado) ->
+                 case w of ww { TigerEscap.S ww1 ww2 ->
+                 TigerEscap.$w$cshowsPrec 0# ww1 ww2 }) -}
+b018b07bb59fa58ea5a82fb3a582402b
+  $fShowEstado2 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 0#) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fShowEstado_$cshow :: TigerEscap.Estado -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U(U(U),1*U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: TigerEscap.Estado) ->
+                 TigerEscap.$fShowEstado_$cshowsPrec
+                   TigerEscap.$fShowEstado2
+                   x
+                   (GHC.Types.[] @ GHC.Types.Char)) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fShowEstado_$cshowList :: [TigerEscap.Estado] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerEscap.Estado]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerEscap.Estado
+                   TigerEscap.$fShowEstado1
+                   ls
+                   s) -}
+7a62ae3e922aa37990beec226dcb044f
+  $fShowEstado_$cshowsPrec ::
+    GHC.Types.Int -> TigerEscap.Estado -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S(S),1*U(U)><S,1*U(U(U),1*U)>,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: GHC.Types.Int) (w1 :: TigerEscap.Estado) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { TigerEscap.S ww3 ww4 ->
+                 TigerEscap.$w$cshowsPrec ww1 ww3 ww4 } }) -}
+9391b587ee6e7783614f3f09b568e687
+  $fShowSEstado :: GHC.Show.Show TigerEscap.SEstado
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerEscap.SEstado
+                  TigerEscap.$fShowSEstado_$cshowsPrec
+                  TigerEscap.$fShowSEstado_$cshow
+                  TigerEscap.$fShowSEstado_$cshowList -}
+9391b587ee6e7783614f3f09b568e687
+  $fShowSEstado1 :: TigerEscap.SEstado -> GHC.Show.ShowS
+  {- Arity: 1, Strictness: <S,1*U(U(U),1*U,U)>,
+     Unfolding: (\ (w :: TigerEscap.SEstado) ->
+                 case w of ww { TigerEscap.Step ww1 ww2 ww3 ->
+                 TigerEscap.$w$cshowsPrec1 0# ww1 ww2 ww3 }) -}
+f8d855110ac3edf19eff548ffbf30816
+  $fShowSEstado2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("msgP = "#) -}
+b9161262e349704fea83283fbc7bd1a0
+  $fShowSEstado3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("envP = "#) -}
+66fc99a91bfafbe3ecc33d36fcc8981e
+  $fShowSEstado4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("lvlP = "#) -}
+3bc94d43159e6376d022357e3769fb8c
+  $fShowSEstado5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Step {"#) -}
+9391b587ee6e7783614f3f09b568e687
+  $fShowSEstado_$cshow :: TigerEscap.SEstado -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U(U(U),1*U,U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: TigerEscap.SEstado) ->
+                 TigerEscap.$fShowSEstado_$cshowsPrec
+                   TigerEscap.$fShowEstado2
+                   x
+                   (GHC.Types.[] @ GHC.Types.Char)) -}
+9391b587ee6e7783614f3f09b568e687
+  $fShowSEstado_$cshowList :: [TigerEscap.SEstado] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerEscap.SEstado]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerEscap.SEstado
+                   TigerEscap.$fShowSEstado1
+                   ls
+                   s) -}
+9391b587ee6e7783614f3f09b568e687
+  $fShowSEstado_$cshowsPrec ::
+    GHC.Types.Int -> TigerEscap.SEstado -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S(S),1*U(U)><S,1*U(U(U),1*U,U)>,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ (w :: GHC.Types.Int) (w1 :: TigerEscap.SEstado) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { TigerEscap.Step ww3 ww4 ww5 ->
+                 TigerEscap.$w$cshowsPrec1 ww1 ww3 ww4 ww5 } }) -}
+a1402ffe8f564c3c0576bba5166a5406
+  $s$fApplicativeExceptT_$c<*>1 ::
+    Control.Monad.Trans.Except.ExceptT
+      e
+      (Control.Monad.Trans.State.Lazy.StateT
+         TigerEscap.Estado Data.Functor.Identity.Identity)
+      (a -> b)
+    -> Control.Monad.Trans.Except.ExceptT
+         e
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         a
+    -> TigerEscap.Estado
+    -> Data.Functor.Identity.Identity
+         (Data.Either.Either e b, TigerEscap.Estado)
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <C(S(SL)),1*C1(U(1*U,U))><L,1*C1(U(1*U,U))><L,U>m,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ @ e
+                   @ a
+                   @ b
+                   (w :: Control.Monad.Trans.Except.ExceptT
+                           e
+                           (Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity)
+                           (a -> b))
+                   (w1 :: Control.Monad.Trans.Except.ExceptT
+                            e
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity)
+                            a)
+                   (w2 :: TigerEscap.Estado) ->
+                 case (w `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <e>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a -> b>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                             <TigerEscap.Estado>_N
+                                             <Data.Functor.Identity.Identity>_R
+                                             <Data.Either.Either e (a -> b)>_N)
+                         w2)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either e (a -> b),
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1
+                   -> (Data.Either.Left @ e @ b e1, s')
+                        `cast`
+                      (Sym (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e b, TigerEscap.Estado)>_R))
+                   Data.Either.Right k
+                   -> case (w1
+                              `cast`
+                            (Control.Monad.Trans.Except.N:ExceptT[0]
+                                 <e>_N
+                                 <Control.Monad.Trans.State.Lazy.StateT
+                                    TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                                 <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                             <TigerEscap.Estado>_N
+                                             <Data.Functor.Identity.Identity>_R
+                                             <Data.Either.Either e a>_N)
+                              s')
+                             `cast`
+                           (Data.Functor.Identity.N:Identity[0]
+                                <(Data.Either.Either e a,
+                                  TigerEscap.Estado)>_R) of wild2 { (,) a2 s'1 ->
+                      case a2 of wild3 {
+                        Data.Either.Left e1
+                        -> (Data.Either.Left @ e @ b e1, s'1)
+                             `cast`
+                           (Sym (Data.Functor.Identity.N:Identity[0]
+                                     <(Data.Either.Either e b, TigerEscap.Estado)>_R))
+                        Data.Either.Right x
+                        -> (Data.Either.Right @ e @ b (k x), s'1)
+                             `cast`
+                           (Sym (Data.Functor.Identity.N:Identity[0]
+                                     <(Data.Either.Either e b, TigerEscap.Estado)>_R)) } } } }) -}
+47ec81075ac138a7b74b518b7424b9d7
+  $tc'S :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   2714139318278364560##
+                   11110756027712285021##
+                   TigerEscap.$trModule
+                   TigerEscap.$tc'S2
+                   0#
+                   TigerEscap.$tc'S1) -}
+58ab5856aa870ff8bc8ca154b8d57262
+  $tc'S1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+1a81de3173955558ad29018e24cda595
+  $tc'S2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$tc'S3) -}
+fc37ab5a28ba0e00430ae291ce73f58c
+  $tc'S3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'S"#) -}
+07dd49e63b2dff260c712d87c20a4d69
+  $tc'Step :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   443324870978197313##
+                   11513510572629243597##
+                   TigerEscap.$trModule
+                   TigerEscap.$tc'Step2
+                   0#
+                   TigerEscap.$tc'Step1) -}
+6bfad80c2ecf90b2f145851b33cbed14
+  $tc'Step1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+27e2d43cf9e8f0e486e5a15245b07de8
+  $tc'Step2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$tc'Step3) -}
+0217fdb0a4f692eb8cd67d0fabc4fe55
+  $tc'Step3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Step"#) -}
+f9164ca3d1e137fd0d888eb332d85e76
+  $tcEscapator :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   4232482423287310209##
+                   17111144669086889136##
+                   TigerEscap.$trModule
+                   TigerEscap.$tcEscapator2
+                   0#
+                   TigerEscap.$tcEscapator1) -}
+85eeb8c5cf203ddc20e11c0d0816283f
+  $tcEscapator1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+088e2ad772f4d2bb8fe7d923d0d55f01
+  $tcEscapator2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$tcEscapator3) -}
+82108af45837c674e54db865ed2e9291
+  $tcEscapator3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Escapator"#) -}
+75ce3c176c9f7593323c662e2714da3a
+  $tcEstado :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   12573922403547116444##
+                   14905316947555398461##
+                   TigerEscap.$trModule
+                   TigerEscap.$tcEstado1
+                   0#
+                   GHC.Types.krep$*) -}
+a53aca985c41bc310db1ceb4029288b3
+  $tcEstado1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$tcEstado2) -}
+9f3f1f12fa53c69f8e382950fa84efd9
+  $tcEstado2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Estado"#) -}
+98274af9e6d4023c63ac625369a6f8b5
+  $tcSEstado :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   2008230665730896852##
+                   1081087448200885690##
+                   TigerEscap.$trModule
+                   TigerEscap.$tcSEstado1
+                   0#
+                   GHC.Types.krep$*) -}
+1279600648681397b4b4aad0a711bb24
+  $tcSEstado1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$tcSEstado2) -}
+62c4b286f033b294cdf3b81682fa2c2d
+  $tcSEstado2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("SEstado"#) -}
+9be9709c7509142ee101df031ffdcd33
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   TigerEscap.$trModule3
+                   TigerEscap.$trModule1) -}
+a78527be3f0bde795dc3785f76ade728
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$trModule2) -}
+dfb7bf74c892bcc6b76b3cba34bf82c5
+  $trModule2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("TigerEscap"#) -}
+b11763662d69d7eb27bd9f4721820405
+  $trModule3 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerEscap.$trModule4) -}
+86d63244605b5b73d5404c4fc1d3fb82
+  $trModule4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY"#) -}
+02dc0065a132b960b222fe75d45f325b
+  $w$cinsert ::
+    TigerSymbol.Symbol
+    -> TigerAbs.Escapa
+    -> TigerEscap.Mini a
+    -> TigerEscap.Estado
+    -> (# Data.Either.Either Data.Text.Internal.Text a,
+          TigerEscap.Estado #)
+  {- Arity: 4,
+     Strictness: <L,U(U,U,U)><L,U><C(S(SL)),1*C1(U(1*U,U(U,U)))><L,U(U,U)>,
+     Inline: [0],
+     Unfolding: (\ @ a
+                   (w :: TigerSymbol.Symbol)
+                   (w1 :: TigerAbs.Escapa)
+                   (w2 :: TigerEscap.Mini a)
+                   (w3 :: TigerEscap.Estado) ->
+                 case (w2
+                         `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <Data.Text.Internal.Text>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <a>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                        <TigerEscap.Estado>_N
+                                        <Data.Functor.Identity.Identity>_R
+                                        <Data.Either.Either Data.Text.Internal.Text a>_N)
+                         (case w3 of wild { TigerEscap.S ds ds1 ->
+                          TigerEscap.S
+                            ds
+                            (case w of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                             TigerEscap.$w$sgo8
+                               @ (GHC.Types.Int, TigerAbs.Escapa)
+                               ww1
+                               ww2
+                               ww3
+                               (ds, w1)
+                               ds1 }) }))
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either Data.Text.Internal.Text a,
+                             TigerEscap.Estado)>_R) of wild { (,) a1 s' ->
+                 case a1 of wild1 {
+                   Data.Either.Left e1 -> (# wild1, s' #)
+                   Data.Either.Right x
+                   -> case w of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                      case w3 of wild2 { TigerEscap.S ds ds1 ->
+                      case TigerEscap.$wpoly_go1
+                             @ (GHC.Types.Int, TigerAbs.Escapa)
+                             ww1
+                             ww2
+                             ww3
+                             ds1 of wild3 {
+                        GHC.Types.False
+                        -> (# wild1,
+                              case s' of wild4 { TigerEscap.S ds2 ds3 ->
+                              TigerEscap.S
+                                ds2
+                                (TigerEscap.$w$sgo13
+                                   @ (GHC.Types.Int, TigerAbs.Escapa)
+                                   ww1
+                                   ww2
+                                   ww3
+                                   ds3) } #)
+                        GHC.Types.True
+                        -> (# wild1,
+                              case s' of wild4 { TigerEscap.S ds2 ds3 ->
+                              TigerEscap.S
+                                ds2
+                                (TigerEscap.$w$sgo8
+                                   @ (GHC.Types.Int, TigerAbs.Escapa)
+                                   ww1
+                                   ww2
+                                   ww3
+                                   (TigerEscap.$wpoly_go13
+                                      @ (GHC.Types.Int, TigerAbs.Escapa)
+                                      ww1
+                                      ww2
+                                      ww3
+                                      ds1)
+                                   ds3) } #) } } } } }) -}
+8c66a1156bd76838c7fe701754061158
+  $w$cshowsPrec ::
+    GHC.Prim.Int# -> GHC.Types.Int -> TigerEscap.Env -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <S,U><L,U(U)><L,1*U>, Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Int#)
+                   (ww1 :: GHC.Types.Int)
+                   (ww2 :: TigerEscap.Env) ->
+                 let {
+                   f :: GHC.Base.String -> GHC.Base.String
+                   = Data.Map.Internal.$w$cshowsPrec
+                       @ Data.Text.Internal.Text
+                       @ (GHC.Types.Int, TigerAbs.Escapa)
+                       Data.Text.Show.$fShowText
+                       TigerEscap.$fEscapatorExceptT_$s$fShow(,)
+                       0#
+                       ww2
+                 } in
+                 case GHC.Prim.>=# ww 11# of lwild {
+                   DEFAULT
+                   -> \ (x :: GHC.Base.String) ->
+                      GHC.CString.unpackAppendCString#
+                        TigerEscap.$fEscapatorExceptT11
+                        (GHC.CString.unpackAppendCString#
+                           TigerEscap.$fEscapatorExceptT10
+                           (case ww1 of ww3 { GHC.Types.I# ww4 ->
+                            case GHC.Show.$wshowSignedInt
+                                   0#
+                                   ww4
+                                   (GHC.Base.++
+                                      @ GHC.Types.Char
+                                      GHC.Show.showCommaSpace1
+                                      (GHC.CString.unpackAppendCString#
+                                         TigerEscap.$fEscapatorExceptT9
+                                         (f (GHC.CString.unpackAppendCString#
+                                               TigerEscap.$fEscapatorExceptT8
+                                               x)))) of ww5 { (#,#) ww6 ww7 ->
+                            GHC.Types.: @ GHC.Types.Char ww6 ww7 } }))
+                   1#
+                   -> \ (x :: GHC.Base.String) ->
+                      GHC.Types.:
+                        @ GHC.Types.Char
+                        GHC.Show.$fShow(,)4
+                        (GHC.CString.unpackAppendCString#
+                           TigerEscap.$fEscapatorExceptT11
+                           (GHC.CString.unpackAppendCString#
+                              TigerEscap.$fEscapatorExceptT10
+                              (case ww1 of ww3 { GHC.Types.I# ww4 ->
+                               case GHC.Show.$wshowSignedInt
+                                      0#
+                                      ww4
+                                      (GHC.Base.++
+                                         @ GHC.Types.Char
+                                         GHC.Show.showCommaSpace1
+                                         (GHC.CString.unpackAppendCString#
+                                            TigerEscap.$fEscapatorExceptT9
+                                            (f (GHC.CString.unpackAppendCString#
+                                                  TigerEscap.$fEscapatorExceptT8
+                                                  (GHC.Types.:
+                                                     @ GHC.Types.Char
+                                                     GHC.Show.$fShow(,)2
+                                                     x))))) of ww5 { (#,#) ww6 ww7 ->
+                               GHC.Types.: @ GHC.Types.Char ww6 ww7 } }))) }) -}
+63ab1716f0a663174351ac155a0c15f5
+  $w$cshowsPrec1 ::
+    GHC.Prim.Int#
+    -> GHC.Types.Int
+    -> TigerEscap.Env
+    -> [GHC.Base.String]
+    -> GHC.Show.ShowS
+  {- Arity: 4, Strictness: <S,U><L,U(U)><L,1*U><L,U>, Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Int#)
+                   (ww1 :: GHC.Types.Int)
+                   (ww2 :: TigerEscap.Env)
+                   (ww3 :: [GHC.Base.String]) ->
+                 let {
+                   f :: GHC.Base.String -> GHC.Base.String
+                   = Data.Map.Internal.$w$cshowsPrec
+                       @ Data.Text.Internal.Text
+                       @ (GHC.Types.Int, TigerAbs.Escapa)
+                       Data.Text.Show.$fShowText
+                       TigerEscap.$fEscapatorExceptT_$s$fShow(,)
+                       0#
+                       ww2
+                 } in
+                 let {
+                   p :: GHC.Show.ShowS {- Arity: 1, Strictness: <L,U> -}
+                   = \ (x :: GHC.Base.String) ->
+                     GHC.CString.unpackAppendCString#
+                       TigerEscap.$fShowSEstado5
+                       (GHC.CString.unpackAppendCString#
+                          TigerEscap.$fShowSEstado4
+                          (case ww1 of ww4 { GHC.Types.I# ww5 ->
+                           case GHC.Show.$wshowSignedInt
+                                  0#
+                                  ww5
+                                  (GHC.Base.++
+                                     @ GHC.Types.Char
+                                     GHC.Show.showCommaSpace1
+                                     (GHC.CString.unpackAppendCString#
+                                        TigerEscap.$fShowSEstado3
+                                        (f (GHC.Base.++
+                                              @ GHC.Types.Char
+                                              GHC.Show.showCommaSpace1
+                                              (GHC.CString.unpackAppendCString#
+                                                 TigerEscap.$fShowSEstado2
+                                                 (let {
+                                                    s :: GHC.Base.String
+                                                    = GHC.CString.unpackAppendCString#
+                                                        TigerEscap.$fEscapatorExceptT8
+                                                        x
+                                                  } in
+                                                  case ww3 of wild {
+                                                    []
+                                                    -> GHC.CString.unpackAppendCString#
+                                                         GHC.Show.showList__4
+                                                         s
+                                                    : x1 xs
+                                                    -> GHC.Types.:
+                                                         @ GHC.Types.Char
+                                                         GHC.Show.showList__3
+                                                         (GHC.Types.:
+                                                            @ GHC.Types.Char
+                                                            GHC.Show.$fShow(,)3
+                                                            (GHC.Show.showLitString
+                                                               x1
+                                                               (GHC.Types.:
+                                                                  @ GHC.Types.Char
+                                                                  GHC.Show.$fShow(,)3
+                                                                  (let {
+                                                                     lvl43 :: [GHC.Types.Char]
+                                                                     = GHC.Types.:
+                                                                         @ GHC.Types.Char
+                                                                         GHC.Show.showList__2
+                                                                         s
+                                                                   } in
+                                                                   letrec {
+                                                                     showl :: [[GHC.Types.Char]]
+                                                                              -> GHC.Base.String
+                                                                       {- Arity: 1,
+                                                                          Strictness: <S,1*U> -}
+                                                                     = \ (ds2 :: [[GHC.Types.Char]]) ->
+                                                                       case ds2 of wild1 {
+                                                                         [] -> lvl43
+                                                                         : y ys
+                                                                         -> GHC.Types.:
+                                                                              @ GHC.Types.Char
+                                                                              GHC.Show.showList__1
+                                                                              (GHC.Types.:
+                                                                                 @ GHC.Types.Char
+                                                                                 GHC.Show.$fShow(,)3
+                                                                                 (GHC.Show.showLitString
+                                                                                    y
+                                                                                    (GHC.Types.:
+                                                                                       @ GHC.Types.Char
+                                                                                       GHC.Show.$fShow(,)3
+                                                                                       (showl
+                                                                                          ys)))) }
+                                                                   } in
+                                                                   showl
+                                                                     xs)))) })))))) of ww6 { (#,#) ww7 ww8 ->
+                           GHC.Types.: @ GHC.Types.Char ww7 ww8 } }))
+                 } in
+                 case GHC.Prim.>=# ww 11# of lwild {
+                   DEFAULT -> p
+                   1#
+                   -> \ (x :: GHC.Base.String) ->
+                      GHC.Types.:
+                        @ GHC.Types.Char
+                        GHC.Show.$fShow(,)4
+                        (p (GHC.Types.: @ GHC.Types.Char GHC.Show.$fShow(,)2 x)) }) -}
+b49ca21db80aacc080839239511a1a49
+  $w$sgo13 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+  {- Arity: 4, Strictness: <L,U><L,U><L,U><S,1*U>, Inline: [0] -}
+5afd4e72911011a03dc6010cf826996e
+  $w$sgo8 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a1
+  {- Arity: 5, Strictness: <L,U><L,U><L,U><S,1*U><S,1*U>,
+     Inline: [0] -}
+47369ccd4e16c0397c72ec5fec53da51
+  $w$stravF ::
+    TigerSymbol.Symbol
+    -> [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)]
+    -> GHC.Base.Maybe TigerSymbol.Symbol
+    -> TigerAbs.Exp
+    -> TigerAbs.Pos
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         (TigerSymbol.Symbol,
+          [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)],
+          GHC.Base.Maybe TigerSymbol.Symbol, TigerAbs.Exp, TigerAbs.Pos)
+  {- Arity: 5, Strictness: <L,U><L,U><L,U><L,1*U><L,U>,
+     Inline: [0] -}
+4d621283a4c9e7a956c30c5329c62ec6
+  $wpoly_go1 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a
+    -> GHC.Types.Bool
+  {- Arity: 4, HasNoCafRefs, Strictness: <L,U><L,U><L,U><S,1*U>,
+     Inline: [0] -}
+1f12e39911bccfb329f1261ba1abb4ad
+  $wpoly_go13 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a
+    -> a
+  {- Arity: 4, Strictness: <S,U><S,U><S,U><S,1*U>, Inline: [0] -}
+1970ec16dc0f5b00d8246adc9503dbb8
+  $wpoly_go2 ::
+    GHC.Prim.ByteArray#
+    -> GHC.Prim.Int#
+    -> GHC.Prim.Int#
+    -> Data.Map.Internal.Map TigerSymbol.Symbol a
+    -> GHC.Base.Maybe a
+  {- Arity: 4, HasNoCafRefs, Strictness: <L,U><L,U><L,U><S,1*U>,
+     Inline: [0] -}
+b8d7af4ea865e9b0e44a1d98138b7826
+  $wtravF ::
+    TigerEscap.Escapator m =>
+    TigerSymbol.Symbol
+    -> [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)]
+    -> GHC.Base.Maybe TigerSymbol.Symbol
+    -> TigerAbs.Exp
+    -> TigerAbs.Pos
+    -> m (TigerSymbol.Symbol,
+          [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)],
+          GHC.Base.Maybe TigerSymbol.Symbol, TigerAbs.Exp, TigerAbs.Pos)
+  {- Arity: 6,
+     Strictness: <S(LS(LC(C(S))LLL)LLLLLLL),U(U(A,C(C1(U)),C(U),C(U)),U(U(A,C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U,C(U),A,A,C(C1(U)),C(U),C(C1(C1(U))))><L,U><L,U><L,U><L,1*U><L,U>,
+     Inline: [0] -}
+b6c23e6d6aee7632460ffd0d306a3f91
+  type Dat = (GHC.Types.Int, TigerAbs.Escapa)
+2a459532ccd0446ddee34bd49e8f11f7
+  type Depth = GHC.Types.Int
+2463d1625db1effaf431d59c9782bb89
+  type Env = Data.Map.Internal.Map TigerSymbol.Symbol TigerEscap.Dat
+38d087fe5a06f152302c0ea2952b8cde
+  class (TigerErrores.Demon m, GHC.Base.Monad m) =>
+        Escapator (m :: * -> *) where
+    depth :: m TigerEscap.Depth
+    up :: m a -> m a
+    printEnv :: m ()
+    raise :: TigerSymbol.Symbol -> m a
+    update :: TigerSymbol.Symbol -> TigerAbs.Escapa -> m ()
+    lookup :: TigerSymbol.Symbol
+              -> m (GHC.Base.Maybe (GHC.Types.Int, TigerAbs.Escapa))
+    insert :: TigerSymbol.Symbol -> TigerAbs.Escapa -> m a -> m a
+    {-# MINIMAL depth, up, printEnv, update, lookup, insert #-}
+7a62ae3e922aa37990beec226dcb044f
+  data Estado = S {lvl :: GHC.Types.Int, env :: TigerEscap.Env}
+7a62ae3e922aa37990beec226dcb044f
+  type Mini =
+    Control.Monad.Trans.Except.ExceptT
+      TigerSymbol.Symbol
+      (Control.Monad.Trans.State.Lazy.State TigerEscap.Estado)
+    :: * -> *
+9391b587ee6e7783614f3f09b568e687
+  data SEstado
+    = Step {lvlP :: GHC.Types.Int,
+            envP :: TigerEscap.Env,
+            msgP :: [GHC.Base.String]}
+eb73570aa0f1e6caa484551f0222ced2
+  addMsg ::
+    TigerEscap.SEstado -> GHC.Base.String -> TigerEscap.SEstado
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U(U,U,U)><L,U>m,
+     Unfolding: InlineRule (2, True, False)
+                (\ (e :: TigerEscap.SEstado) (msg :: GHC.Base.String) ->
+                 case e of wild { TigerEscap.Step ds ds1 ds2 ->
+                 TigerEscap.Step
+                   ds
+                   ds1
+                   (GHC.Types.: @ GHC.Base.String msg ds2) }) -}
+2b135fb5bde46fc9d0dd55c23c818a5a
+  bulkInsert ::
+    TigerEscap.Escapator m =>
+    [(TigerSymbol.Symbol, TigerAbs.Escapa)] -> m a -> m a
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <L,U(A,A,A,A,A,A,A,A,C(C1(C1(U))))><S,1*U><L,U>,
+     Unfolding: (\ @ m :: * -> *
+                   @ a
+                   ($dEscapator :: TigerEscap.Escapator m)
+                   (xs :: [(TigerSymbol.Symbol, TigerAbs.Escapa)])
+                   (m1 :: m a) ->
+                 letrec {
+                   go5 :: [(TigerSymbol.Symbol, TigerAbs.Escapa)] -> m a
+                     {- Arity: 1, Strictness: <S,1*U> -}
+                   = \ (ds :: [(TigerSymbol.Symbol, TigerAbs.Escapa)]) ->
+                     case ds of wild {
+                       [] -> m1
+                       : y ys
+                       -> case y of wild1 { (,) name esc ->
+                          TigerEscap.insert @ m $dEscapator @ a name esc (go5 ys) } }
+                 } in
+                 go5 xs) -}
+baf7d7c51de72f9962cbad21e9142359
+  calcularEEsc ::
+    TigerAbs.Exp -> Data.Either.Either TigerSymbol.Symbol TigerAbs.Exp
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (e :: TigerAbs.Exp) ->
+                 case ((TigerEscap.calcularEEsc_$stravExp e)
+                         `cast`
+                       (Control.Monad.Trans.Except.N:ExceptT[0]
+                            <TigerSymbol.Symbol>_N
+                            <Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity>_R
+                            <TigerAbs.Exp>_N ; Control.Monad.Trans.State.Lazy.N:StateT[0]
+                                                   <TigerEscap.Estado>_N
+                                                   <Data.Functor.Identity.Identity>_R
+                                                   <Data.Either.Either
+                                                      TigerSymbol.Symbol TigerAbs.Exp>_N)
+                         TigerEscap.initSt)
+                        `cast`
+                      (Data.Functor.Identity.N:Identity[0]
+                           <(Data.Either.Either TigerSymbol.Symbol TigerAbs.Exp,
+                             TigerEscap.Estado)>_R) of wild { (,) x ds1 ->
+                 x }) -}
+e06a3227f71deaf112c208dff0eedf90
+  calcularEEsc_$stravExp ::
+    TigerAbs.Exp
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         TigerAbs.Exp
+  {- Arity: 1, Strictness: <S,1*U> -}
+7a62ae3e922aa37990beec226dcb044f
+  env :: TigerEscap.Estado -> TigerEscap.Env
+  RecSel Left TigerEscap.Estado
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LS),1*U(A,1*U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerEscap.Estado) ->
+                 case ds of wild { TigerEscap.S ds1 ds2 -> ds2 }) -}
+9391b587ee6e7783614f3f09b568e687
+  envP :: TigerEscap.SEstado -> TigerEscap.Env
+  RecSel Left TigerEscap.SEstado
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LSL),1*U(A,1*U,A)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerEscap.SEstado) ->
+                 case ds of wild { TigerEscap.Step ds1 ds2 ds3 -> ds2 }) -}
+0404da5789a26922870c4a1c20d8a4dc
+  initSt :: TigerEscap.Estado
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (TigerEscap.S
+                   TigerEscap.initSt1
+                   (Data.Map.Internal.Tip @ TigerSymbol.Symbol @ TigerEscap.Dat)) -}
+0bdb8bd08d1435e5b8045aa2ac059d28
+  initSt1 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 1#) -}
+bd206bd25a33023e57d6f3dc2f3152d4
+  lookUpLvl ::
+    TigerEscap.Escapator m => TigerSymbol.Symbol -> m GHC.Types.Int
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(LS(LC(C(S))LLL)LLLLLLL),U(1*U(A,A,A,1*C1(U)),1*U(A,1*C1(C1(U)),A,C(U),A),A,A,A,A,A,1*C1(U),A)><L,U>,
+     Unfolding: (\ @ m :: * -> *
+                   ($dEscapator :: TigerEscap.Escapator m)
+                   (eta5 :: TigerSymbol.Symbol) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad m
+                   = TigerEscap.$p2Escapator @ m $dEscapator
+                 } in
+                 GHC.Base.>>=
+                   @ m
+                   $dMonad
+                   @ (GHC.Base.Maybe (GHC.Types.Int, TigerAbs.Escapa))
+                   @ GHC.Types.Int
+                   (TigerEscap.lookup @ m $dEscapator eta5)
+                   (let {
+                      n :: m GHC.Types.Int
+                      = TigerErrores.notfound
+                          @ m
+                          (TigerEscap.$p1Escapator @ m $dEscapator)
+                          @ GHC.Types.Int
+                          eta5
+                    } in
+                    \ (ds1 :: GHC.Base.Maybe (GHC.Types.Int, TigerAbs.Escapa)) ->
+                    case ds1 of wild {
+                      GHC.Base.Nothing -> n
+                      GHC.Base.Just x
+                      -> GHC.Base.return
+                           @ m
+                           $dMonad
+                           @ GHC.Types.Int
+                           (case x of wild1 { (,) x1 ds2 -> x1 }) })) -}
+fb8b73e8b2c41749529f1b9d6edc1e1c
+  lookUpLvl_$slookUpLvl ::
+    TigerSymbol.Symbol
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         GHC.Types.Int
+  {- Arity: 1, Strictness: <L,U(U,U,U)>,
+     Unfolding: (\ (eta5 :: TigerSymbol.Symbol) ->
+                 let {
+                   x :: TigerSymbol.Symbol
+                   = TigerSymbol.addStr TigerEscap.$fDemonExceptT_g4 eta5
+                 } in
+                 let {
+                   lvl36 :: Data.Either.Either TigerSymbol.Symbol GHC.Types.Int
+                   = Data.Either.Left @ TigerSymbol.Symbol @ GHC.Types.Int x
+                 } in
+                 (\ (s1 :: TigerEscap.Estado) ->
+                  case eta5 of ww { Data.Text.Internal.Text ww1 ww2 ww3 ->
+                  case s1 of wild { TigerEscap.S ds ds1 ->
+                  case TigerEscap.$wpoly_go2
+                         @ (GHC.Types.Int, TigerAbs.Escapa)
+                         ww1
+                         ww2
+                         ww3
+                         ds1 of wild1 {
+                    GHC.Base.Nothing
+                    -> (lvl36, wild)
+                         `cast`
+                       (Sym (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either TigerSymbol.Symbol GHC.Types.Int,
+                                   TigerEscap.Estado)>_R))
+                    GHC.Base.Just x1
+                    -> (Data.Either.Right
+                          @ Data.Text.Internal.Text
+                          @ GHC.Types.Int
+                          (case x1 of wild2 { (,) x2 ds2 -> x2 }),
+                        wild)
+                         `cast`
+                       (Sym (Data.Functor.Identity.N:Identity[0]
+                                 <(Data.Either.Either Data.Text.Internal.Text GHC.Types.Int,
+                                   TigerEscap.Estado)>_R)) } } })
+                   `cast`
+                 (Sym (Control.Monad.Trans.State.Lazy.N:StateT[0]
+                           <TigerEscap.Estado>_N
+                           <Data.Functor.Identity.Identity>_R
+                           <Data.Either.Either
+                              Data.Text.Internal.Text
+                              GHC.Types.Int>_N) ; Sym (Control.Monad.Trans.Except.N:ExceptT[0]
+                                                           <Data.Text.Internal.Text>_N
+                                                           <Control.Monad.Trans.State.Lazy.StateT
+                                                              TigerEscap.Estado
+                                                              Data.Functor.Identity.Identity>_R
+                                                           <GHC.Types.Int>_N))) -}
+7a62ae3e922aa37990beec226dcb044f
+  lvl :: TigerEscap.Estado -> GHC.Types.Int
+  RecSel Left TigerEscap.Estado
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(SL),1*U(1*U(U),A)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerEscap.Estado) ->
+                 case ds of wild { TigerEscap.S ds1 ds2 -> ds1 }) -}
+9391b587ee6e7783614f3f09b568e687
+  lvlP :: TigerEscap.SEstado -> GHC.Types.Int
+  RecSel Left TigerEscap.SEstado
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(SLL),1*U(1*U(U),A,A)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerEscap.SEstado) ->
+                 case ds of wild { TigerEscap.Step ds1 ds2 ds3 -> ds1 }) -}
+9391b587ee6e7783614f3f09b568e687
+  msgP :: TigerEscap.SEstado -> [GHC.Base.String]
+  RecSel Left TigerEscap.SEstado
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LLS),1*U(A,A,1*U)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerEscap.SEstado) ->
+                 case ds of wild { TigerEscap.Step ds1 ds2 ds3 -> ds3 }) -}
+f56bee5ceed7b247e99cb49c04253dff
+  travDecs :: TigerEscap.Escapator m => [TigerAbs.Dec] -> m a -> m a
+  {- Arity: 3,
+     Strictness: <L,U(U(A,C(C1(U)),C(U),C(U)),U(U(A,C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U,C(U),A,A,C(C1(U)),C(U),C(C1(C1(U))))><S,1*U><L,1*U> -}
+af64af256a5b583a1c8f83203dd3e8ce
+  travDecs_$stravDecs ::
+    [TigerAbs.Dec]
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         a
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         a
+  {- Arity: 2, Strictness: <S,1*U><L,1*U> -}
+ce2aa823bf0433212f1007acc78dfd23
+  travExp :: TigerEscap.Escapator m => TigerAbs.Exp -> m TigerAbs.Exp
+  {- Arity: 2,
+     Strictness: <S(LSLLLLLLL),U(U(A,C(C1(U)),C(U),C(U)),U(U(A,C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U,C(U),A,A,C(C1(U)),C(U),C(C1(C1(U))))><S,1*U> -}
+a841fe1a5409a64b4774333e5ed15233
+  travF ::
+    TigerEscap.Escapator m =>
+    (TigerSymbol.Symbol,
+     [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)],
+     GHC.Base.Maybe TigerSymbol.Symbol, TigerAbs.Exp, TigerAbs.Pos)
+    -> m (TigerSymbol.Symbol,
+          [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)],
+          GHC.Base.Maybe TigerSymbol.Symbol, TigerAbs.Exp, TigerAbs.Pos)
+  {- Arity: 2,
+     Strictness: <S(LS(LC(C(S))LLL)LLLLLLL),U(U(A,C(C1(U)),C(U),C(U)),U(U(A,C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U,C(U),A,A,C(C1(U)),C(U),C(C1(C1(U))))><S,1*U(U,U,U,1*U,U)>,
+     Inline: [0],
+     Unfolding: InlineRule (2, True, False)
+                (\ @ m :: * -> *
+                   (w :: TigerEscap.Escapator m)
+                   (w1 :: (TigerSymbol.Symbol,
+                           [(TigerSymbol.Symbol, TigerAbs.Escapa, TigerAbs.Ty)],
+                           GHC.Base.Maybe TigerSymbol.Symbol, TigerAbs.Exp, TigerAbs.Pos)) ->
+                 case w1 of ww { (,,,,) ww1 ww2 ww3 ww4 ww5 ->
+                 TigerEscap.$wtravF @ m w ww1 ww2 ww3 ww4 ww5 }) -}
+1bee7a9baec08065d9c9631154da7cc0
+  travVar :: TigerEscap.Escapator m => TigerAbs.Var -> m TigerAbs.Var
+  {- Arity: 2,
+     Strictness: <S(LS(LC(C(S))LLL)LLLLLLL),U(U(A,C(C1(U)),C(U),C(U)),U(U(A,C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U,C(U),A,A,C(C1(U)),C(U),C(C1(C1(U))))><S,1*U> -}
+4f5964da351980912e3a90f3ad612215
+  travVar_$stravVar ::
+    TigerAbs.Var
+    -> Control.Monad.Trans.Except.ExceptT
+         TigerSymbol.Symbol
+         (Control.Monad.Trans.State.Lazy.StateT
+            TigerEscap.Estado Data.Functor.Identity.Identity)
+         TigerAbs.Var
+  {- Arity: 1, Strictness: <S,1*U> -}
+instance TigerErrores.Demon [Control.Monad.Trans.Except.ExceptT]
+  = TigerEscap.$fDemonExceptT
+instance TigerEscap.Escapator [Control.Monad.Trans.Except.ExceptT]
+  = TigerEscap.$fEscapatorExceptT
+instance GHC.Show.Show [TigerEscap.Estado]
+  = TigerEscap.$fShowEstado
+instance GHC.Show.Show [TigerEscap.SEstado]
+  = TigerEscap.$fShowSEstado
+"SPEC lookUpLvl @ (ExceptT Symbol (StateT Estado Identity))" forall ($dEscapator :: TigerEscap.Escapator
+                                                                                      (Control.Monad.Trans.Except.ExceptT
+                                                                                         TigerSymbol.Symbol
+                                                                                         (Control.Monad.Trans.State.Lazy.StateT
+                                                                                            TigerEscap.Estado
+                                                                                            Data.Functor.Identity.Identity)))
+  TigerEscap.lookUpLvl @ (Control.Monad.Trans.Except.ExceptT
+                            TigerSymbol.Symbol
+                            (Control.Monad.Trans.State.Lazy.StateT
+                               TigerEscap.Estado Data.Functor.Identity.Identity))
+                       $dEscapator
+  = TigerEscap.lookUpLvl_$slookUpLvl
+"SPEC travDecs @ (ExceptT Symbol (StateT Estado Identity)) _" forall @ a
+                                                                     ($dEscapator :: TigerEscap.Escapator
+                                                                                       (Control.Monad.Trans.Except.ExceptT
+                                                                                          TigerSymbol.Symbol
+                                                                                          (Control.Monad.Trans.State.Lazy.StateT
+                                                                                             TigerEscap.Estado
+                                                                                             Data.Functor.Identity.Identity)))
+  TigerEscap.travDecs @ (Control.Monad.Trans.Except.ExceptT
+                           TigerSymbol.Symbol
+                           (Control.Monad.Trans.State.Lazy.StateT
+                              TigerEscap.Estado Data.Functor.Identity.Identity))
+                      @ a
+                      $dEscapator
+  = TigerEscap.travDecs_$stravDecs @ a
+"SPEC travExp @ (ExceptT Symbol (StateT Estado Identity))" forall ($dEscapator :: TigerEscap.Escapator
+                                                                                    (Control.Monad.Trans.Except.ExceptT
+                                                                                       TigerSymbol.Symbol
+                                                                                       (Control.Monad.Trans.State.Lazy.StateT
+                                                                                          TigerEscap.Estado
+                                                                                          Data.Functor.Identity.Identity)))
+  TigerEscap.travExp @ (Control.Monad.Trans.Except.ExceptT
+                          TigerSymbol.Symbol
+                          (Control.Monad.Trans.State.Lazy.StateT
+                             TigerEscap.Estado Data.Functor.Identity.Identity))
+                     $dEscapator
+  = TigerEscap.calcularEEsc_$stravExp
+"SPEC travVar @ (ExceptT Symbol (StateT Estado Identity))" forall ($dEscapator :: TigerEscap.Escapator
+                                                                                    (Control.Monad.Trans.Except.ExceptT
+                                                                                       TigerSymbol.Symbol
+                                                                                       (Control.Monad.Trans.State.Lazy.StateT
+                                                                                          TigerEscap.Estado
+                                                                                          Data.Functor.Identity.Identity)))
+  TigerEscap.travVar @ (Control.Monad.Trans.Except.ExceptT
+                          TigerSymbol.Symbol
+                          (Control.Monad.Trans.State.Lazy.StateT
+                             TigerEscap.Estado Data.Functor.Identity.Identity))
+                     $dEscapator
+  = TigerEscap.travVar_$stravVar
+"SPEC/TigerEscap $fApplicativeExceptT @ (StateT Estado Identity) _" forall @ e
+                                                                           (v1 :: GHC.Base.Monad
+                                                                                    (Control.Monad.Trans.State.Lazy.StateT
+                                                                                       TigerEscap.Estado
+                                                                                       Data.Functor.Identity.Identity))
+                                                                           (v :: GHC.Base.Functor
+                                                                                   (Control.Monad.Trans.State.Lazy.StateT
+                                                                                      TigerEscap.Estado
+                                                                                      Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fApplicativeExceptT @ (Control.Monad.Trans.State.Lazy.StateT
+                                                       TigerEscap.Estado
+                                                       Data.Functor.Identity.Identity)
+                                                  @ e
+                                                  v
+                                                  v1
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT @ e
+"SPEC/TigerEscap $fApplicativeExceptT_$c*> @ (StateT
+                                               Estado Identity) _" forall @ e
+                                                                                                                               ($dMonad :: GHC.Base.Monad
+                                                                                                                                             (Control.Monad.Trans.State.Lazy.StateT
+                                                                                                                                                TigerEscap.Estado
+                                                                                                                                                Data.Functor.Identity.Identity))
+                                                                                                                               ($dFunctor :: GHC.Base.Functor
+                                                                                                                                               (Control.Monad.Trans.State.Lazy.StateT
+                                                                                                                                                  TigerEscap.Estado
+                                                                                                                                                  Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fApplicativeExceptT_$c*> @ (Control.Monad.Trans.State.Lazy.StateT
+                                                            TigerEscap.Estado
+                                                            Data.Functor.Identity.Identity)
+                                                       @ e
+                                                       $dFunctor
+                                                       $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT_$c*> @ e
+"SPEC/TigerEscap $fApplicativeExceptT_$cpure @ (StateT
+                                                 Estado Identity) _" forall @ e
+                                                                                                                                   ($dMonad :: GHC.Base.Monad
+                                                                                                                                                 (Control.Monad.Trans.State.Lazy.StateT
+                                                                                                                                                    TigerEscap.Estado
+                                                                                                                                                    Data.Functor.Identity.Identity))
+                                                                                                                                   ($dFunctor :: GHC.Base.Functor
+                                                                                                                                                   (Control.Monad.Trans.State.Lazy.StateT
+                                                                                                                                                      TigerEscap.Estado
+                                                                                                                                                      Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fApplicativeExceptT_$cpure @ (Control.Monad.Trans.State.Lazy.StateT
+                                                              TigerEscap.Estado
+                                                              Data.Functor.Identity.Identity)
+                                                         @ e
+                                                         $dFunctor
+                                                         $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeExceptT_$cpure @ e
+"SPEC/TigerEscap $fApplicativeStateT @ Identity _" [orphan] forall @ s
+                                                                   (v1 :: GHC.Base.Monad
+                                                                            Data.Functor.Identity.Identity)
+                                                                   (v :: GHC.Base.Functor
+                                                                           Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fApplicativeStateT @ Data.Functor.Identity.Identity
+                                                     @ s
+                                                     v
+                                                     v1
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT @ s
+"SPEC/TigerEscap $fApplicativeStateT_$c*> @ Identity _" [orphan] forall @ s
+                                                                        ($dMonad :: GHC.Base.Monad
+                                                                                      Data.Functor.Identity.Identity)
+                                                                        ($dFunctor :: GHC.Base.Functor
+                                                                                        Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fApplicativeStateT_$c*> @ Data.Functor.Identity.Identity
+                                                          @ s
+                                                          $dFunctor
+                                                          $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$c*> @ s
+"SPEC/TigerEscap $fApplicativeStateT_$c<*> @ Identity _" [orphan] forall @ s
+                                                                         ($dMonad :: GHC.Base.Monad
+                                                                                       Data.Functor.Identity.Identity)
+                                                                         ($dFunctor :: GHC.Base.Functor
+                                                                                         Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fApplicativeStateT_$c<*> @ Data.Functor.Identity.Identity
+                                                           @ s
+                                                           $dFunctor
+                                                           $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$c<*> @ s
+"SPEC/TigerEscap $fApplicativeStateT_$cpure @ Identity _" [orphan] forall @ s
+                                                                          ($dMonad :: GHC.Base.Monad
+                                                                                        Data.Functor.Identity.Identity)
+                                                                          ($dFunctor :: GHC.Base.Functor
+                                                                                          Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fApplicativeStateT_$cpure @ Data.Functor.Identity.Identity
+                                                            @ s
+                                                            $dFunctor
+                                                            $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fApplicativeStateT_$cpure @ s
+"SPEC/TigerEscap $fFunctorExceptT @ (StateT Estado Identity) _" forall @ e
+                                                                       (v :: GHC.Base.Functor
+                                                                               (Control.Monad.Trans.State.Lazy.StateT
+                                                                                  TigerEscap.Estado
+                                                                                  Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fFunctorExceptT @ (Control.Monad.Trans.State.Lazy.StateT
+                                                   TigerEscap.Estado Data.Functor.Identity.Identity)
+                                              @ e
+                                              v
+  = TigerEscap.$fEscapatorExceptT_$s$fFunctorExceptT @ e
+"SPEC/TigerEscap $fFunctorStateT @ Identity _" [orphan] forall @ s
+                                                               (v :: GHC.Base.Functor
+                                                                       Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fFunctorStateT @ Data.Functor.Identity.Identity
+                                                 @ s
+                                                 v
+  = TigerEscap.$fEscapatorExceptT_$s$fFunctorStateT @ s
+"SPEC/TigerEscap $fMonadExceptT @ (StateT Estado Identity) _" forall @ e
+                                                                     (v :: GHC.Base.Monad
+                                                                             (Control.Monad.Trans.State.Lazy.StateT
+                                                                                TigerEscap.Estado
+                                                                                Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fMonadExceptT @ (Control.Monad.Trans.State.Lazy.StateT
+                                                 TigerEscap.Estado Data.Functor.Identity.Identity)
+                                            @ e
+                                            v
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT @ e
+"SPEC/TigerEscap $fMonadExceptT_$c>> @ (StateT Estado Identity) _" forall @ e
+                                                                          ($dMonad :: GHC.Base.Monad
+                                                                                        (Control.Monad.Trans.State.Lazy.StateT
+                                                                                           TigerEscap.Estado
+                                                                                           Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fMonadExceptT_$c>> @ (Control.Monad.Trans.State.Lazy.StateT
+                                                      TigerEscap.Estado
+                                                      Data.Functor.Identity.Identity)
+                                                 @ e
+                                                 $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT_$c>> @ e
+"SPEC/TigerEscap $fMonadExceptT_$c>>= @ (StateT Estado Identity) _" forall @ e
+                                                                           ($dMonad :: GHC.Base.Monad
+                                                                                         (Control.Monad.Trans.State.Lazy.StateT
+                                                                                            TigerEscap.Estado
+                                                                                            Data.Functor.Identity.Identity))
+  Control.Monad.Trans.Except.$fMonadExceptT_$c>>= @ (Control.Monad.Trans.State.Lazy.StateT
+                                                       TigerEscap.Estado
+                                                       Data.Functor.Identity.Identity)
+                                                  @ e
+                                                  $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadExceptT_$c>>= @ e
+"SPEC/TigerEscap $fMonadStateT @ Identity _" [orphan] forall @ s
+                                                             (v :: GHC.Base.Monad
+                                                                     Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fMonadStateT @ Data.Functor.Identity.Identity
+                                               @ s
+                                               v
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadStateT @ s
+"SPEC/TigerEscap $fMonadStateT_$c>> @ Identity _" [orphan] forall @ s
+                                                                  ($dMonad :: GHC.Base.Monad
+                                                                                Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fMonadStateT_$c>> @ Data.Functor.Identity.Identity
+                                                    @ s
+                                                    $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$c>> @ s
+"SPEC/TigerEscap $fMonadStateT_$c>>= @ Identity _" [orphan] forall @ s
+                                                                   ($dMonad :: GHC.Base.Monad
+                                                                                 Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fMonadStateT_$c>>= @ Data.Functor.Identity.Identity
+                                                     @ s
+                                                     $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$c>>= @ s
+"SPEC/TigerEscap $fMonadStateT_$cfail @ Identity _" [orphan] forall @ s
+                                                                    ($dMonad :: GHC.Base.Monad
+                                                                                  Data.Functor.Identity.Identity)
+  Control.Monad.Trans.State.Lazy.$fMonadStateT_$cfail @ Data.Functor.Identity.Identity
+                                                      @ s
+                                                      $dMonad
+  = TigerEscap.$fEscapatorExceptT_$s$fMonadStateT_$cfail @ s
+"SPEC/TigerEscap $fShow(,) @ Int @ Escapa" [orphan] forall (v1 :: GHC.Show.Show
+                                                                    TigerAbs.Escapa)
+                                                           (v :: GHC.Show.Show GHC.Types.Int)
+  GHC.Show.$fShow(,) @ GHC.Types.Int @ TigerAbs.Escapa v v1
+  = TigerEscap.$fEscapatorExceptT_$s$fShow(,)
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: none
+require own pkg trusted: False
+

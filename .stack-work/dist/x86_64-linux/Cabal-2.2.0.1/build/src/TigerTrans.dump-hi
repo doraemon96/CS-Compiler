@@ -1,0 +1,2713 @@
+
+==================== FINAL INTERFACE ====================
+2019-03-18 19:26:20.819288815 UTC
+
+interface HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerTrans 8043
+  interface hash: f8106250cc33aef282d77a2f86309e62
+  ABI hash: 92c598f6370c1400fae072c188db0cf7
+  export-list hash: dff05df5190e1183aa89a1b334922c81
+  orphan hash: 693e9af84d3dfcc71e640e005bdc5e2e
+  flag hash: 78ee77044def946ef4a3f1b39c5af7fd
+  opt_hash: 14e536840aca4e889cad654e6f9b79c1
+  hpc_hash: 93b885adfe0da089cdf634904fd59f71
+  sig of: Nothing
+  used TH splices: False
+  where
+exports:
+  TigerTrans.getFrame
+  TigerTrans.getNlvl
+  TigerTrans.getParent
+  TigerTrans.newLevel
+  TigerTrans.outermost
+  TigerTrans.seq
+  TigerTrans.setFrame
+  TigerTrans.unCx
+  TigerTrans.unEx
+  TigerTrans.unNx
+  TigerTrans.BExp{TigerTrans.Cx TigerTrans.Ex TigerTrans.Nx}
+  TigerTrans.Externa{TigerTrans.Propia TigerTrans.Runtime}
+  TigerTrans.IrGen{TigerTrans.arrayExp TigerTrans.assignExp TigerTrans.binOpIntExp TigerTrans.binOpIntRelExp TigerTrans.binOpPtrExp TigerTrans.binOpStrExp TigerTrans.breakExp TigerTrans.callExp TigerTrans.envFunctionDec TigerTrans.fieldVar TigerTrans.forExp TigerTrans.functionDec TigerTrans.ifThenElseExp TigerTrans.ifThenElseExpUnit TigerTrans.ifThenExp TigerTrans.intExp TigerTrans.letExp TigerTrans.nilExp TigerTrans.posWhileforExp TigerTrans.preWhileforExp TigerTrans.procEntryExit TigerTrans.recordExp TigerTrans.seqExp TigerTrans.simpleVar TigerTrans.stringExp TigerTrans.subscriptVar TigerTrans.unitExp TigerTrans.varDec TigerTrans.whileExp}
+  TigerTrans.IsProc{TigerTrans.IsFun TigerTrans.IsProc}
+  TigerTrans.Level
+  TigerTrans.LevelI{TigerTrans.MkLI getFrame' getNlvl'}
+  TigerTrans.MemM{TigerTrans.allocArg TigerTrans.allocLocal TigerTrans.downLvl TigerTrans.getActualLevel TigerTrans.getFrags TigerTrans.popLevel TigerTrans.popSalida TigerTrans.pushFrag TigerTrans.pushLevel TigerTrans.pushSalida TigerTrans.topLevel TigerTrans.topSalida TigerTrans.upLvl}
+  TigerTrans.TransFrag
+module dependencies: State TigerAbs TigerErrores TigerFrame
+                     TigerSymbol TigerTemp TigerTree TigerUnique
+package dependencies: array-0.5.2.0 base-4.11.1.0 binary-0.8.5.1
+                      bytestring-0.10.8.2 containers-0.5.11.0 deepseq-1.4.3.0
+                      ghc-prim-0.5.2.0 integer-gmp-1.0.2.0 mtl-2.2.2 syb-0.7 text-1.2.3.0
+                      transformers-0.5.5.0
+orphans: syb-0.7:Data.Generics.Instances
+         HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY:TigerUnique
+         transformers-0.5.5.0:Control.Monad.Trans.Error
+         text-1.2.3.0:Data.Text binary-0.8.5.1:Data.Binary.Generic
+         bytestring-0.10.8.2:Data.ByteString.Builder
+         text-1.2.3.0:Data.Text.Show base-4.11.1.0:GHC.Float
+         base-4.11.1.0:GHC.Base
+family instance modules: base-4.11.1.0:Control.Applicative
+                         base-4.11.1.0:Data.Complex base-4.11.1.0:Data.Functor.Compose
+                         base-4.11.1.0:Data.Functor.Const
+                         base-4.11.1.0:Data.Functor.Identity
+                         base-4.11.1.0:Data.Functor.Product base-4.11.1.0:Data.Functor.Sum
+                         base-4.11.1.0:Data.Monoid base-4.11.1.0:Data.Semigroup
+                         base-4.11.1.0:Data.Semigroup.Internal base-4.11.1.0:Data.Version
+                         base-4.11.1.0:Data.Void base-4.11.1.0:GHC.Exts
+                         base-4.11.1.0:GHC.Generics base-4.11.1.0:GHC.IO.Exception
+                         containers-0.5.11.0:Data.IntMap.Internal
+                         containers-0.5.11.0:Data.IntSet.Internal
+                         containers-0.5.11.0:Data.Map.Internal
+                         containers-0.5.11.0:Data.Sequence.Internal
+                         containers-0.5.11.0:Data.Set.Internal containers-0.5.11.0:Data.Tree
+                         text-1.2.3.0:Data.Text
+import  -/  TigerAbs 1d186fe051144908f0c50c683d8be41b
+  exports: 66e1533f82207906d70ea37c53c3d5c6
+  DivideOp 82ac95724b70b2ff5753e7ccf0ea2d4c
+  EqOp 69c34fb6a146bfd376d32ecf3c5e4255
+  Escapa c09003e06c2f0977e7facdcf1c6e85a6
+  GeOp 9665b815308596c90ac99172b8860e2d
+  GtOp 0fd8b1b5d0427f4cbd7b85986da01905
+  LeOp 296b86b4aa90ebb45d606aafdc3d209b
+  LtOp 7fb46a358e9cd1f152dcb68bd2eab6dd
+  MinusOp 9a7f539da5ef283ef631b6a680f1ee91
+  NeqOp f2dd6c2c0ba1ba61c34af9a009a4463d
+  Oper c4bd05e182c6ba1bf57dd81e4b54a10d
+  PlusOp 2446ba7944645c0fa62ec388edcca087
+  TimesOp 3d4a0500175c20ae00301f98802c70fe
+import  -/  TigerErrores ff875f1a83e48c3ca0916553f36b96ae
+  exports: 2ac7c458f6129b5b6f9bf98501d600db
+  Demon 5687eb1b772ba3165ee7e2a25282860a
+  internal 5ac2ce9ed3f2553b79c4cfe77b3712f9
+import  -/  TigerFrame b92d5f1cc4aa8a798b6eadecc5da9c65
+  exports: 133bb83980b11d630d101a96995648a0
+  AString 2defa1245c1ef00078a2c11f831f1da7
+  Access 402c4e2384b2b19d70426842a571c2c2
+  Frag 56100333360f19166abd501d364a04de
+  Frame 69d2335ca6f6c900a4407bb11f38dd8d
+  Proc 8343a6125711059363ea811f47d1f8f7
+  allocArg 3826f31771e5b740839be0f399ccd08a
+  allocLocal a72795454f49028809d576612431ecad
+  auxexp 5043c9113137ee2c548077bad51504c8
+  exp 33ea2e00e86c77ee86f4f49f08e7b4b5
+  externalCall 232594bd38aef2b0a1f87e9b2767201a
+  fp 6f68cbff88ed60a8019edb43ebd0cb9a
+  newFrame 9f1c40a38f7066c477e08ac07cfddc48
+  rv 725c6162bff212ff493253c939adc8d6
+  wSz bc2ea35a99c5aedcb118975a6b140cb5
+import  -/  TigerSymbol 8cdb62767ac36bcd684c9f1304d4a564
+  exports: da94fd004c9146d1f25642212f80c685
+  Symbol 8706b0bbdbf6daae41c5fa34f29c9575
+import  -/  TigerTemp 3bc4ed564aeabe58cf535512ec048d33
+  exports: 6b85f77b0bcc6e133222675af91d5259
+  Label e211b5893645bd99d551cf10a36d620b
+  TLGenerator 0da889271ca392648fe70411a9dd5b23
+  newLabel 7ba494a2fcb58f1d1a94e5e0774e8507
+  newTemp 28e5981eb3c4f40cb3463ab7db349b5a
+import  -/  TigerTree b3822817a90e7d3d52e7faf396d1e661
+  exports: 18931e72ed30bbeb7fa4b14d3a1cec66
+  Binop faf7f6a18bfd79d3c0cf1b8ec84dd76b
+  CJump f9c4df5a608857e7e3a13d599af02159
+  Call d18418b45fa695bd19aa29089226d8fa
+  Const 2e241003f48516223e109f35db44ed4c
+  Div 101feadf978e81973f821c377c089196
+  EQ 73bb27b3e21aba6b44b2415c60c1164a
+  Eseq fb548d788ce5bd7d322c1af9217cb690
+  Exp 41dcc78a73675959911b133e79d2016d
+  ExpS 3a29f4e7809ae1794504de3052de2e2c
+  GE 6d8ce275da5039d6393286e6b9127eee
+  GT dc79f6bd14d96e0131812e60e792b1b3
+  Jump b42879698d8b5db14f9aa3942d21ed85
+  LE 9eb6c58ce9d727933f027a633dda5f61
+  LT 8e07e2905999f2160b06aab125d78dee
+  Label bad5c830d864f66bf4d972a5316315a2
+  Mem ba2eb85ba7f0ea842ee2e5275f01bfbc
+  Minus d2c9b5e363f07f3537a472d39d3847a3
+  Move 6ad598cc8ddd68dab64e5fa3758cb7f0
+  Mul 41ec3725ba28cfe8396331a64a9dedad
+  NE 93e131df860adba6ca418d985d02a5f9
+  Name 8925b162f69e6bfb3c7671fa36d1392c
+  Plus 6072c28bb785621a53aa6ba570d770fd
+  Seq 41d9a8b50d3a4fca04c5c5c057d51c84
+  Stm 41dcc78a73675959911b133e79d2016d
+  Temp 49b0bf6180dfc16efae43b0023765e37
+import  -/  base-4.11.1.0:Control.Monad c5f960c67d822497578bffbd3e4c01cf
+import  -/  base-4.11.1.0:Data.Foldable 8ed35c38958063956af33c935ea03444
+import  -/  base-4.11.1.0:Data.Functor f522c3501272159820fd6f242510732f
+import  -/  base-4.11.1.0:Data.List 83dc843e47bfc0c5af51e19c6f3476d5
+import  -/  base-4.11.1.0:Data.OldList 1b35aa3c6805ff7c8887a35a866fe006
+import  -/  base-4.11.1.0:Data.Ord 8579f16310a4ec69c00617051bb5c3d9
+import  -/  base-4.11.1.0:Data.Traversable 7ad4edb9184ea1ae8e73f6b94f115c8c
+import  -/  base-4.11.1.0:Data.Tuple 3af66f3ac61ed95ba8a3a3f68ebc5003
+import  -/  base-4.11.1.0:Debug.Trace 7d99b5cfd8ae9f4b50938e4fedeaadef
+import  -/  base-4.11.1.0:GHC.Base 604111500e81281298777e721c75643b
+import  -/  base-4.11.1.0:GHC.Err 5e26aa744981f14e0f1e4d29c44ac52e
+import  -/  base-4.11.1.0:GHC.List 1e4357702d8d00cded0703bd293e50e8
+import  -/  base-4.11.1.0:GHC.Num 8e54b26dce4495382dc4b50cf36ab754
+import  -/  base-4.11.1.0:GHC.Show 73be67392447c974f19c3befd83c46c0
+import  -/  base-4.11.1.0:Prelude 0750c25585e2b797cd78291d423d39dd
+import  -/  ghc-prim-0.5.2.0:GHC.Classes 122abfcd7450c6c11602933c9ca5f80d
+import  -/  mtl-2.2.2:Control.Monad.State 1f28325cb5ef11b6b40ffadfe4bc2ca3
+import  -/  text-1.2.3.0:Data.Text 4f359e32d6f1c9011b171e00ff8fb023
+import  -/  text-1.2.3.0:Data.Text.Show 3b4b6fb2985a731022d67f636682da2b
+7c1c7a22e749ab4c800ed2ae0e59d743
+  $dmallocArg ::
+    TigerTrans.MemM w => TigerAbs.Escapa -> w TigerFrame.Access
+  {- Arity: 2,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),C(C1(U)),C(U),A),1*U(U,A),A,A,A,A,A,A,A,C(U),1*U,1*U,A,A,A,A)><L,U>,
+     Unfolding: InlineRule (0, True, False)
+                (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 \ (b :: TigerAbs.Escapa) ->
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTrans.Level
+                   @ TigerFrame.Access
+                   (TigerTrans.topLevel @ w $dMemM)
+                   (\ (t :: TigerTrans.Level) ->
+                    GHC.Base.>>
+                      @ w
+                      $dMonad
+                      @ ()
+                      @ TigerFrame.Access
+                      (TigerTrans.popLevel @ w $dMemM)
+                      (GHC.Base.>>=
+                         @ w
+                         $dMonad
+                         @ (TigerFrame.Frame, TigerFrame.Access)
+                         @ TigerFrame.Access
+                         (TigerFrame.allocArg
+                            @ w
+                            $dMonad
+                            $dTLGenerator
+                            (case GHC.List.head
+                                    @ TigerTrans.LevelI
+                                    t of wild { TigerTrans.MkLI ds ds1 ->
+                             ds })
+                            b)
+                         (\ (ds :: (TigerFrame.Frame, TigerFrame.Access)) ->
+                          case ds of wild { (,) f a ->
+                          GHC.Base.>>
+                            @ w
+                            $dMonad
+                            @ ()
+                            @ TigerFrame.Access
+                            (TigerTrans.pushLevel
+                               @ w
+                               $dMemM
+                               (case t of wild1 {
+                                  []
+                                  -> GHC.Err.error
+                                       @ 'GHC.Types.LiftedRep
+                                       @ TigerTrans.Level
+                                       TigerTrans.$dmallocArg1
+                                         `cast`
+                                       (Sym (GHC.Classes.N:IP[0]
+                                                 <"callStack">_N <GHC.Stack.Types.CallStack>_N))
+                                       (GHC.Base.build
+                                          @ GHC.Types.Char
+                                          (\ @ b1 ->
+                                           GHC.CString.unpackFoldrCString# @ b1 "setFrame"#))
+                                  : ds1 xs
+                                  -> case ds1 of wild2 { TigerTrans.MkLI ds2 l ->
+                                     GHC.Types.: @ TigerTrans.LevelI (TigerTrans.MkLI f l) xs } }))
+                            (GHC.Base.return @ w $dMonad @ TigerFrame.Access a) })))) -}
+f71f7396c63ffeb1c9925d3bb530cfe1
+  $dmallocArg1 :: GHC.Stack.Types.CallStack
+  {- Strictness: m2,
+     Unfolding: (GHC.Stack.Types.PushCallStack
+                   TigerTrans.$dmallocArg12
+                   TigerTrans.$dmallocArg2
+                   GHC.Stack.Types.EmptyCallStack) -}
+0febab231c0cb43b452c92e5ebe5919d
+  $dmallocArg10 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$dmallocArg11) -}
+37245c1fa8d1182b60b6f0fa69b70a50
+  $dmallocArg11 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("HaskTiger-0.1.0.0-ICRikAExwdr6IYW5QWtTsY"#) -}
+38a8e9cad3eb6dc451262729e4d3eb8f
+  $dmallocArg12 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$dmallocArg13) -}
+07ceaa4d26eb194621b843b82d832fef
+  $dmallocArg13 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("error"#) -}
+f7e3c01e18d30044c54bd2f9aaeb77c0
+  $dmallocArg2 :: GHC.Stack.Types.SrcLoc
+  {- Strictness: m,
+     Unfolding: (GHC.Stack.Types.SrcLoc
+                   TigerTrans.$dmallocArg10
+                   TigerTrans.$dmallocArg8
+                   TigerTrans.$dmallocArg6
+                   TigerTrans.$dmallocArg5
+                   TigerTrans.$dmallocArg4
+                   TigerTrans.$dmallocArg5
+                   TigerTrans.$dmallocArg3) -}
+5a8ed8060a751d602b529928a9a37139
+  $dmallocArg3 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 48#) -}
+b6714f93b2d5d03527d775ed9cfcf08c
+  $dmallocArg4 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 30#) -}
+8ccba030aaaa8fa893846552125c43b4
+  $dmallocArg5 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 136#) -}
+25b7904e6cd3d72f0397b4466489446c
+  $dmallocArg6 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$dmallocArg7) -}
+4c387a83f8cd9df9456b5ce3218f8f20
+  $dmallocArg7 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("src/TigerTrans.hs"#) -}
+20766b1591827086712bb0d1f8135629
+  $dmallocArg8 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$dmallocArg9) -}
+4a92f8cc1b55709c142db92f1b97d238
+  $dmallocArg9 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("TigerTrans"#) -}
+e61536b32a6381016ecd5dbe82578b10
+  $dmallocLocal ::
+    TigerTrans.MemM w => TigerAbs.Escapa -> w TigerFrame.Access
+  {- Arity: 2,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),C(C1(U)),C(U),A),1*U(U,A),A,A,A,A,A,A,A,C(U),1*U,1*U,A,A,A,A)><L,U>,
+     Unfolding: InlineRule (0, True, False)
+                (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 \ (b :: TigerAbs.Escapa) ->
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTrans.Level
+                   @ TigerFrame.Access
+                   (TigerTrans.topLevel @ w $dMemM)
+                   (\ (t :: TigerTrans.Level) ->
+                    GHC.Base.>>
+                      @ w
+                      $dMonad
+                      @ ()
+                      @ TigerFrame.Access
+                      (TigerTrans.popLevel @ w $dMemM)
+                      (GHC.Base.>>=
+                         @ w
+                         $dMonad
+                         @ (TigerFrame.Frame, TigerFrame.Access)
+                         @ TigerFrame.Access
+                         (TigerFrame.allocLocal
+                            @ w
+                            $dMonad
+                            $dTLGenerator
+                            (case GHC.List.head
+                                    @ TigerTrans.LevelI
+                                    t of wild { TigerTrans.MkLI ds ds1 ->
+                             ds })
+                            b)
+                         (\ (ds :: (TigerFrame.Frame, TigerFrame.Access)) ->
+                          case ds of wild { (,) f acc ->
+                          GHC.Base.>>
+                            @ w
+                            $dMonad
+                            @ ()
+                            @ TigerFrame.Access
+                            (TigerTrans.pushLevel
+                               @ w
+                               $dMemM
+                               (case t of wild1 {
+                                  []
+                                  -> GHC.Err.error
+                                       @ 'GHC.Types.LiftedRep
+                                       @ TigerTrans.Level
+                                       TigerTrans.$dmallocArg1
+                                         `cast`
+                                       (Sym (GHC.Classes.N:IP[0]
+                                                 <"callStack">_N <GHC.Stack.Types.CallStack>_N))
+                                       (GHC.Base.build
+                                          @ GHC.Types.Char
+                                          (\ @ b1 ->
+                                           GHC.CString.unpackFoldrCString# @ b1 "setFrame"#))
+                                  : ds1 xs
+                                  -> case ds1 of wild2 { TigerTrans.MkLI ds2 l ->
+                                     GHC.Types.: @ TigerTrans.LevelI (TigerTrans.MkLI f l) xs } }))
+                            (GHC.Base.return @ w $dMonad @ TigerFrame.Access acc) })))) -}
+31cdcb76279d9ea1745085582ef0e657
+  $dmgetActualLevel :: TigerTrans.MemM w => w GHC.Types.Int
+  {- Arity: 1,
+     Strictness: <S(S(S(S(C(C(S))L)LLLLL)LLLL)LLLLLLLLLLLLLLL),U(1*U(1*U(1*U(1*C1(C1(U)),A),A,A,A,A,A),A,A,A,A),A,A,A,A,A,A,A,A,A,A,1*U,A,A,A,A)>,
+     Unfolding: InlineRule (0, True, False)
+                (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 GHC.Base.fmap
+                   @ w
+                   (GHC.Base.$p1Applicative
+                      @ w
+                      (GHC.Base.$p1Monad @ w (TigerTrans.$p1MemM @ w $dMemM)))
+                   @ TigerTrans.Level
+                   @ GHC.Types.Int
+                   TigerTrans.getNlvl
+                   (TigerTrans.topLevel @ w $dMemM)) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fEqExterna :: GHC.Classes.Eq TigerTrans.Externa
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.Externa
+                  TigerTrans.$fEqExterna_$c==
+                  TigerTrans.$fEqExterna_$c/= -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fEqExterna_$c/= ::
+    TigerTrans.Externa -> TigerTrans.Externa -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ (x :: TigerTrans.Externa) (y :: TigerTrans.Externa) ->
+                 case x of wild {
+                   TigerTrans.Runtime
+                   -> case y of wild1 {
+                        TigerTrans.Runtime -> GHC.Types.False
+                        TigerTrans.Propia -> GHC.Types.True }
+                   TigerTrans.Propia
+                   -> case y of wild1 {
+                        TigerTrans.Runtime -> GHC.Types.True
+                        TigerTrans.Propia -> GHC.Types.False } }) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fEqExterna_$c== ::
+    TigerTrans.Externa -> TigerTrans.Externa -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: TigerTrans.Externa) (ds1 :: TigerTrans.Externa) ->
+                 case ds of wild {
+                   TigerTrans.Runtime
+                   -> case ds1 of wild1 {
+                        TigerTrans.Runtime -> GHC.Types.True
+                        TigerTrans.Propia -> GHC.Types.False }
+                   TigerTrans.Propia
+                   -> case ds1 of wild1 {
+                        TigerTrans.Runtime -> GHC.Types.False
+                        TigerTrans.Propia -> GHC.Types.True } }) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fEqIsProc :: GHC.Classes.Eq TigerTrans.IsProc
+  DFunId
+  {- HasNoCafRefs, Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.IsProc
+                  TigerTrans.$fEqIsProc_$c==
+                  TigerTrans.$fEqIsProc_$c/= -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fEqIsProc_$c/= ::
+    TigerTrans.IsProc -> TigerTrans.IsProc -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Inline: (sat-args=2),
+     Unfolding: InlineRule (2, False, False)
+                (\ (x :: TigerTrans.IsProc) (y :: TigerTrans.IsProc) ->
+                 case x of wild {
+                   TigerTrans.IsProc
+                   -> case y of wild1 {
+                        TigerTrans.IsProc -> GHC.Types.False
+                        TigerTrans.IsFun -> GHC.Types.True }
+                   TigerTrans.IsFun
+                   -> case y of wild1 {
+                        TigerTrans.IsProc -> GHC.Types.True
+                        TigerTrans.IsFun -> GHC.Types.False } }) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fEqIsProc_$c== ::
+    TigerTrans.IsProc -> TigerTrans.IsProc -> GHC.Types.Bool
+  {- Arity: 2, HasNoCafRefs, Strictness: <S,1*U><S,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: TigerTrans.IsProc) (ds1 :: TigerTrans.IsProc) ->
+                 case ds of wild {
+                   TigerTrans.IsProc
+                   -> case ds1 of wild1 {
+                        TigerTrans.IsProc -> GHC.Types.True
+                        TigerTrans.IsFun -> GHC.Types.False }
+                   TigerTrans.IsFun
+                   -> case ds1 of wild1 {
+                        TigerTrans.IsProc -> GHC.Types.False
+                        TigerTrans.IsFun -> GHC.Types.True } }) -}
+6c5b0546531496c89a65f00e1776af79
+  $fIrGenw :: TigerTrans.MemM w => TigerTrans.IrGen w
+  DFunId
+  {- Arity: 1,
+     Strictness: <L,U(U(U(U(C(C1(U)),A),C(U),A,C(C1(C1(U))),A,A),C(C1(U)),C(C1(U)),C(U),A),U(U,U),U(A,A,C(U),A),U,U,U,C(U),U,U,C(U),A,A,A,A,C(U),A)>,
+     Inline: CONLIKE,
+     Unfolding: DFun: @ w :: * -> * (v :: TigerTrans.MemM w).
+                  @ w
+                  (TigerTrans.$fIrGenw_$cprocEntryExit @ w v)
+                  (TigerTrans.$fIrGenw_$cnilExp @ w v)
+                  (TigerTrans.$fIrGenw_$cnilExp @ w v)
+                  (TigerTrans.$fIrGenw_$cintExp @ w v)
+                  (TigerTrans.$fIrGenw_$cstringExp @ w v)
+                  (TigerTrans.$fIrGenw_$csimpleVar @ w v)
+                  (TigerTrans.$fIrGenw_$cvarDec @ w v)
+                  (TigerTrans.$fIrGenw_$cfieldVar @ w v)
+                  (TigerTrans.$fIrGenw_$csubscriptVar @ w v)
+                  (TigerTrans.$fIrGenw_$crecordExp @ w v)
+                  (TigerTrans.$fIrGenw_$ccallExp @ w v)
+                  (TigerTrans.$fIrGenw_$cletExp @ w v)
+                  (TigerTrans.$fIrGenw_$cbreakExp @ w v)
+                  (TigerTrans.$fIrGenw_$cseqExp @ w v)
+                  (TigerTrans.$fIrGenw_$cpreWhileforExp @ w v)
+                  (TigerTrans.popSalida @ w v)
+                  (TigerTrans.$fIrGenw_$cwhileExp @ w v)
+                  (TigerTrans.$fIrGenw_$cforExp @ w v)
+                  (TigerTrans.$fIrGenw_$cifThenExp @ w v)
+                  (TigerTrans.$fIrGenw_$cifThenElseExp @ w v)
+                  (TigerTrans.$fIrGenw_$cifThenElseExpUnit @ w v)
+                  (TigerTrans.$fIrGenw_$cassignExp @ w v)
+                  (TigerTrans.$fIrGenw_$cenvFunctionDec @ w v)
+                  (TigerTrans.$fIrGenw_$cfunctionDec @ w v)
+                  (TigerTrans.$fIrGenw_$cbinOpIntExp @ w v)
+                  (TigerTrans.$fIrGenw_$cbinOpIntRelExp @ w v)
+                  (TigerTrans.$fIrGenw_$cbinOpStrExp @ w v)
+                  (TigerTrans.$fIrGenw_$cbinOpPtrExp @ w v)
+                  (TigerTrans.$fIrGenw_$carrayExp @ w v) -}
+b48ffa2cdb376355eb1452972016d3ff
+  $fIrGenw1 :: TigerTree.Exp
+  {- Strictness: m3, Unfolding: (TigerTree.Temp TigerFrame.rv) -}
+e0a9353165f4b494c8c1d6c8b697f0ab
+  $fIrGenw10 :: TigerTree.Exp -> TigerTree.Stm
+  {- Arity: 1, Unfolding: (TigerTree.Move TigerTrans.$fIrGenw1) -}
+fde5d49ae7e7014640f7bc593f53a23e
+  $fIrGenw11 :: TigerTrans.BExp
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (TigerTrans.Ex TigerTrans.unEx3) -}
+4f6776f2c58839f96902fba33b85779f
+  $fIrGenw12 :: Data.Text.Internal.Text
+  {- Unfolding: (Data.Text.Show.unpackCString#
+                   TigerTrans.$fIrGenw13) -}
+111d17d129d76e533f3871b981f57ed6
+  $fIrGenw13 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("unCx(Nx...)"#) -}
+04713f03cde39e5384e2f9644d3262cb
+  $fIrGenw14 :: (TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U(A,U)>m3,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: (TigerTemp.Label, TigerTemp.Label)) ->
+                 case ds of wild { (,) ds1 f ->
+                 TigerTree.Jump (TigerTree.Name f) f }) -}
+20336cc406ce937e4261d9d6c8bc8f78
+  $fIrGenw15 :: (TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U(U,A)>m3,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: (TigerTemp.Label, TigerTemp.Label)) ->
+                 case ds of wild { (,) t ds1 ->
+                 TigerTree.Jump (TigerTree.Name t) t }) -}
+f5b014381d4399795c15749bb689a00a
+  $fIrGenw16 :: Data.Text.Internal.Text
+  {- Unfolding: (Data.Text.Show.unpackCString#
+                   TigerTrans.$fIrGenw17) -}
+888b4097fb83f2b4b5b77348a8cbbbf5
+  $fIrGenw17 :: GHC.Prim.Addr#
+  {- HasNoCafRefs,
+     Unfolding: ("no hay label de salida para el break"#) -}
+19bcda85ef83771dc9c4ed6d5457aa65
+  $fIrGenw18 :: TigerTree.Exp
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (TigerTree.Const TigerFrame.wSz) -}
+2d268dc3de4c97a63506085e0f72b9c1
+  $fIrGenw19 :: TigerTree.Exp
+  {- Strictness: m2,
+     Unfolding: (TigerTree.Name TigerTrans.$fIrGenw20) -}
+83332a36ea370e477b351a2550aa3e09
+  $fIrGenw2 :: TigerTree.Exp
+  {- Strictness: m2,
+     Unfolding: (TigerTree.Name TigerTrans.$fIrGenw3) -}
+57a6680effc7a835ab9d6feb2fe416c1
+  $fIrGenw20 :: TigerTemp.Label
+  {- Unfolding: (case GHC.Magic.runRW#
+                        @ ('GHC.Types.TupleRep
+                             '['GHC.Types.TupleRep '[], 'GHC.Types.LiftedRep])
+                        @ (# GHC.Prim.State# GHC.Prim.RealWorld, Data.Text.Internal.Text #)
+                        TigerTrans.$fIrGenw21 of ds1 { (#,#) ipv ipv1 ->
+                 ipv1 }) -}
+be60160dbb504574376f78a492abf742
+  $fIrGenw21 ::
+    GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+          Data.Text.Internal.Text #)
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: (\ (s1 :: GHC.Prim.State#
+                            GHC.Prim.RealWorld)[OneShot] ->
+                 case GHC.Prim.newByteArray#
+                        @ GHC.Prim.RealWorld
+                        10#
+                        s1 of ds1 { (#,#) ipv ipv1 ->
+                 TigerFrame.$wouter
+                   ipv1
+                   4#
+                   (GHC.CString.unpackCString# TigerTrans.$fIrGenw22)
+                   0#
+                   ipv }) -}
+7a4cf12bc486c6399fe96f89ec4fa783
+  $fIrGenw22 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("_checkIndex"#) -}
+3416fdc58c77fa9ad061260cd9ed14b2
+  $fIrGenw23 :: TigerTree.Exp
+  {- Strictness: m2,
+     Unfolding: (TigerTree.Name TigerTrans.$fIrGenw24) -}
+b5164e49f422bdb13f5daecb442e5e2b
+  $fIrGenw24 :: TigerTemp.Label
+  {- Unfolding: (case GHC.Magic.runRW#
+                        @ ('GHC.Types.TupleRep
+                             '['GHC.Types.TupleRep '[], 'GHC.Types.LiftedRep])
+                        @ (# GHC.Prim.State# GHC.Prim.RealWorld, Data.Text.Internal.Text #)
+                        TigerTrans.$fIrGenw25 of ds1 { (#,#) ipv ipv1 ->
+                 ipv1 }) -}
+cb6ffb52f5cd4db67c9732a819641f58
+  $fIrGenw25 ::
+    GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+          Data.Text.Internal.Text #)
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: (\ (s1 :: GHC.Prim.State#
+                            GHC.Prim.RealWorld)[OneShot] ->
+                 case GHC.Prim.newByteArray#
+                        @ GHC.Prim.RealWorld
+                        10#
+                        s1 of ds1 { (#,#) ipv ipv1 ->
+                 TigerFrame.$wouter
+                   ipv1
+                   4#
+                   (GHC.CString.unpackCString# TigerTrans.$fIrGenw26)
+                   0#
+                   ipv }) -}
+cd5d9b776e41a976e0d56bd495ddb4ef
+  $fIrGenw26 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("_checkNil"#) -}
+72d9c0fc0a6ee5a00b66a8f2c01091b2
+  $fIrGenw3 :: TigerTemp.Label
+  {- Unfolding: (case GHC.Magic.runRW#
+                        @ ('GHC.Types.TupleRep
+                             '['GHC.Types.TupleRep '[], 'GHC.Types.LiftedRep])
+                        @ (# GHC.Prim.State# GHC.Prim.RealWorld, Data.Text.Internal.Text #)
+                        TigerTrans.$fIrGenw4 of ds1 { (#,#) ipv ipv1 ->
+                 ipv1 }) -}
+34df89709e1c654f1223f705949e4504
+  $fIrGenw4 ::
+    GHC.Prim.State# GHC.Prim.RealWorld
+    -> (# GHC.Prim.State# GHC.Prim.RealWorld,
+          Data.Text.Internal.Text #)
+  {- Arity: 1, Strictness: <S,U>,
+     Unfolding: (\ (s1 :: GHC.Prim.State#
+                            GHC.Prim.RealWorld)[OneShot] ->
+                 case GHC.Prim.newByteArray#
+                        @ GHC.Prim.RealWorld
+                        10#
+                        s1 of ds1 { (#,#) ipv ipv1 ->
+                 TigerFrame.$wouter
+                   ipv1
+                   4#
+                   (GHC.CString.unpackCString# TigerTrans.$fIrGenw5)
+                   0#
+                   ipv }) -}
+e375f26fe53843078796683cc780e576
+  $fIrGenw5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("_allocArray"#) -}
+f0a0ef19f711c00d928982bfe327f4dd
+  $fIrGenw6 :: Data.Text.Internal.Text
+  {- Unfolding: (Data.Text.Show.unpackCString#
+                   TigerTrans.$fIrGenw7) -}
+88a4eacad00ee76511094252583aee20
+  $fIrGenw7 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("SEGUIMOS RETRASANDO #01m"#) -}
+c5af6161a7c9584cbb624d3819164ef8
+  $fIrGenw8 :: Data.Text.Internal.Text
+  {- Unfolding: (Data.Text.Show.unpackCString#
+                   TigerTrans.$fIrGenw9) -}
+79ad0b192d3aff33da54e8d13961ef00
+  $fIrGenw9 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("BASSSURA JAPISHH #25j"#) -}
+4834239ee0b33df9d20c4d8d906238fb
+  $fIrGenw_$carrayExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Exp
+                   = TigerTrans.unEx @ w $dMonad $dTLGenerator eta1
+                 } in
+                 let {
+                   lvl31 :: w TigerTemp.Temp = TigerTemp.newTemp @ w $dTLGenerator
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (sz :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Exp
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (ini :: TigerTree.Exp) ->
+                       let {
+                         lvl32 :: [TigerTree.Exp]
+                         = GHC.Types.: @ TigerTree.Exp ini (GHC.Types.[] @ TigerTree.Exp)
+                       } in
+                       let {
+                         lvl33 :: [TigerTree.Exp] = GHC.Types.: @ TigerTree.Exp sz lvl32
+                       } in
+                       let {
+                         lvl34 :: TigerTree.Exp = TigerTree.Call TigerTrans.$fIrGenw2 lvl33
+                       } in
+                       let {
+                         lvl35 :: TigerTree.Stm = TigerTree.ExpS lvl34
+                       } in
+                       GHC.Base.>>=
+                         @ w
+                         $dMonad
+                         @ TigerTemp.Temp
+                         @ TigerTrans.BExp
+                         lvl31
+                         (\ (t :: TigerTemp.Temp) ->
+                          GHC.Base.return
+                            @ w
+                            $dMonad
+                            @ TigerTrans.BExp
+                            (TigerTrans.Ex
+                               (TigerTree.Eseq
+                                  (TigerTrans.seq
+                                     (GHC.Types.:
+                                        @ TigerTree.Stm
+                                        lvl35
+                                        (GHC.Types.:
+                                           @ TigerTree.Stm
+                                           (TigerTree.Move (TigerTree.Temp t) TigerTrans.$fIrGenw1)
+                                           (GHC.Types.[] @ TigerTree.Stm))))
+                                  (TigerTree.Temp t))))))) -}
+e2676c2f89517b98ed12d9a7362e1153
+  $fIrGenw_$cassignExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Exp
+                   = TigerTrans.unEx @ w $dMonad $dTLGenerator eta1
+                 } in
+                 let {
+                   lvl31 :: w TigerTemp.Temp = TigerTemp.newTemp @ w $dTLGenerator
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (cvara :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Exp
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (cin :: TigerTree.Exp) ->
+                       case cvara of wild {
+                         DEFAULT
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Nx (TigerTree.Move wild cin))
+                         TigerTree.Mem v'
+                         -> GHC.Base.>>=
+                              @ w
+                              $dMonad
+                              @ TigerTemp.Temp
+                              @ TigerTrans.BExp
+                              lvl31
+                              (\ (t :: TigerTemp.Temp) ->
+                               GHC.Base.return
+                                 @ w
+                                 $dMonad
+                                 @ TigerTrans.BExp
+                                 (TigerTrans.Nx
+                                    (TigerTrans.seq
+                                       (GHC.Types.:
+                                          @ TigerTree.Stm
+                                          (TigerTree.Move (TigerTree.Temp t) cin)
+                                          (GHC.Types.:
+                                             @ TigerTree.Stm
+                                             (TigerTree.Move wild (TigerTree.Temp t))
+                                             (GHC.Types.[] @ TigerTree.Stm)))))) }))) -}
+4efe744c9f1977951cd939d76437720d
+  $fIrGenw_$cbinOpIntExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerAbs.Oper)
+                   (eta2 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Exp
+                   = TigerTrans.unEx @ w $dMonad $dTLGenerator eta2
+                 } in
+                 let {
+                   lvl31 :: w TigerTrans.BExp
+                   = TigerErrores.internal
+                       @ w
+                       (TigerTrans.$p3MemM @ w $dMemM)
+                       @ TigerTrans.BExp
+                       TigerTrans.$fIrGenw8
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (ele :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Exp
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (ere :: TigerTree.Exp) ->
+                       case eta1 of wild {
+                         DEFAULT -> lvl31
+                         TigerAbs.PlusOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Ex (TigerTree.Binop TigerTree.Plus ele ere))
+                         TigerAbs.MinusOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Ex (TigerTree.Binop TigerTree.Minus ele ere))
+                         TigerAbs.TimesOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Ex (TigerTree.Binop TigerTree.Mul ele ere))
+                         TigerAbs.DivideOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Ex (TigerTree.Binop TigerTree.Div ele ere)) }))) -}
+2edb5da675708f236c3f5886d0dc2352
+  $fIrGenw_$cbinOpIntRelExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,U><L,1*U> -}
+7915dad2217ec71fd4eed2e4e4cd2029
+  $fIrGenw_$cbinOpPtrExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerAbs.Oper)
+                   (eta2 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Exp
+                   = TigerTrans.unEx @ w $dMonad $dTLGenerator eta2
+                 } in
+                 let {
+                   lvl31 :: w TigerTrans.BExp
+                   = TigerErrores.internal
+                       @ w
+                       (TigerTrans.$p3MemM @ w $dMemM)
+                       @ TigerTrans.BExp
+                       TigerTrans.$fIrGenw6
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (ele :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Exp
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (ere :: TigerTree.Exp) ->
+                       case eta1 of wild {
+                         DEFAULT -> lvl31
+                         TigerAbs.EqOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Cx
+                                 (\ (ds :: (TigerTemp.Label, TigerTemp.Label)) ->
+                                  case ds of wild1 { (,) t f ->
+                                  TigerTree.CJump TigerTree.EQ ele ere t f }))
+                         TigerAbs.NeqOp
+                         -> GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Cx
+                                 (\ (ds :: (TigerTemp.Label, TigerTemp.Label)) ->
+                                  case ds of wild1 { (,) t f ->
+                                  TigerTree.CJump TigerTree.NE ele ere t f })) }))) -}
+9c594d0d0ab0c5cff4ceb4ebce24493a
+  $fIrGenw_$cbinOpStrExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,U><L,1*U> -}
+ce76ccd3f976e5341eb0471155ef51f0
+  $fIrGenw_$cbreakExp :: TigerTrans.MemM w => w TigerTrans.BExp
+  {- Arity: 1,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,1*C1(C1(U)),A,C(U),A),A,1*U(A,A,1*C1(U),A),A,A,A,A,1*U,A,A,A,A,A,A,A,A)>,
+     Unfolding: (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 let {
+                   lvl30 :: w TigerTrans.BExp
+                   = TigerErrores.internal
+                       @ w
+                       (TigerTrans.$p3MemM @ w $dMemM)
+                       @ TigerTrans.BExp
+                       TigerTrans.$fIrGenw16
+                 } in
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ (GHC.Base.Maybe TigerTemp.Label)
+                   @ TigerTrans.BExp
+                   (TigerTrans.topSalida @ w $dMemM)
+                   (\ (lastM :: GHC.Base.Maybe TigerTemp.Label) ->
+                    case lastM of wild {
+                      GHC.Base.Nothing -> lvl30
+                      GHC.Base.Just done
+                      -> GHC.Base.return
+                           @ w
+                           $dMonad
+                           @ TigerTrans.BExp
+                           (TigerTrans.Nx (TigerTree.Jump (TigerTree.Name done) done)) })) -}
+159d66a876cf46be5d2157a8a4947aa5
+  $fIrGenw_$ccallExp ::
+    TigerTrans.MemM w =>
+    TigerTemp.Label
+    -> TigerTrans.Externa
+    -> TigerTrans.IsProc
+    -> TigerTrans.Level
+    -> [TigerTrans.BExp]
+    -> w TigerTrans.BExp
+  {- Arity: 6,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(1*U(A,1*C1(U),A,C(C1(C1(U))),A,A),C(C1(U)),A,C(U),A),1*U(U,U),A,1*U,A,A,A,A,A,A,A,A,A,A,A,A)><L,U(U,U,U)><L,1*U><L,U><L,U><L,1*U> -}
+642400ea6dd9a39803565a4b3f49ba3e
+  $fIrGenw_$cenvFunctionDec ::
+    TigerTrans.MemM w =>
+    TigerTrans.Level -> w TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S(S(LLC(C(S))LL)LLLLLLLLLLLLLLL),U(1*U(A,1*C1(C1(U)),C(C1(U)),C(U),A),A,A,A,1*U,1*U,1*C1(U),A,1*U,1*C1(U),A,A,A,A,A,A)><L,U><L,U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.Level)
+                   (eta1 :: w TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 GHC.Base.>>
+                   @ w
+                   $dMonad
+                   @ ()
+                   @ TigerTrans.BExp
+                   (TigerTrans.pushSalida
+                      @ w
+                      $dMemM
+                      (GHC.Base.Nothing @ TigerTemp.Label))
+                   (GHC.Base.>>
+                      @ w
+                      $dMonad
+                      @ ()
+                      @ TigerTrans.BExp
+                      (TigerTrans.upLvl @ w $dMemM)
+                      (GHC.Base.>>
+                         @ w
+                         $dMonad
+                         @ ()
+                         @ TigerTrans.BExp
+                         (TigerTrans.pushLevel @ w $dMemM eta)
+                         (let {
+                            lvl30 :: w () = TigerTrans.popSalida @ w $dMemM
+                          } in
+                          let {
+                            lvl31 :: w () = TigerTrans.downLvl @ w $dMemM
+                          } in
+                          GHC.Base.>>=
+                            @ w
+                            $dMonad
+                            @ TigerTrans.BExp
+                            @ TigerTrans.BExp
+                            eta1
+                            (\ (fun :: TigerTrans.BExp) ->
+                             GHC.Base.>>
+                               @ w
+                               $dMonad
+                               @ ()
+                               @ TigerTrans.BExp
+                               lvl30
+                               (GHC.Base.>>
+                                  @ w
+                                  $dMonad
+                                  @ ()
+                                  @ TigerTrans.BExp
+                                  lvl31
+                                  (GHC.Base.return @ w $dMonad @ TigerTrans.BExp fun))))))) -}
+db946bae3ae9bf1c70a282c3794fcfd9
+  $fIrGenw_$cfieldVar ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> GHC.Types.Int -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: GHC.Types.Int) ->
+                 let {
+                   lvl30 :: TigerTree.Exp = TigerTree.Const eta1
+                 } in
+                 let {
+                   lvl31 :: TigerTree.Exp
+                   = TigerTree.Binop TigerTree.Mul lvl30 TigerTrans.$fIrGenw18
+                 } in
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl32 :: w TigerTemp.Temp = TigerTemp.newTemp @ w $dTLGenerator
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (ebe :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTemp.Temp
+                      @ TigerTrans.BExp
+                      lvl32
+                      (\ (tbe :: TigerTemp.Temp) ->
+                       GHC.Base.return
+                         @ w
+                         $dMonad
+                         @ TigerTrans.BExp
+                         (TigerTrans.Ex
+                            (TigerTree.Eseq
+                               (TigerTrans.seq
+                                  (GHC.Types.:
+                                     @ TigerTree.Stm
+                                     (TigerTree.Move (TigerTree.Temp tbe) ebe)
+                                     (GHC.Types.:
+                                        @ TigerTree.Stm
+                                        (TigerTree.ExpS
+                                           (TigerTree.Call
+                                              TigerTrans.$fIrGenw23
+                                              (GHC.Types.:
+                                                 @ TigerTree.Exp
+                                                 (TigerTree.Temp tbe)
+                                                 (GHC.Types.[] @ TigerTree.Exp))))
+                                        (GHC.Types.[] @ TigerTree.Stm))))
+                               (TigerTree.Mem
+                                  (TigerTree.Binop
+                                     TigerTree.Plus
+                                     (TigerTree.Temp tbe)
+                                     lvl31))))))) -}
+dfcc76cd5283b9148c708c110cf59eb6
+  $fIrGenw_$cforExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerTrans.BExp
+    -> TigerTrans.BExp
+    -> TigerTrans.BExp
+    -> w TigerTrans.BExp
+  {- Arity: 5,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,1*U,A,A,A,A,A,A,A,A)><L,1*U><L,1*U><L,1*U><L,1*U> -}
+863a4227ef882b4f727846dedb38e5c0
+  $fIrGenw_$cfunctionDec ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerTrans.Level -> TigerTrans.IsProc -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(U(1*U(1*U(1*C1(C1(U)),A),A,A,A,A,A),C(C1(U)),C(C1(U)),C(U),A),U(1*U,U),A,A,A,A,A,A,A,A,A,A,A,A,C(U),A)><L,1*U><L,U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerTrans.Level)
+                   (eta2 :: TigerTrans.IsProc) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTrans.BExp
+                   = GHC.Base.return
+                       @ w
+                       $dMonad
+                       @ TigerTrans.BExp
+                       TigerTrans.$fIrGenw11
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Stm
+                   @ TigerTrans.BExp
+                   (case eta2 of wild {
+                      TigerTrans.IsProc
+                      -> TigerTrans.unNx @ w $dMonad (TigerTrans.$p2MemM @ w $dMemM) eta
+                      TigerTrans.IsFun
+                      -> GHC.Base.fmap
+                           @ w
+                           (GHC.Base.$p1Applicative @ w (GHC.Base.$p1Monad @ w $dMonad))
+                           @ TigerTree.Exp
+                           @ TigerTree.Stm
+                           TigerTrans.$fIrGenw10
+                           (TigerTrans.unEx
+                              @ w
+                              $dMonad
+                              (TigerTrans.$p2MemM @ w $dMemM)
+                              eta) })
+                   (\ (body :: TigerTree.Stm) ->
+                    GHC.Base.>>
+                      @ w
+                      $dMonad
+                      @ ()
+                      @ TigerTrans.BExp
+                      (TigerTrans.$fIrGenw_$cprocEntryExit
+                         @ w
+                         $dMemM
+                         eta1
+                         (TigerTrans.Nx body))
+                      lvl30)) -}
+9e3dc592e885154dcb9ebb99f638767e
+  $fIrGenw_$cifThenElseExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U><L,1*U> -}
+572e7284652b225268f663033e152b04
+  $fIrGenw_$cifThenElseExpUnit ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp
+    -> TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 4,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(A,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U><L,1*U> -}
+2e0ce33f444918d573c174bad893caa4
+  $fIrGenw_$cifThenExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(A,U),1*U(A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Stm
+                   = TigerTrans.unNx @ w $dMonad $dTLGenerator eta1
+                 } in
+                 let {
+                   lvl31 :: w TigerTemp.Label = TigerTemp.newLabel @ w $dTLGenerator
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                   @ TigerTrans.BExp
+                   (TigerTrans.$wunCx @ w $dMonad (TigerTrans.$p3MemM @ w $dMemM) eta)
+                   (\ (ccond :: (TigerTemp.Label, TigerTemp.Label)
+                                -> TigerTree.Stm) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Stm
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (nbody :: TigerTree.Stm) ->
+                       GHC.Base.>>=
+                         @ w
+                         $dMonad
+                         @ TigerTemp.Label
+                         @ TigerTrans.BExp
+                         lvl31
+                         (\ (lbody :: TigerTemp.Label) ->
+                          let {
+                            lvl32 :: TigerTree.Stm = TigerTree.Label lbody
+                          } in
+                          GHC.Base.>>=
+                            @ w
+                            $dMonad
+                            @ TigerTemp.Label
+                            @ TigerTrans.BExp
+                            lvl31
+                            (\ (lexit :: TigerTemp.Label) ->
+                             GHC.Base.return
+                               @ w
+                               $dMonad
+                               @ TigerTrans.BExp
+                               (TigerTrans.Nx
+                                  (TigerTrans.seq
+                                     (GHC.Types.:
+                                        @ TigerTree.Stm
+                                        (ccond (lbody, lexit))
+                                        (GHC.Types.:
+                                           @ TigerTree.Stm
+                                           lvl32
+                                           (GHC.Types.:
+                                              @ TigerTree.Stm
+                                              nbody
+                                              (GHC.Types.:
+                                                 @ TigerTree.Stm
+                                                 (TigerTree.Label lexit)
+                                                 (GHC.Types.[] @ TigerTree.Stm)))))))))))) -}
+8590c58b2b50582ceaca3dd733b32f5b
+  $fIrGenw_$cintExp ::
+    TigerTrans.MemM w => GHC.Types.Int -> w TigerTrans.BExp
+  {- Arity: 2, HasNoCafRefs,
+     Strictness: <S(S(LLLC(S)L)LLLLLLLLLLLLLLL),1*U(1*U(A,A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: GHC.Types.Int) ->
+                 GHC.Base.return
+                   @ w
+                   (TigerTrans.$p1MemM @ w $dMemM)
+                   @ TigerTrans.BExp
+                   (TigerTrans.Ex (TigerTree.Const eta))) -}
+4b6fa769f2133ee3c2f0b368cebeb78b
+  $fIrGenw_$cletExp ::
+    TigerTrans.MemM w =>
+    [TigerTrans.BExp] -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(1*U(A,1*C1(U),A,C(C1(C1(U))),A,A),C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><S,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: [TigerTrans.BExp])
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 case eta of wild {
+                   []
+                   -> GHC.Base.>>=
+                        @ w
+                        $dMonad
+                        @ TigerTree.Exp
+                        @ TigerTrans.BExp
+                        (TigerTrans.unEx @ w $dMonad $dTLGenerator eta1)
+                        (\ (e' :: TigerTree.Exp) ->
+                         GHC.Base.return @ w $dMonad @ TigerTrans.BExp (TigerTrans.Ex e'))
+                   : ipv ipv1
+                   -> let {
+                        lvl30 :: w TigerTree.Exp
+                        = TigerTrans.unEx @ w $dMonad $dTLGenerator eta1
+                      } in
+                      GHC.Base.>>=
+                        @ w
+                        $dMonad
+                        @ [TigerTree.Stm]
+                        @ TigerTrans.BExp
+                        (let {
+                           $dApplicative :: GHC.Base.Applicative w
+                           = GHC.Base.$p1Monad @ w $dMonad
+                         } in
+                         let {
+                           z :: w [TigerTree.Stm]
+                           = GHC.Base.pure
+                               @ w
+                               $dApplicative
+                               @ [TigerTree.Stm]
+                               (GHC.Types.[] @ TigerTree.Stm)
+                         } in
+                         letrec {
+                           go :: [TigerTrans.BExp] -> w [TigerTree.Stm]
+                             {- Arity: 1, Strictness: <S,1*U> -}
+                           = \ (ds :: [TigerTrans.BExp]) ->
+                             case ds of wild1 {
+                               [] -> z
+                               : y ys
+                               -> GHC.Base.liftA2
+                                    @ w
+                                    $dApplicative
+                                    @ TigerTree.Stm
+                                    @ [TigerTree.Stm]
+                                    @ [TigerTree.Stm]
+                                    (GHC.Types.: @ TigerTree.Stm)
+                                    (TigerTrans.unNx @ w $dMonad $dTLGenerator y)
+                                    (go ys) }
+                         } in
+                         go wild)
+                        (\ (bes :: [TigerTree.Stm]) ->
+                         let {
+                           lvl31 :: TigerTree.Stm = TigerTrans.seq bes
+                         } in
+                         GHC.Base.>>=
+                           @ w
+                           $dMonad
+                           @ TigerTree.Exp
+                           @ TigerTrans.BExp
+                           lvl30
+                           (\ (be :: TigerTree.Exp) ->
+                            GHC.Base.return
+                              @ w
+                              $dMonad
+                              @ TigerTrans.BExp
+                              (TigerTrans.Ex (TigerTree.Eseq lvl31 be)))) }) -}
+8487a334c15fd0480c93a0de76ef2feb
+  $fIrGenw_$cnilExp :: TigerTrans.MemM w => w TigerTrans.BExp
+  {- Arity: 1, HasNoCafRefs,
+     Strictness: <S(S(LLLC(S)L)LLLLLLLLLLLLLLL),1*U(1*U(A,A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A,A,A)>,
+     Unfolding: InlineRule (1, True, False)
+                (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 GHC.Base.return
+                   @ w
+                   (TigerTrans.$p1MemM @ w $dMemM)
+                   @ TigerTrans.BExp
+                   TigerTrans.$fIrGenw11) -}
+01e2756dcddf1ec78cd077bcf2fd7ebc
+  $fIrGenw_$cpreWhileforExp :: TigerTrans.MemM w => w ()
+  {- Arity: 1, HasNoCafRefs,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,1*C1(C1(U)),A,A,A),1*U(A,1*U),A,A,A,A,C(U),A,A,A,A,A,A,A,A,A)>,
+     Unfolding: (\ @ w :: * -> * ($dMemM :: TigerTrans.MemM w) ->
+                 GHC.Base.>>=
+                   @ w
+                   (TigerTrans.$p1MemM @ w $dMemM)
+                   @ TigerTemp.Label
+                   @ ()
+                   (TigerTemp.newLabel @ w (TigerTrans.$p2MemM @ w $dMemM))
+                   (\ (x :: TigerTemp.Label) ->
+                    TigerTrans.pushSalida
+                      @ w
+                      $dMemM
+                      (GHC.Base.Just @ TigerTemp.Label x))) -}
+208a9a50b3916f83335f50a736915862
+  $fIrGenw_$cprocEntryExit ::
+    TigerTrans.MemM w => TigerTrans.Level -> TigerTrans.BExp -> w ()
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(A,1*U),A,A,A,A,A,A,A,A,A,A,A,A,C(U),A)><L,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.Level)
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   lvl30 :: TigerFrame.Frame
+                   = case eta of wild {
+                       [] -> case GHC.List.badHead ret_ty TigerFrame.Frame of {}
+                       : x ds1 -> case x of wild1 { TigerTrans.MkLI ds ds2 -> ds } }
+                 } in
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Stm
+                   @ ()
+                   (TigerTrans.unNx @ w $dMonad (TigerTrans.$p2MemM @ w $dMemM) eta1)
+                   (\ (bd' :: TigerTree.Stm) ->
+                    TigerTrans.pushFrag @ w $dMemM (TigerFrame.Proc bd' lvl30))) -}
+bc69d9a0c75cad1dcbb359de2c24c295
+  $fIrGenw_$crecordExp ::
+    TigerTrans.MemM w =>
+    [(TigerTrans.BExp, GHC.Types.Int)] -> w TigerTrans.BExp
+  {- Arity: 2,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(1*U(A,1*C1(U),A,C(C1(C1(U))),A,A),C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,U> -}
+578a1a8b437e159c42e3bc12b4080fb6
+  $fIrGenw_$cseqExp ::
+    TigerTrans.MemM w => [TigerTrans.BExp] -> w TigerTrans.BExp
+  {- Arity: 2,
+     Strictness: <S(SLLLLLLLLLLLLLLL),U(1*U(U(U(C(C1(U)),A),C(U),A,C(C1(C1(U))),A,A),C(C1(U)),A,C(U),A),U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><S,1*U> -}
+6d8139c81af4d04fd0d5128f70539022
+  $fIrGenw_$csimpleVar ::
+    TigerTrans.MemM w =>
+    TigerFrame.Access -> GHC.Types.Int -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LLLC(S)L)LLLLLLLLLLLLLLL),1*U(1*U(A,A,A,1*C1(U),A),A,A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U(1*U)>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerFrame.Access)
+                   (eta1 :: GHC.Types.Int) ->
+                 GHC.Base.return
+                   @ w
+                   (TigerTrans.$p1MemM @ w $dMemM)
+                   @ TigerTrans.BExp
+                   (TigerTrans.Ex
+                      (case eta of wild {
+                         TigerFrame.InFrame k
+                         -> TigerTree.Mem
+                              (TigerTree.Binop
+                                 TigerTree.Plus
+                                 (case eta1 of ww { GHC.Types.I# ww1 -> TigerFrame.$wauxexp ww1 })
+                                 (TigerTree.Const k))
+                         TigerFrame.InReg l
+                         -> case eta1 of wild1 { GHC.Types.I# x ->
+                            case x of wild2 {
+                              DEFAULT -> TigerTree.Temp l 0# -> TigerFrame.exp1 } } }))) -}
+a8a98de3eb09f33daba546802d5470ca
+  $fIrGenw_$cstringExp ::
+    TigerTrans.MemM w => TigerSymbol.Symbol -> w TigerTrans.BExp
+  {- Arity: 2,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,1*C1(C1(U)),C(C1(U)),C(U),A),1*U(A,1*U),A,A,A,A,A,A,A,A,A,A,A,A,C(U),A)><L,U(U,U,U)> -}
+1e50b5c55c12985eb9fcf887705aa6cf
+  $fIrGenw_$csubscriptVar ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(U,U),A,A,A,A,A,A,A,A,A,A,A,A,A,A)><L,1*U><L,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerTrans.BExp)
+                   (eta1 :: TigerTrans.BExp) ->
+                 let {
+                   $dMonad :: GHC.Base.Monad w = TigerTrans.$p1MemM @ w $dMemM
+                 } in
+                 let {
+                   $dTLGenerator :: TigerTemp.TLGenerator w
+                   = TigerTrans.$p2MemM @ w $dMemM
+                 } in
+                 let {
+                   lvl30 :: w TigerTree.Exp
+                   = TigerTrans.unEx @ w $dMonad $dTLGenerator eta1
+                 } in
+                 let {
+                   lvl31 :: w TigerTemp.Temp = TigerTemp.newTemp @ w $dTLGenerator
+                 } in
+                 GHC.Base.>>=
+                   @ w
+                   $dMonad
+                   @ TigerTree.Exp
+                   @ TigerTrans.BExp
+                   (TigerTrans.unEx @ w $dMonad $dTLGenerator eta)
+                   (\ (evar :: TigerTree.Exp) ->
+                    GHC.Base.>>=
+                      @ w
+                      $dMonad
+                      @ TigerTree.Exp
+                      @ TigerTrans.BExp
+                      lvl30
+                      (\ (eind :: TigerTree.Exp) ->
+                       GHC.Base.>>=
+                         @ w
+                         $dMonad
+                         @ TigerTemp.Temp
+                         @ TigerTrans.BExp
+                         lvl31
+                         (\ (tvar :: TigerTemp.Temp) ->
+                          let {
+                            lvl32 :: TigerTree.Exp = TigerTree.Temp tvar
+                          } in
+                          let {
+                            lvl33 :: TigerTree.Stm = TigerTree.Move lvl32 evar
+                          } in
+                          GHC.Base.>>=
+                            @ w
+                            $dMonad
+                            @ TigerTemp.Temp
+                            @ TigerTrans.BExp
+                            lvl31
+                            (\ (tind :: TigerTemp.Temp) ->
+                             GHC.Base.return
+                               @ w
+                               $dMonad
+                               @ TigerTrans.BExp
+                               (TigerTrans.Ex
+                                  (TigerTree.Eseq
+                                     (TigerTrans.seq
+                                        (GHC.Types.:
+                                           @ TigerTree.Stm
+                                           lvl33
+                                           (GHC.Types.:
+                                              @ TigerTree.Stm
+                                              (TigerTree.Move (TigerTree.Temp tind) eind)
+                                              (GHC.Types.:
+                                                 @ TigerTree.Stm
+                                                 (TigerTree.ExpS
+                                                    (TigerTree.Call
+                                                       TigerTrans.$fIrGenw19
+                                                       (GHC.Types.:
+                                                          @ TigerTree.Exp
+                                                          lvl32
+                                                          (GHC.Types.:
+                                                             @ TigerTree.Exp
+                                                             (TigerTree.Temp tind)
+                                                             (GHC.Types.[] @ TigerTree.Exp)))))
+                                                 (GHC.Types.[] @ TigerTree.Stm)))))
+                                     (TigerTree.Mem
+                                        (TigerTree.Binop
+                                           TigerTree.Plus
+                                           lvl32
+                                           (TigerTree.Binop
+                                              TigerTree.Mul
+                                              (TigerTree.Temp tind)
+                                              TigerTrans.$fIrGenw18)))))))))) -}
+0f3a0795f859870635e92bb49d0be7b6
+  $fIrGenw_$cvarDec ::
+    TigerTrans.MemM w => TigerFrame.Access -> w TigerTrans.BExp
+  {- Arity: 2,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(U(A,1*C1(C1(U)),A,C(U),A),A,A,1*U,A,A,A,A,A,A,A,A,A,A,A,A)><L,U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMemM :: TigerTrans.MemM w)
+                   (eta :: TigerFrame.Access) ->
+                 GHC.Base.>>=
+                   @ w
+                   (TigerTrans.$p1MemM @ w $dMemM)
+                   @ GHC.Types.Int
+                   @ TigerTrans.BExp
+                   (TigerTrans.getActualLevel @ w $dMemM)
+                   (\ (i :: GHC.Types.Int) ->
+                    TigerTrans.$fIrGenw_$csimpleVar @ w $dMemM eta i)) -}
+aac41b7a386772f679ae1aeb4aba5d71
+  $fIrGenw_$cwhileExp ::
+    TigerTrans.MemM w =>
+    TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+  {- Arity: 3,
+     Strictness: <S(S(LC(C(S))LLL)LLLLLLLLLLLLLLL),U(1*U(A,C(C1(U)),A,C(U),A),1*U(A,U),1*U(A,A,C(U),A),A,A,A,A,1*U,A,A,A,A,A,A,A,A)><L,1*U><L,1*U> -}
+510e37e1fcac5419b2934439bd4a8618
+  $fShowBExp :: GHC.Show.Show TigerTrans.BExp
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.BExp
+                  TigerTrans.$fShowBExp_$cshowsPrec
+                  TigerTrans.$fShowBExp_$cshow
+                  TigerTrans.$fShowBExp_$cshowList -}
+8813d0d25356fd38e78a191c701fc39b
+  $fShowBExp1 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowBExp2) -}
+987a62e6b569e06e4cc15c050da3429a
+  $fShowBExp2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Cx "#) -}
+f95603be13d4f126790190b875931d13
+  $fShowBExp3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Nx "#) -}
+05311387bae0f1511149ba170781ec03
+  $fShowBExp4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Ex "#) -}
+510e37e1fcac5419b2934439bd4a8618
+  $fShowBExp_$cshow :: TigerTrans.BExp -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: (\ (ds :: TigerTrans.BExp) ->
+                 case ds of wild {
+                   TigerTrans.Ex e
+                   -> GHC.CString.unpackAppendCString#
+                        TigerTrans.$fShowBExp4
+                        (TigerTree.$w$cshowsPrec1 0# e (GHC.Types.[] @ GHC.Types.Char))
+                   TigerTrans.Nx e
+                   -> GHC.CString.unpackAppendCString#
+                        TigerTrans.$fShowBExp3
+                        (TigerTree.$w$cshowsPrec3 0# e (GHC.Types.[] @ GHC.Types.Char))
+                   TigerTrans.Cx ds1 -> TigerTrans.$fShowBExp1 }) -}
+510e37e1fcac5419b2934439bd4a8618
+  $fShowBExp_$cshowList :: [TigerTrans.BExp] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerTrans.BExp]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerTrans.BExp
+                   TigerTrans.$w$cshowsPrec
+                   ls
+                   s) -}
+510e37e1fcac5419b2934439bd4a8618
+  $fShowBExp_$cshowsPrec ::
+    GHC.Types.Int -> TigerTrans.BExp -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <L,A><S,1*U><L,1*U>, Inline: [0],
+     Unfolding: InlineRule (3, True, True)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: TigerTrans.BExp)
+                   (w2 :: GHC.Base.String) ->
+                 TigerTrans.$w$cshowsPrec w1 w2) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fShowExterna :: GHC.Show.Show TigerTrans.Externa
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.Externa
+                  TigerTrans.$fShowExterna_$cshowsPrec
+                  TigerTrans.$fShowExterna_$cshow
+                  TigerTrans.$fShowExterna_$cshowList -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fShowExterna1 :: TigerTrans.Externa -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: TigerTrans.Externa) (eta :: GHC.Base.String) ->
+                 case ds of wild {
+                   TigerTrans.Runtime
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowExterna4)
+                        eta
+                   TigerTrans.Propia
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowExterna2)
+                        eta }) -}
+1d4419607da4237661f58735ab177f72
+  $fShowExterna2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowExterna3) -}
+be8a03d0183106ff2c40ef9a3023b022
+  $fShowExterna3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Propia"#) -}
+a009a6fdc57b1da3c11f7baeac8c8699
+  $fShowExterna4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowExterna5) -}
+4c79ebbe064de0181641c7d270a2cbaa
+  $fShowExterna5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Runtime"#) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fShowExterna_$cshow :: TigerTrans.Externa -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: TigerTrans.Externa) ->
+                 case x of wild {
+                   TigerTrans.Runtime -> TigerTrans.$fShowExterna4
+                   TigerTrans.Propia -> TigerTrans.$fShowExterna2 }) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fShowExterna_$cshowList :: [TigerTrans.Externa] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerTrans.Externa]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerTrans.Externa
+                   TigerTrans.$fShowExterna1
+                   ls
+                   s) -}
+50958414d2ca833ee9bbbc72aadffe8e
+  $fShowExterna_$cshowsPrec ::
+    GHC.Types.Int -> TigerTrans.Externa -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <L,A><S,1*U><L,1*U>,
+     Unfolding: InlineRule (3, True, False)
+                (\ (ds :: GHC.Types.Int)
+                   (ds1 :: TigerTrans.Externa)
+                   (eta :: GHC.Base.String) ->
+                 case ds1 of wild {
+                   TigerTrans.Runtime
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowExterna4)
+                        eta
+                   TigerTrans.Propia
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowExterna2)
+                        eta }) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fShowIsProc :: GHC.Show.Show TigerTrans.IsProc
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.IsProc
+                  TigerTrans.$fShowIsProc_$cshowsPrec
+                  TigerTrans.$fShowIsProc_$cshow
+                  TigerTrans.$fShowIsProc_$cshowList -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fShowIsProc1 :: TigerTrans.IsProc -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,1*U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ds :: TigerTrans.IsProc) (eta :: GHC.Base.String) ->
+                 case ds of wild {
+                   TigerTrans.IsProc
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowIsProc4)
+                        eta
+                   TigerTrans.IsFun
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowIsProc2)
+                        eta }) -}
+9944ff190b9c72d9614609d6a487a7f0
+  $fShowIsProc2 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowIsProc3) -}
+5c10c1eb6396c38ddf7e3fefe204b9e5
+  $fShowIsProc3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("IsFun"#) -}
+6ac3706d91531800b300f309bc35eb36
+  $fShowIsProc4 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowIsProc5) -}
+f89e2c9db9d8f7ff4c0cd8aedfc78c94
+  $fShowIsProc5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("IsProc"#) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fShowIsProc_$cshow :: TigerTrans.IsProc -> GHC.Base.String
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: TigerTrans.IsProc) ->
+                 case x of wild {
+                   TigerTrans.IsProc -> TigerTrans.$fShowIsProc4
+                   TigerTrans.IsFun -> TigerTrans.$fShowIsProc2 }) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fShowIsProc_$cshowList :: [TigerTrans.IsProc] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerTrans.IsProc]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerTrans.IsProc
+                   TigerTrans.$fShowIsProc1
+                   ls
+                   s) -}
+c9c51782abee57aaf0bbdb74d1eaca00
+  $fShowIsProc_$cshowsPrec ::
+    GHC.Types.Int -> TigerTrans.IsProc -> GHC.Show.ShowS
+  {- Arity: 3, Strictness: <L,A><S,1*U><L,1*U>,
+     Unfolding: InlineRule (3, True, False)
+                (\ (ds :: GHC.Types.Int)
+                   (ds1 :: TigerTrans.IsProc)
+                   (eta :: GHC.Base.String) ->
+                 case ds1 of wild {
+                   TigerTrans.IsProc
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowIsProc4)
+                        eta
+                   TigerTrans.IsFun
+                   -> GHC.Base.augment
+                        @ GHC.Types.Char
+                        (\ @ b
+                           (c :: GHC.Types.Char -> b -> b)[OneShot]
+                           (n :: b)[OneShot] ->
+                         GHC.Base.foldr @ GHC.Types.Char @ b c n TigerTrans.$fShowIsProc2)
+                        eta }) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  $fShowLevelI :: GHC.Show.Show TigerTrans.LevelI
+  DFunId
+  {- Strictness: m, Inline: CONLIKE,
+     Unfolding: DFun:.
+                  @ TigerTrans.LevelI
+                  TigerTrans.$fShowLevelI_$cshowsPrec
+                  TigerTrans.$fShowLevelI_$cshow
+                  TigerTrans.$fShowLevelI_$cshowList -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  $fShowLevelI1 :: TigerTrans.LevelI -> GHC.Show.ShowS
+  {- Arity: 2,
+     Strictness: <S,1*U(1*U(1*U(U,U,U),1*U,1*U,1*U(U),1*U(U),1*U(U)),1*U(U))><L,U>,
+     Unfolding: (\ (w :: TigerTrans.LevelI) (w1 :: GHC.Base.String) ->
+                 case w of ww { TigerTrans.MkLI ww1 ww2 ->
+                 TigerTrans.$w$cshowsPrec1 0# ww1 ww2 w1 }) -}
+eb141048ba047617c2c52067d6268580
+  $fShowLevelI2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("}"#) -}
+422e3a8cd221557b725c70582a9686d3
+  $fShowLevelI3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("getNlvl' = "#) -}
+07dfde8e88103e8260951b1edf5fb53e
+  $fShowLevelI4 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("getFrame' = "#) -}
+884309f65fe62aee2984c2828a065113
+  $fShowLevelI5 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowLevelI6) -}
+0dd627c3124d3285e782aeb87a5683bb
+  $fShowLevelI6 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("MkLI {"#) -}
+99057ca2f63f6c0876922dbb443141da
+  $fShowLevelI7 :: [GHC.Types.Char]
+  {- Unfolding: (GHC.CString.unpackCString#
+                   TigerTrans.$fShowLevelI2) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  $fShowLevelI_$cshow :: TigerTrans.LevelI -> GHC.Base.String
+  {- Arity: 1,
+     Strictness: <S,1*U(1*U(1*U(U,U,U),1*U,1*U,1*U(U),1*U(U),1*U(U)),1*U(U))>,
+     Inline: [0],
+     Unfolding: InlineRule (1, True, False)
+                (\ (w :: TigerTrans.LevelI) ->
+                 case w of ww { TigerTrans.MkLI ww1 ww2 ->
+                 TigerTrans.$w$cshow ww1 ww2 }) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  $fShowLevelI_$cshowList :: [TigerTrans.LevelI] -> GHC.Show.ShowS
+  {- Arity: 2, Strictness: <S,1*U><L,U>,
+     Unfolding: InlineRule (2, True, False)
+                (\ (ls :: [TigerTrans.LevelI]) (s :: GHC.Base.String) ->
+                 GHC.Show.showList__
+                   @ TigerTrans.LevelI
+                   TigerTrans.$fShowLevelI1
+                   ls
+                   s) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  $fShowLevelI_$cshowsPrec ::
+    GHC.Types.Int -> TigerTrans.LevelI -> GHC.Show.ShowS
+  {- Arity: 3,
+     Strictness: <S(S),1*U(U)><S,1*U(1*U(1*U(U,U,U),1*U,1*U,1*U(U),1*U(U),1*U(U)),1*U(U))><L,U>,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: GHC.Types.Int)
+                   (w1 :: TigerTrans.LevelI)
+                   (w2 :: GHC.Base.String) ->
+                 case w of ww { GHC.Types.I# ww1 ->
+                 case w1 of ww2 { TigerTrans.MkLI ww3 ww4 ->
+                 TigerTrans.$w$cshowsPrec1 ww1 ww3 ww4 w2 } }) -}
+c5be8648554ef471571fe719b57943a4
+  $tc'C:IrGen :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   11156407095928784325##
+                   16190943200388021860##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'C:IrGen2
+                   1#
+                   TigerTrans.$tc'C:IrGen1) -}
+52a90d376b18dc032e3f86d234d03421
+  $tc'C:IrGen1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+ed90fc0b9c1781defcb460a6cac0285a
+  $tc'C:IrGen2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'C:IrGen3) -}
+5b8243fc52c9038f65b7dc4039588201
+  $tc'C:IrGen3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'C:IrGen"#) -}
+fe9bcce3f57294b7946bd9077a22ccc4
+  $tc'C:MemM :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   12711544858456729589##
+                   5305091585129885668##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'C:MemM2
+                   1#
+                   TigerTrans.$tc'C:MemM1) -}
+5b84ca5a34d45c6ee176645d38928302
+  $tc'C:MemM1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+0fb862816db8a5ad6638f9223b33f4b7
+  $tc'C:MemM2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'C:MemM3) -}
+7abd4751d0b434172683d7a4f375d477
+  $tc'C:MemM3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'C:MemM"#) -}
+8c798cf378f3151e930db9d01e7c1863
+  $tc'Cx :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   8808974914455257438##
+                   8053413415639139127##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'Cx2
+                   0#
+                   TigerTrans.$tc'Cx1) -}
+d515f76a696b9f3b7102b541082d210d
+  $tc'Cx1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+f2632f8faa80bc4d6d322fa1f9d3a865
+  $tc'Cx2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'Cx3) -}
+6a619106e806cb46d3a3b24f5b827f98
+  $tc'Cx3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Cx"#) -}
+a7c581338971fe087580c0baa9d0d582
+  $tc'Ex :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   438088096286257090##
+                   14930170459171434399##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'Ex2
+                   0#
+                   TigerTrans.$tc'Ex1) -}
+1a0e27cf38a9538c72bebb087d7ea499
+  $tc'Ex1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+f3e2bb651c24dba137a13c82eff57ac9
+  $tc'Ex2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'Ex3) -}
+26d397faf98c60af18071febd658d4b3
+  $tc'Ex3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Ex"#) -}
+64388b133534fd6a2a74a005da592774
+  $tc'IsFun :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   11375892757720794021##
+                   6185994862095071656##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'IsFun2
+                   0#
+                   TigerTrans.$tc'IsFun1) -}
+7cd8d015882a75169b69be42fef46054
+  $tc'IsFun1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m1, Inline: [~] -}
+baeb306909c35149637698ac028c9074
+  $tc'IsFun2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'IsFun3) -}
+a21732ea8548db112b08554019463614
+  $tc'IsFun3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'IsFun"#) -}
+5d5c80b38b8ed22fa4ab3ad9fda6e4ab
+  $tc'IsProc :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   3929188615380748412##
+                   17140401645226656381##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'IsProc1
+                   0#
+                   TigerTrans.$tc'IsFun1) -}
+749b1f11b7ec0a32ca15fca61f36e7b4
+  $tc'IsProc1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'IsProc2) -}
+b7e5b3f3c2ddac0d561f718671dab90b
+  $tc'IsProc2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'IsProc"#) -}
+bf14b53dba9680a9708d829ad1193515
+  $tc'MkLI :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   1224640990788104686##
+                   17795571222517307159##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'MkLI2
+                   0#
+                   TigerTrans.$tc'MkLI1) -}
+c92baf9c8869a206c99fb7ea17a64aa5
+  $tc'MkLI1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+2a162236e64fcfb5812eeab44607bf70
+  $tc'MkLI2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'MkLI3) -}
+273c0f14dbf9667fdb03f81260b12da3
+  $tc'MkLI3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'MkLI"#) -}
+04c37eb66b84f8f3bdc05504f552695a
+  $tc'Nx :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   14804582127576330804##
+                   7178373626581427373##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'Nx2
+                   0#
+                   TigerTrans.$tc'Nx1) -}
+b74063c3339cf1f07ae26fb93aff1cff
+  $tc'Nx1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+2cfde48446fed08de5fb5bcee4b01f1b
+  $tc'Nx2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'Nx3) -}
+f87c3a97dabacb2a37f3ae756356e6c7
+  $tc'Nx3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Nx"#) -}
+87a70c54da865440be39f0e0417dcc4a
+  $tc'Propia :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   4070607718527093820##
+                   11441746954032684300##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'Propia2
+                   0#
+                   TigerTrans.$tc'Propia1) -}
+6f7f1657135396999989b48ba4e22931
+  $tc'Propia1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m1, Inline: [~] -}
+15b51b81ff1c3d2c12ac196c7b3c1164
+  $tc'Propia2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'Propia3) -}
+6fcefd33ad104d91783d33addc12ca8a
+  $tc'Propia3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Propia"#) -}
+cba6b4cbff5660ce65b681efe5406b95
+  $tc'Runtime :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   11246624755719088611##
+                   5938001804136963146##
+                   TigerTrans.$trModule
+                   TigerTrans.$tc'Runtime1
+                   0#
+                   TigerTrans.$tc'Propia1) -}
+722ca409ec42b12ff5033aa1b1ecd26a
+  $tc'Runtime1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tc'Runtime2) -}
+6ec0ffbdcb68c900e86cdb705746ebba
+  $tc'Runtime2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("'Runtime"#) -}
+ebaa1a5b67da7299b7f4647d5a86405f
+  $tcBExp :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   15907681854782303010##
+                   1454981332740686081##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcBExp1
+                   0#
+                   GHC.Types.krep$*) -}
+075a0fddbb39c641b3fa52f518624886
+  $tcBExp1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tcBExp2) -}
+f0ad677d06ba8c3a9618488ab4edab4c
+  $tcBExp2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("BExp"#) -}
+bcd7a9f981a885798878512daac36fa0
+  $tcExterna :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   16344296194551952606##
+                   17959691747226458600##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcExterna1
+                   0#
+                   GHC.Types.krep$*) -}
+8fd57d1046ff50cfae383d858c1dd553
+  $tcExterna1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tcExterna2) -}
+bfe9d94e43d3162b559d8b3ddefb4ca9
+  $tcExterna2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("Externa"#) -}
+b12005266a0959ebcbb15c8fff24f53d
+  $tcIrGen :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   9808656144569149998##
+                   14840807015343483764##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcIrGen2
+                   0#
+                   TigerTrans.$tcIrGen1) -}
+67225c8744ad449dd046c84274eafb05
+  $tcIrGen1 :: GHC.Types.KindRep
+  {- HasNoCafRefs, Strictness: m4, Inline: [~] -}
+ecbaef57771163667cd1ccf3b9d03430
+  $tcIrGen2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tcIrGen3) -}
+88e89739ea0a6696677068ed41c64ef6
+  $tcIrGen3 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("IrGen"#) -}
+818fd60ae2defa1375bc27848d625f4a
+  $tcIsProc :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   11265501539427065017##
+                   15638026174998297441##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcIsProc1
+                   0#
+                   GHC.Types.krep$*) -}
+1b036d0238e50583fedccbac142a9549
+  $tcIsProc1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$fShowIsProc5) -}
+62b582ad6e5172909bf416b4e3348124
+  $tcLevelI :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   8120131562707303462##
+                   16065316330357417869##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcLevelI1
+                   0#
+                   GHC.Types.krep$*) -}
+e886dbe29e35e8cfa8c72763ce3e239e
+  $tcLevelI1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tcLevelI2) -}
+91a8f71125939ab675b7e01980aa06ba
+  $tcLevelI2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("LevelI"#) -}
+861e2423768d2ff1f6dc02c2e9ca464c
+  $tcMemM :: GHC.Types.TyCon
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.TyCon
+                   14174264758935212364##
+                   12071745851653052057##
+                   TigerTrans.$trModule
+                   TigerTrans.$tcMemM1
+                   0#
+                   TigerTrans.$tcIrGen1) -}
+03e4a58e4e5dacca27f783c663174950
+  $tcMemM1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$tcMemM2) -}
+df61e77f630c3ff358e303c1abd16190
+  $tcMemM2 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("MemM"#) -}
+643c4217dff3a2bfac2350ff181f4b7f
+  $trModule :: GHC.Types.Module
+  {- HasNoCafRefs, Strictness: m,
+     Unfolding: (GHC.Types.Module
+                   TigerTrans.$trModule2
+                   TigerTrans.$trModule1) -}
+d81bf8addcc1ff66e85764e39307bf30
+  $trModule1 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$dmallocArg9) -}
+b299549911f44d1b2dc0b045bf126894
+  $trModule2 :: GHC.Types.TrName
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (GHC.Types.TrNameS TigerTrans.$dmallocArg11) -}
+693eabaf241fc73eafe8bfa71140e50b
+  $w$cshow :: TigerFrame.Frame -> GHC.Types.Int -> GHC.Base.String
+  {- Arity: 2,
+     Strictness: <L,1*U(1*U(U,U,U),1*U,1*U,1*U(U),1*U(U),1*U(U))><L,1*U(U)>,
+     Inline: [0],
+     Unfolding: (\ (ww :: TigerFrame.Frame) (ww1 :: GHC.Types.Int) ->
+                 GHC.Base.++
+                   @ GHC.Types.Char
+                   TigerTrans.$fShowLevelI5
+                   (GHC.CString.unpackAppendCString#
+                      TigerTrans.$fShowLevelI4
+                      (case ww of ww2 { TigerFrame.Frame ww3 ww4 ww5 ww6 ww7 ww8 ->
+                       TigerFrame.$w$cshowsPrec1
+                         0#
+                         ww3
+                         ww4
+                         ww5
+                         ww6
+                         ww7
+                         ww8
+                         (GHC.Base.++
+                            @ GHC.Types.Char
+                            GHC.Show.showCommaSpace1
+                            (GHC.CString.unpackAppendCString#
+                               TigerTrans.$fShowLevelI3
+                               (case ww1 of ww12 { GHC.Types.I# ww13 ->
+                                case GHC.Show.$wshowSignedInt
+                                       0#
+                                       ww13
+                                       TigerTrans.$fShowLevelI7 of ww14 { (#,#) ww15 ww16 ->
+                                GHC.Types.: @ GHC.Types.Char ww15 ww16 } }))) }))) -}
+510e37e1fcac5419b2934439bd4a8618
+  $w$cshowsPrec ::
+    TigerTrans.BExp -> GHC.Base.String -> [GHC.Types.Char]
+  {- Arity: 2, Strictness: <S,1*U><L,1*U>, Inline: [0],
+     Unfolding: (\ (w :: TigerTrans.BExp) (w1 :: GHC.Base.String) ->
+                 case w of wild {
+                   TigerTrans.Ex e
+                   -> GHC.CString.unpackAppendCString#
+                        TigerTrans.$fShowBExp4
+                        (GHC.Base.++
+                           @ GHC.Types.Char
+                           (TigerTree.$w$cshowsPrec1 0# e (GHC.Types.[] @ GHC.Types.Char))
+                           w1)
+                   TigerTrans.Nx e
+                   -> GHC.CString.unpackAppendCString#
+                        TigerTrans.$fShowBExp3
+                        (GHC.Base.++
+                           @ GHC.Types.Char
+                           (TigerTree.$w$cshowsPrec3 0# e (GHC.Types.[] @ GHC.Types.Char))
+                           w1)
+                   TigerTrans.Cx ds
+                   -> GHC.Base.++ @ GHC.Types.Char TigerTrans.$fShowBExp1 w1 }) -}
+4c91f0bcd1faeaea9c1d25ef10d99779
+  $w$cshowsPrec1 ::
+    GHC.Prim.Int#
+    -> TigerFrame.Frame
+    -> GHC.Types.Int
+    -> GHC.Base.String
+    -> GHC.Base.String
+  {- Arity: 4,
+     Strictness: <S,U><L,1*U(1*U(U,U,U),1*U,1*U,1*U(U),1*U(U),1*U(U))><L,1*U(U)><L,U>,
+     Inline: [0],
+     Unfolding: (\ (ww :: GHC.Prim.Int#)
+                   (ww1 :: TigerFrame.Frame)
+                   (ww2 :: GHC.Types.Int)
+                   (w :: GHC.Base.String) ->
+                 case GHC.Prim.>=# ww 11# of lwild {
+                   DEFAULT
+                   -> GHC.Base.++
+                        @ GHC.Types.Char
+                        TigerTrans.$fShowLevelI5
+                        (GHC.CString.unpackAppendCString#
+                           TigerTrans.$fShowLevelI4
+                           (case ww1 of ww3 { TigerFrame.Frame ww4 ww5 ww6 ww7 ww8 ww9 ->
+                            TigerFrame.$w$cshowsPrec1
+                              0#
+                              ww4
+                              ww5
+                              ww6
+                              ww7
+                              ww8
+                              ww9
+                              (GHC.Base.++
+                                 @ GHC.Types.Char
+                                 GHC.Show.showCommaSpace1
+                                 (GHC.CString.unpackAppendCString#
+                                    TigerTrans.$fShowLevelI3
+                                    (case ww2 of ww10 { GHC.Types.I# ww11 ->
+                                     case GHC.Show.$wshowSignedInt
+                                            0#
+                                            ww11
+                                            (GHC.CString.unpackAppendCString#
+                                               TigerTrans.$fShowLevelI2
+                                               w) of ww12 { (#,#) ww13 ww14 ->
+                                     GHC.Types.: @ GHC.Types.Char ww13 ww14 } }))) }))
+                   1#
+                   -> GHC.Types.:
+                        @ GHC.Types.Char
+                        GHC.Show.$fShow(,)4
+                        (GHC.Base.++
+                           @ GHC.Types.Char
+                           TigerTrans.$fShowLevelI5
+                           (GHC.CString.unpackAppendCString#
+                              TigerTrans.$fShowLevelI4
+                              (case ww1 of ww3 { TigerFrame.Frame ww4 ww5 ww6 ww7 ww8 ww9 ->
+                               TigerFrame.$w$cshowsPrec1
+                                 0#
+                                 ww4
+                                 ww5
+                                 ww6
+                                 ww7
+                                 ww8
+                                 ww9
+                                 (GHC.Base.++
+                                    @ GHC.Types.Char
+                                    GHC.Show.showCommaSpace1
+                                    (GHC.CString.unpackAppendCString#
+                                       TigerTrans.$fShowLevelI3
+                                       (case ww2 of ww10 { GHC.Types.I# ww11 ->
+                                        case GHC.Show.$wshowSignedInt
+                                               0#
+                                               ww11
+                                               (GHC.CString.unpackAppendCString#
+                                                  TigerTrans.$fShowLevelI2
+                                                  (GHC.Types.:
+                                                     @ GHC.Types.Char
+                                                     GHC.Show.$fShow(,)2
+                                                     w)) of ww12 { (#,#) ww13 ww14 ->
+                                        GHC.Types.: @ GHC.Types.Char ww13 ww14 } }))) }))) }) -}
+3a9bd215ea5668b1f84b540df0df8088
+  $wunCx ::
+    (GHC.Base.Monad w, TigerErrores.Demon w) =>
+    TigerTrans.BExp
+    -> w ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+  {- Arity: 3,
+     Strictness: <L,1*U(A,A,A,1*C1(U),A)><L,1*U(A,A,1*C1(U),A)><S,1*U>,
+     Inline: [0],
+     Unfolding: (\ @ w :: * -> *
+                   (w1 :: GHC.Base.Monad w)
+                   (w2 :: TigerErrores.Demon w)
+                   (w3 :: TigerTrans.BExp) ->
+                 case w3 of wild {
+                   TigerTrans.Ex ds
+                   -> case ds of wild1 {
+                        DEFAULT
+                        -> GHC.Base.return
+                             @ w
+                             w1
+                             @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                             (\ (p :: (TigerTemp.Label, TigerTemp.Label)) ->
+                              TigerTree.CJump
+                                TigerTree.NE
+                                wild1
+                                TigerTrans.unEx3
+                                (case p of wild2 { (,) x ds1 -> x })
+                                (case p of wild2 { (,) ds1 y -> y }))
+                        TigerTree.Const ds1
+                        -> case ds1 of wild2 { GHC.Types.I# ds2 ->
+                           case ds2 of ds3 {
+                             DEFAULT
+                             -> GHC.Base.return
+                                  @ w
+                                  w1
+                                  @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                                  TigerTrans.$fIrGenw15
+                             0#
+                             -> GHC.Base.return
+                                  @ w
+                                  w1
+                                  @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                                  TigerTrans.$fIrGenw14 } } }
+                   TigerTrans.Nx ds
+                   -> TigerErrores.internal
+                        @ w
+                        w2
+                        @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                        TigerTrans.$fIrGenw12
+                   TigerTrans.Cx cf
+                   -> GHC.Base.return
+                        @ w
+                        w1
+                        @ ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+                        cf }) -}
+510e37e1fcac5419b2934439bd4a8618
+  data BExp where
+    Ex :: TigerTree.Exp -> BExp
+    Nx :: TigerTree.Stm -> BExp
+    Cx :: ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm) -> BExp
+50958414d2ca833ee9bbbc72aadffe8e
+  data Externa = Runtime | Propia
+6c5b0546531496c89a65f00e1776af79
+  class IrGen (w :: * -> *) where
+    procEntryExit :: TigerTrans.Level -> TigerTrans.BExp -> w ()
+    unitExp :: w TigerTrans.BExp
+    nilExp :: w TigerTrans.BExp
+    intExp :: GHC.Types.Int -> w TigerTrans.BExp
+    stringExp :: TigerSymbol.Symbol -> w TigerTrans.BExp
+    simpleVar :: TigerFrame.Access
+                 -> GHC.Types.Int -> w TigerTrans.BExp
+    varDec :: TigerFrame.Access -> w TigerTrans.BExp
+    fieldVar :: TigerTrans.BExp -> GHC.Types.Int -> w TigerTrans.BExp
+    subscriptVar :: TigerTrans.BExp
+                    -> TigerTrans.BExp -> w TigerTrans.BExp
+    recordExp :: [(TigerTrans.BExp, GHC.Types.Int)]
+                 -> w TigerTrans.BExp
+    callExp :: TigerTemp.Label
+               -> TigerTrans.Externa
+               -> TigerTrans.IsProc
+               -> TigerTrans.Level
+               -> [TigerTrans.BExp]
+               -> w TigerTrans.BExp
+    letExp :: [TigerTrans.BExp] -> TigerTrans.BExp -> w TigerTrans.BExp
+    breakExp :: w TigerTrans.BExp
+    seqExp :: [TigerTrans.BExp] -> w TigerTrans.BExp
+    preWhileforExp :: w ()
+    posWhileforExp :: w ()
+    whileExp :: TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+    forExp :: TigerTrans.BExp
+              -> TigerTrans.BExp
+              -> TigerTrans.BExp
+              -> TigerTrans.BExp
+              -> w TigerTrans.BExp
+    ifThenExp :: TigerTrans.BExp
+                 -> TigerTrans.BExp -> w TigerTrans.BExp
+    ifThenElseExp :: TigerTrans.BExp
+                     -> TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+    ifThenElseExpUnit :: TigerTrans.BExp
+                         -> TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+    assignExp :: TigerTrans.BExp
+                 -> TigerTrans.BExp -> w TigerTrans.BExp
+    envFunctionDec :: TigerTrans.Level
+                      -> w TigerTrans.BExp -> w TigerTrans.BExp
+    functionDec :: TigerTrans.BExp
+                   -> TigerTrans.Level -> TigerTrans.IsProc -> w TigerTrans.BExp
+    binOpIntExp :: TigerTrans.BExp
+                   -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+    binOpIntRelExp :: TigerTrans.BExp
+                      -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+    binOpStrExp :: TigerTrans.BExp
+                   -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+    binOpPtrExp :: TigerTrans.BExp
+                   -> TigerAbs.Oper -> TigerTrans.BExp -> w TigerTrans.BExp
+    arrayExp :: TigerTrans.BExp -> TigerTrans.BExp -> w TigerTrans.BExp
+    {-# MINIMAL procEntryExit, unitExp, nilExp, intExp, stringExp,
+                simpleVar, varDec, fieldVar, subscriptVar, recordExp, callExp,
+                letExp, breakExp, seqExp, preWhileforExp, posWhileforExp, whileExp,
+                forExp, ifThenExp, ifThenElseExp, ifThenElseExpUnit, assignExp,
+                envFunctionDec, functionDec, binOpIntExp, binOpIntRelExp,
+                binOpStrExp, binOpPtrExp, arrayExp #-}
+c9c51782abee57aaf0bbdb74d1eaca00
+  data IsProc = IsProc | IsFun
+af40134cd6efb9d8e312df5ad007a90f
+  type Level = [TigerTrans.LevelI]
+c6f90efc2c113e82c1d5968b7572e0b9
+  data LevelI
+    = MkLI {getFrame' :: TigerFrame.Frame, getNlvl' :: GHC.Types.Int}
+2f9e5c063b12b90c8c0ccc6d81fd0e6a
+  class (GHC.Base.Monad w, TigerTemp.TLGenerator w,
+         TigerErrores.Demon w) =>
+        MemM (w :: * -> *) where
+    getActualLevel :: w GHC.Types.Int
+    upLvl :: w ()
+    downLvl :: w ()
+    pushSalida :: GHC.Base.Maybe TigerTemp.Label -> w ()
+    topSalida :: w (GHC.Base.Maybe TigerTemp.Label)
+    popSalida :: w ()
+    pushLevel :: TigerTrans.Level -> w ()
+    popLevel :: w ()
+    topLevel :: w TigerTrans.Level
+    allocLocal :: TigerAbs.Escapa -> w TigerFrame.Access
+    allocArg :: TigerAbs.Escapa -> w TigerFrame.Access
+    pushFrag :: TigerFrame.Frag -> w ()
+    getFrags :: w [TigerFrame.Frag]
+    {-# MINIMAL upLvl, downLvl, pushSalida, topSalida, popSalida,
+                pushLevel, popLevel, topLevel, pushFrag, getFrags #-}
+b9d92b46a23643baea424928bf131436
+  type TransFrag = TigerFrame.Frag
+a75e51d4f59cfd308e1a7c366bfab552
+  getFrame :: TigerTrans.Level -> TigerFrame.Frame
+  {- Arity: 1, Strictness: <S,1*U>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: [TigerTrans.LevelI]) ->
+                 case x of wild {
+                   [] -> case GHC.List.badHead ret_ty TigerFrame.Frame of {}
+                   : x1 ds1 -> case x1 of wild1 { TigerTrans.MkLI ds ds2 -> ds } }) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  getFrame' :: TigerTrans.LevelI -> TigerFrame.Frame
+  RecSel Left TigerTrans.LevelI
+  {- Arity: 1, HasNoCafRefs,
+     Strictness: <S(SL),1*U(1*U(U,U,U,U,U,U),A)>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerTrans.LevelI) ->
+                 case ds of wild { TigerTrans.MkLI ds1 ds2 -> ds1 }) -}
+6b91f0e148feeb1ba5e6489a99c27fd3
+  getNlvl :: TigerTrans.Level -> GHC.Types.Int
+  {- Arity: 1, Strictness: <S,1*U>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (x :: [TigerTrans.LevelI]) ->
+                 case x of wild {
+                   [] -> case GHC.List.badHead ret_ty GHC.Types.Int of {}
+                   : x1 ds1
+                   -> case x1 of wild1 { TigerTrans.MkLI ds ds2 -> ds2 } }) -}
+c6f90efc2c113e82c1d5968b7572e0b9
+  getNlvl' :: TigerTrans.LevelI -> GHC.Types.Int
+  RecSel Left TigerTrans.LevelI
+  {- Arity: 1, HasNoCafRefs, Strictness: <S(LS),1*U(A,1*U(U))>m,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: TigerTrans.LevelI) ->
+                 case ds of wild { TigerTrans.MkLI ds1 ds2 -> ds2 }) -}
+1b95b40dec55992f1e98a13a7ce3d7c9
+  getParent :: TigerTrans.Level -> TigerTrans.Level
+  {- Arity: 1, Strictness: <S,1*U>,
+     Unfolding: InlineRule (1, True, False)
+                (\ (ds :: [TigerTrans.LevelI]) ->
+                 case ds of wild { [] -> TigerTrans.getParent1 : ds1 xs -> xs }) -}
+0bca8bfde1ebd43963fa998dcbc23d57
+  getParent1 :: TigerTrans.Level
+  {- Strictness: x -}
+5d1cccf7904307da689045cd9e75725c
+  newLevel ::
+    TigerTrans.Level
+    -> TigerSymbol.Symbol -> [TigerAbs.Escapa] -> TigerTrans.Level
+  {- Arity: 3, HasNoCafRefs, Strictness: <S,1*U><L,U><L,U>m2,
+     Inline: [0],
+     Unfolding: InlineRule (3, True, False)
+                (\ (w :: TigerTrans.Level)
+                   (w1 :: TigerSymbol.Symbol)
+                   (w2 :: [TigerAbs.Escapa]) ->
+                 case w of wild {
+                   []
+                   -> GHC.Types.:
+                        @ TigerTrans.LevelI
+                        (TigerTrans.MkLI (TigerFrame.newFrame w1 w2) TigerTrans.unEx4)
+                        (GHC.Types.[] @ TigerTrans.LevelI)
+                   : ds ds1
+                   -> case ds of wild1 { TigerTrans.MkLI ds2 lvl30 ->
+                      GHC.Types.:
+                        @ TigerTrans.LevelI
+                        (TigerTrans.MkLI
+                           (TigerFrame.newFrame w1 w2)
+                           (case lvl30 of wild2 { GHC.Types.I# x ->
+                            GHC.Types.I# (GHC.Prim.+# x 1#) }))
+                        wild } }) -}
+403ff4b88eadd8b9a4357df0e212fc5b
+  outermost :: TigerTrans.Level
+  {- Strictness: m2,
+     Unfolding: (GHC.Types.:
+                   @ TigerTrans.LevelI
+                   TigerTrans.outermost1
+                   (GHC.Types.[] @ TigerTrans.LevelI)) -}
+2d8c0c151c2b943a7614b13ace961644
+  outermost1 :: TigerTrans.LevelI
+  {- Strictness: m,
+     Unfolding: (TigerTrans.MkLI
+                   TigerTrans.outermost3
+                   TigerTrans.outermost2) -}
+2117f2b8b4ba3f73168ecda73dc2b233
+  outermost2 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# -1#) -}
+e9b36c04d0db697b3af4cd006bf1d18f
+  outermost3 :: TigerFrame.Frame
+  {- Strictness: m,
+     Unfolding: (TigerFrame.Frame
+                   TigerTrans.outermost4
+                   (GHC.Types.[] @ TigerAbs.Escapa)
+                   (GHC.Types.[] @ TigerAbs.Escapa)
+                   TigerFrame.localsInicial
+                   TigerFrame.localsInicial
+                   TigerFrame.regInicial) -}
+636fcdc48e0fb1f058479ca8b9169f7c
+  outermost4 :: Data.Text.Internal.Text
+  {- Unfolding: (Data.Text.Show.unpackCString#
+                   TigerTrans.outermost5) -}
+99f1fbcba6ef8129f59e696644e10650
+  outermost5 :: GHC.Prim.Addr#
+  {- HasNoCafRefs, Unfolding: ("_undermain"#) -}
+8a516dbc3790eb1b1144766c5594d624
+  seq :: [TigerTree.Stm] -> TigerTree.Stm
+  {- Arity: 1, HasNoCafRefs, Strictness: <S,1*U> -}
+5cac597ce0cabd487fe66e2f7c60af64
+  setFrame ::
+    TigerFrame.Frame -> TigerTrans.Level -> TigerTrans.Level
+  {- Arity: 2, Strictness: <L,U><S,1*U>m2,
+     Unfolding: InlineRule (2, True, False)
+                (\ (f :: TigerFrame.Frame) (ds :: [TigerTrans.LevelI]) ->
+                 case ds of wild {
+                   [] -> TigerTrans.setFrame1
+                   : ds1 xs
+                   -> case ds1 of wild1 { TigerTrans.MkLI ds2 l ->
+                      GHC.Types.: @ TigerTrans.LevelI (TigerTrans.MkLI f l) xs } }) -}
+10a1f305ea7a37b358e23ed68c52da5c
+  setFrame1 :: TigerTrans.Level
+  {- Strictness: x -}
+2b7cd901200ce9ecff69a7c2e4b19a52
+  unCx ::
+    (GHC.Base.Monad w, TigerTemp.TLGenerator w,
+     TigerErrores.Demon w) =>
+    TigerTrans.BExp
+    -> w ((TigerTemp.Label, TigerTemp.Label) -> TigerTree.Stm)
+  {- Arity: 4,
+     Strictness: <L,1*U(A,A,A,1*C1(U),A)><L,A><L,1*U(A,A,1*C1(U),A)><S,1*U>,
+     Inline: [0],
+     Unfolding: InlineRule (4, True, True)
+                (\ @ w :: * -> *
+                   (w1 :: GHC.Base.Monad w)
+                   (w2 :: TigerTemp.TLGenerator w)
+                   (w3 :: TigerErrores.Demon w)
+                   (w4 :: TigerTrans.BExp) ->
+                 TigerTrans.$wunCx @ w w1 w3 w4) -}
+4e4189f9e91f169cc13a372536cb1060
+  unEx ::
+    (GHC.Base.Monad w, TigerTemp.TLGenerator w) =>
+    TigerTrans.BExp -> w TigerTree.Exp
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S,U(A,C(C1(U)),A,C(U),A)><L,U(1*U,1*U)><S,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMonad :: GHC.Base.Monad w)
+                   ($dTLGenerator :: TigerTemp.TLGenerator w)
+                   (ds :: TigerTrans.BExp) ->
+                 case ds of wild {
+                   TigerTrans.Ex e -> GHC.Base.return @ w $dMonad @ TigerTree.Exp e
+                   TigerTrans.Nx s
+                   -> GHC.Base.return
+                        @ w
+                        $dMonad
+                        @ TigerTree.Exp
+                        (TigerTree.Eseq s TigerTrans.unEx3)
+                   TigerTrans.Cx cf
+                   -> let {
+                        lvl30 :: w TigerTemp.Label = TigerTemp.newLabel @ w $dTLGenerator
+                      } in
+                      GHC.Base.>>=
+                        @ w
+                        $dMonad
+                        @ TigerTemp.Temp
+                        @ TigerTree.Exp
+                        (TigerTemp.newTemp @ w $dTLGenerator)
+                        (\ (r :: TigerTemp.Temp) ->
+                         let {
+                           lvl31 :: TigerTree.Exp = TigerTree.Temp r
+                         } in
+                         let {
+                           lvl32 :: TigerTree.Stm = TigerTree.Move lvl31 TigerTrans.unEx1
+                         } in
+                         let {
+                           lvl33 :: TigerTree.Stm = TigerTree.Move lvl31 TigerTrans.unEx3
+                         } in
+                         GHC.Base.>>=
+                           @ w
+                           $dMonad
+                           @ TigerTemp.Label
+                           @ TigerTree.Exp
+                           lvl30
+                           (\ (t :: TigerTemp.Label) ->
+                            let {
+                              lvl34 :: TigerTree.Stm = TigerTree.Label t
+                            } in
+                            let {
+                              lvl35 :: [TigerTree.Stm]
+                              = GHC.Types.: @ TigerTree.Stm lvl34 (GHC.Types.[] @ TigerTree.Stm)
+                            } in
+                            let {
+                              lvl36 :: [TigerTree.Stm] = GHC.Types.: @ TigerTree.Stm lvl33 lvl35
+                            } in
+                            GHC.Base.>>=
+                              @ w
+                              $dMonad
+                              @ TigerTemp.Label
+                              @ TigerTree.Exp
+                              lvl30
+                              (\ (f :: TigerTemp.Label) ->
+                               GHC.Base.return
+                                 @ w
+                                 $dMonad
+                                 @ TigerTree.Exp
+                                 (TigerTree.Eseq
+                                    (TigerTrans.seq
+                                       (GHC.Types.:
+                                          @ TigerTree.Stm
+                                          lvl32
+                                          (GHC.Types.:
+                                             @ TigerTree.Stm
+                                             (cf (t, f))
+                                             (GHC.Types.:
+                                                @ TigerTree.Stm
+                                                (TigerTree.Label f)
+                                                lvl36))))
+                                    lvl31)))) }) -}
+490e6ef9a427cbd735f02957cfb89533
+  unEx1 :: TigerTree.Exp
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (TigerTree.Const TigerTrans.unEx2) -}
+fbb4a3d041804a60e614f7a8b6d13f96
+  unEx2 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 1#) -}
+3019ee0bf24581dd1811eb96d0b14789
+  unEx3 :: TigerTree.Exp
+  {- HasNoCafRefs, Strictness: m1,
+     Unfolding: (TigerTree.Const TigerTrans.unEx4) -}
+562e8bbbc7afca86ec924861e9c67568
+  unEx4 :: GHC.Types.Int
+  {- HasNoCafRefs, Strictness: m, Unfolding: (GHC.Types.I# 0#) -}
+687a3ece678cdac98d9146c74bb69c6b
+  unNx ::
+    (GHC.Base.Monad w, TigerTemp.TLGenerator w) =>
+    TigerTrans.BExp -> w TigerTree.Stm
+  {- Arity: 3, HasNoCafRefs,
+     Strictness: <S,U(A,1*C1(C1(U)),A,C(U),A)><L,1*U(A,1*U)><S,1*U>,
+     Unfolding: (\ @ w :: * -> *
+                   ($dMonad :: GHC.Base.Monad w)
+                   ($dTLGenerator :: TigerTemp.TLGenerator w)
+                   (ds :: TigerTrans.BExp) ->
+                 case ds of wild {
+                   TigerTrans.Ex e
+                   -> GHC.Base.return @ w $dMonad @ TigerTree.Stm (TigerTree.ExpS e)
+                   TigerTrans.Nx s -> GHC.Base.return @ w $dMonad @ TigerTree.Stm s
+                   TigerTrans.Cx cf
+                   -> GHC.Base.>>=
+                        @ w
+                        $dMonad
+                        @ TigerTemp.Label
+                        @ TigerTree.Stm
+                        (TigerTemp.newLabel @ w $dTLGenerator)
+                        (\ (t :: TigerTemp.Label) ->
+                         GHC.Base.return
+                           @ w
+                           $dMonad
+                           @ TigerTree.Stm
+                           (TigerTrans.seq
+                              (GHC.Types.:
+                                 @ TigerTree.Stm
+                                 (cf (t, t))
+                                 (GHC.Types.:
+                                    @ TigerTree.Stm
+                                    (TigerTree.Label t)
+                                    (GHC.Types.[] @ TigerTree.Stm))))) }) -}
+instance GHC.Classes.Eq [TigerTrans.Externa]
+  = TigerTrans.$fEqExterna
+instance GHC.Classes.Eq [TigerTrans.IsProc] = TigerTrans.$fEqIsProc
+instance TigerTrans.IrGen [.] = TigerTrans.$fIrGenw
+instance GHC.Show.Show [TigerTrans.BExp] = TigerTrans.$fShowBExp
+instance GHC.Show.Show [TigerTrans.Externa]
+  = TigerTrans.$fShowExterna
+instance GHC.Show.Show [TigerTrans.IsProc]
+  = TigerTrans.$fShowIsProc
+instance GHC.Show.Show [TigerTrans.LevelI]
+  = TigerTrans.$fShowLevelI
+vectorised variables:
+vectorised tycons:
+vectorised reused tycons:
+parallel variables:
+parallel tycons:
+trusted: none
+require own pkg trusted: False
+

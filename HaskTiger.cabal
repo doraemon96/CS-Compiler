@@ -41,6 +41,7 @@ library
         , TigerInterp
         , TigerQQ
       -- Tercer entrega. So vo.
+        , TigerMunch
   build-depends:       base
                        , containers
                        , text
