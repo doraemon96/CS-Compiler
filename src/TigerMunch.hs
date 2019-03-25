@@ -1,6 +1,7 @@
 module TigerMunch where
 
 import qualified TigerTemp          as Temp
+import qualified TigerFrame         as Frame
 import TigerTree
 import TigerUnique
 
@@ -33,8 +34,8 @@ instance Emitter Monadita where
 format :: (Temp.Temp -> String) -> Instr -> String
 format = undefined
 
+-- MUNCH STM
 munchStm :: (Emitter w) => Stm -> w ()
-munchStm (Seq s1 s2) = munchStm s1 >> munchStm s2
 munchStm (Move (Mem (Binop Plus e1 (Const i))) e2) = do me1 <- munchExp e1
                                                         me2 <- munchExp e2
                                                         emit $ OPER{ oassem = "sw %s1, " ++ show i ++ "(%s0)\n" -- STORE M[%s0 + i] <- %s1
@@ -47,6 +48,13 @@ munchStm (Move (Mem (Binop Plus (Const i) e1)) e2) = do me1 <- munchExp e1
                                                                    , osrc   = [me1, me2]
                                                                    , odst   = []
                                                                    , ojmp   = Nothing}
+munchStm (Move (Mem (Binop Minus e1 (Const i))) e2) = do me1 <- munchExp e1
+                                                         me2 <- munchExp e2
+                                                         emit $ OPER{ oassem = "sw %s1, -" ++ show i ++ "(%s0)\n" -- STORE M[%s0 - i] <- %s1
+                                                                    , osrc   = [me1, me2]
+                                                                    , odst   = []
+                                                                    , ojmp   = Nothing}
+-- RESTA NO CONMUTA: munchStm (Move (Mem (Binop Minus (Const i) e1)) e2)
 munchStm (Move (Mem e1) (Mem e2)) = do me1 <- munchExp e1
                                        me2 <- munchExp e2
                                        t <- Temp.newTemp
@@ -70,11 +78,98 @@ munchStm (Move (Temp i) e2) = do me2 <- munchExp e2
                                             , osrc   = [me2]
                                             , odst   = [i] 
                                             , ojmp   = Nothing}
+munchStm (Move e1 e2) = undefined --TODO?
+munchStm (ExpS e1) = undefined --TODO: munchExp solo hace un result que en turno hace emit,
+                               --      con lo cual no se descarta el temporal, pero exps no deberia guardar el resultado!
+munchStm (Jump e1 lab) = do me1 <- munchExp e1
+                            emit $ OPER{ oassem = "j " ++ (T.unpack lab) ++ "\n"
+                                       , osrc   = []
+                                       , odst   = []
+                                       , ojmp   = Just [{-NEXT_INSTRUCTION-}, lab]} --TODO
+munchStm (CJump rop e1 e2 lab1 lab2) = undefined
+munchStm (Seq s1 s2) = munchStm s1 >> munchStm s2
 munchStm (Label lab) = emit $ LABEL{ lassem = (T.unpack lab) ++ "\n" -- lab :
                                    , llab = lab}
 
 
+-- MUNCH EXP
 munchExp :: (Emitter w) => Exp -> w Temp.Temp
+munchExp (Const i) = result (\t -> emit $ OPER{ oassem = "addi %d0, $zero, " ++ show i ++ "\n" -- ADDI %d0 <- 0 + i
+                                              , osrc   = []
+                                              , odst   = [t]
+                                              , ojmp   = Nothing})
+munchExp (Name l) = undefined
+munchExp (Temp t) = return t
+munchExp (Binop Plus e1 (Const i)) = do me1 <- munchExp e1
+                                        result (\t -> emit $ OPER{ oassem = "addi %d0, %s0, " ++ show i ++ "\n" -- ADDI %d0 <- %s0 + i
+                                                                 , osrc   = [me1]
+                                                                 , odst   = [t]
+                                                                 , ojmp   = Nothing})
+munchExp (Binop Plus (Const i) e1) = do me1 <- munchExp e1
+                                        result (\t -> emit $ OPER{ oassem = "addi %d0, " ++ show i ++ ", %s0\n" -- ADDI %d0 <- i + %s0
+                                                                 , osrc   = [me1]
+                                                                 , odst   = [t]
+                                                                 , ojmp   = Nothing})
+munchExp (Binop Plus e1 e2) = do me1 <- munchExp e1
+                                 me2 <- munchExp e2
+                                 result (\t -> emit $ OPER{ oassem = "add %d0, %s0, %s1\n" -- ADD %d0 <- %s0 + %s1
+                                                          , osrc   = [me1, me2]
+                                                          , odst   = [t]
+                                                          , ojmp   = Nothing})
+munchExp (Binop Minus e1 e2) = do me1 <- munchExp e1
+                                  me2 <- munchExp e2
+                                  result (\t -> emit $ OPER{ oassem = "sub %d0, %s0, %s1\n" -- SUB %d0 <- %s0 - %s1
+                                                           , osrc   = [me1, me2]
+                                                           , odst   = [t]
+                                                           , ojmp   = Nothing})
+--TODO: Mul o Mult? Que version de mips simularemos? La respuesta los sorprendera
+munchExp (Binop Mul e1 e2) = do me1 <- munchExp e1
+                                me2 <- munchExp e2
+                                result (\t -> emit $ OPER{ oassem = "mul %d0, %s0, %s1\n" -- MUL $d0 <- %s0 * %s1
+                                                         , osrc   = [me1, me2]
+                                                         , odst   = [t]
+                                                         , ojmp   = Nothing})
+--TODO: consultar LO (aparte: que hacemos con el resto? nada?)
+munchExp (Binop Div e1 e2) = do me1 <- munchExp e1
+                                me2 <- munchExp e2
+                                result (\t -> emit $ OPER{ oassem = "div %s0, %s1\nmflo %d0\n" -- DIV %d0 <- %s0 / %s1
+                                                         , osrc   = [me1, me2]
+                                                         , odst   = [t]
+                                                         , ojmp   = Nothing})
+munchExp (Binop And e1 e2) = do me1 <- munchExp e1
+                                me2 <- munchExp e2
+                                result (\t -> emit $ OPER{ oassem = "and %d0, %s0, %s1\n" -- AND %d0 <- %s0 & %s1
+                                                         , osrc   = [me1, me2]
+                                                         , odst   = [t]
+                                                         , ojmp   = Nothing})
+munchExp (Binop Or e1 e2) = do me1 <- munchExp e1
+                               me2 <- munchExp e2
+                               result (\t -> emit $ OPER{ oassem = "or %d0, %s0, %s1\n" -- OR %d0 <- %s0 | %s1
+                                                        , osrc   = [me1, me2]
+                                                        , odst   = [t]
+                                                        , ojmp   = Nothing})
+munchExp (Binop LShift e1 (Const i)) = do me1 <- munchExp e1
+                                          result (\t -> emit $ OPER{ oassem = "sll %d0, %s0, " ++ show i ++ "\n" -- SLL %d0 <- %s0 << i
+                                                                   , osrc   = [me1]
+                                                                   , odst   = [t]
+                                                                   , ojmp   = Nothing})
+munchExp (Binop LShift e1 e2) = do me1 <- munchExp e1
+                                   me2 <- munchExp e2
+                                   result (\t -> emit $ OPER{ oassem = "sllv %d0, %s0, %s1\n" -- SLLV %d0 <- %s0 << (%s1 % 32)
+                                                            , osrc   = [me1, me2]
+                                                            , odst   = [t]
+                                                            , ojmp   = Nothing})
+munchExp (Binop RShift e1 (Const i)) = do me1 <- munchExp e1
+                                          result (\t -> emit $ OPER{ oassem = "srl %d0, %s0, " ++ show i ++ "\n" -- SRL %d0 <- %s0 >> i
+                                                                   , osrc   = [me1]
+                                                                   , odst   = [t]
+                                                                   , ojmp   = Nothing})
+munchExp (Binop RShift e1 e2) = do me1 <- munchExp e1
+                                   me2 <- munchExp e2
+                                   result (\t -> emit $ OPER{ oassem = "srlv %d0, %s0, %s1\n" -- SRLV %d0 <- %s0 >> (%s1 % 32)
+                                                            , osrc   = [me1, me2]
+                                                            , odst   = [t]
+                                                            , ojmp   = Nothing})
 munchExp (Mem (Binop Plus e1 (Const i))) = do me1 <- munchExp e1
                                               result (\t -> emit $ OPER{ oassem = "lw %d0, " ++ show i ++ "(%s0)\n" -- LOAD %d0 <- M[%s0 + i]
                                                                        , osrc   = [me1]
@@ -94,24 +189,6 @@ munchExp (Mem e1) = do me1 <- munchExp e1
                                                 , osrc   = [me1]
                                                 , odst   = [t]
                                                 , ojmp   = Nothing})
-munchExp (Binop Plus e1 (Const i)) = do me1 <- munchExp e1
-                                        result (\t -> emit $ OPER{ oassem = "addi %d0, %s0, " ++ show i ++ "\n" -- ADDI %d0 <- %s0 + i
-                                                                 , osrc   = [me1]
-                                                                 , odst   = [t]
-                                                                 , ojmp   = Nothing})
-munchExp (Binop Plus (Const i) e1) = do me1 <- munchExp e1
-                                        result (\t -> emit $ OPER{ oassem = "addi %d0, " ++ show i ++ ", %s0\n" -- ADDI %d0 <- i + %s0
-                                                                 , osrc   = [me1]
-                                                                 , odst   = [t]
-                                                                 , ojmp   = Nothing})
-munchExp (Const i) = result (\t -> emit $ OPER{ oassem = "addi %d0, $zero, " ++ show i ++ "\n" -- ADDI %d0 <- 0 + i
-                                              , osrc   = []
-                                              , odst   = [t]
-                                              , ojmp   = Nothing})
-munchExp (Binop Plus e1 e2) = do me1 <- munchExp e1
-                                 me2  <- munchExp e2
-                                 result (\t -> emit $ OPER{ oassem = "add %d0, %s0, %s1\n" -- ADD %d0 <- %s0 + %s1
-                                                          , osrc   = [me1, me2]
-                                                          , odst   = [t]
-                                                          , ojmp   = Nothing})
-munchExp (Temp t) = return t
+munchExp (Call e1 []) = undefined
+munchExp (Call e1 es) = undefined
+munchExp (Eseq s1 e1) = undefined

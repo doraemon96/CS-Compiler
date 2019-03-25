@@ -12,13 +12,17 @@ import           Prelude                 hiding ( exp )
 --
 
 -- | Registros muy usados.
-fp, sp, rv :: Temp
+fp, sp, rv, hi, lo:: Temp
 -- | Frame pointer
 fp = pack "FP"
 -- | Stack pointer
 sp = pack "SP"
 -- | Return value
 rv = pack "RV"
+-- | HI registro-ro
+hi = pack "HI"
+-- | LO registro-ro
+lo = pack "LO"
 
 -- | Word size in bytes
 wSz :: Int
