@@ -78,17 +78,74 @@ munchStm (Move (Temp i) e2) = do me2 <- munchExp e2
                                             , osrc   = [me2]
                                             , odst   = [i] 
                                             , ojmp   = Nothing}
-munchStm (Move e1 e2) = undefined --TODO?
-munchStm (ExpS e1) = undefined --TODO: munchExp solo hace un result que en turno hace emit,
-                               --      con lo cual no se descarta el temporal, pero exps no deberia guardar el resultado!
-munchStm (Jump e1 lab) = do me1 <- munchExp e1
-                            emit $ OPER{ oassem = "j " ++ (T.unpack lab) ++ "\n"
-                                       , osrc   = []
-                                       , odst   = []
-                                       , ojmp   = Just [{-NEXT_INSTRUCTION-}, lab]} --TODO
-munchStm (CJump rop e1 e2 lab1 lab2) = undefined
+munchStm (Move e1 e2) = do me1 <- munchExp e1
+                           me2 <- munchExp e2
+                           emit $ OPER{ oassem = "move %d0, %s0\n" -- MOVE %d0 <- %s0
+                                      , osrc   = [me2]
+                                      , odst   = [me1]
+                                      , ojmp   = Nothing}
+munchStm (ExpS e1) = do munchExp e1 --TODO: preguntar
+                        return ()
+munchStm (Jump (Name lab1) lab2) | lab1 == lab2 =
+                                        emit $ OPER{ oassem = "j " ++ (T.unpack lab1) ++ "\n"
+                                                   , osrc   = []
+                                                   , odst   = []
+                                                   , ojmp   = Just [lab2]}
+munchStm (Jump e1 lab) = undefined --TODO: preguntar
+-- Sabemos que lab2 (porque viene de Canon) es 
+munchStm (CJump rop e1 e2 lab1 lab2) = do me1 <- munchExp e1
+                                          me2 <- munchExp e2
+                                          case rop of
+                                                TigerTree.EQ -> emit $ OPER{ oassem = "beq %s0, %s1, " ++ (T.unpack lab1) ++ "\n" -- EQ %s0, %s1, lab1
+                                                                           , osrc   = [me1, me2]
+                                                                           , odst   = []
+                                                                           , ojmp   = Just [lab1, lab2]}
+                                                NE -> emit $ OPER{ oassem = "bne %s0, %s1, " ++ (T.unpack lab1) ++ "\n" -- NE %s0, %s1, lab1
+                                                                 , osrc   = [me1, me2]
+                                                                 , odst   = []
+                                                                 , ojmp   = Just [lab1, lab2]}
+                                                TigerTree.LT -> do t <- Temp.newTemp  
+                                                                   emit $ OPER{ oassem = "slt %d0, %s0, %s1\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- LT %s0, %s1, lab1
+                                                                              , osrc   = [me1, me2]
+                                                                              , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                              , ojmp   = Just [lab1, lab2]}
+                                                TigerTree.GT -> do t <- Temp.newTemp  
+                                                                   emit $ OPER{ oassem = "slt %d0, %s1, %s0\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- GT %s0, %s1, lab1
+                                                                              , osrc   = [me1, me2]
+                                                                              , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                              , ojmp   = Just [lab1, lab2]}
+                                                LE -> do t <- Temp.newTemp  
+                                                         emit $ OPER{ oassem = "beq %s0, %s1, " ++ (T.unpack lab1) ++ "\nslt %d0, %s0, %s1\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- LE %s0, %s1, lab1
+                                                                    , osrc   = [me1, me2]
+                                                                    , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                    , ojmp   = Just [lab1, lab2]}
+                                                GE -> do t <- Temp.newTemp  
+                                                         emit $ OPER{ oassem = "beq %s0, %s1, " ++ (T.unpack lab1) ++ "\nslt %d0, %s1, %s0\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- GE %s0, %s1, lab1
+                                                                    , osrc   = [me1, me2]
+                                                                    , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                    , ojmp   = Just [lab1, lab2]}
+                                                ULT -> do t <- Temp.newTemp  
+                                                          emit $ OPER{ oassem = "sltu %d0, %s0, %s1\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- ULT %s0, %s1, lab1
+                                                                     , osrc   = [me1, me2]
+                                                                     , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                     , ojmp   = Just [lab1, lab2]}
+                                                UGT -> do t <- Temp.newTemp  
+                                                          emit $ OPER{ oassem = "sltu %d0, %s1, %s0\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- UGT %s0, %s1, lab1
+                                                                     , osrc   = [me1, me2]
+                                                                     , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                     , ojmp   = Just [lab1, lab2]}
+                                                ULE -> do t <- Temp.newTemp  
+                                                          emit $ OPER{ oassem = "beq %s0, %s1, " ++ (T.unpack lab1) ++ "\nsltu %d0, %s0, %s1\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- ULE %s0, %s1, lab1
+                                                                     , osrc   = [me1, me2]
+                                                                     , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                     , ojmp   = Just [lab1, lab2]}
+                                                UGE -> do t <- Temp.newTemp  
+                                                          emit $ OPER{ oassem = "beq %s0, %s1, " ++ (T.unpack lab1) ++ "\nsltu %d0, %s1, %s0\nbne %d0, $zero, " ++ (T.unpack lab1) ++ "\n" -- UGE %s0, %s1, lab1
+                                                                     , osrc   = [me1, me2]
+                                                                     , odst   = [t] --TODO: consultar, es intermedio, se pone en dst?
+                                                                     , ojmp   = Just [lab1, lab2]}
 munchStm (Seq s1 s2) = munchStm s1 >> munchStm s2
-munchStm (Label lab) = emit $ LABEL{ lassem = (T.unpack lab) ++ "\n" -- lab :
+munchStm (Label lab) = emit $ LABEL{ lassem = (T.unpack lab) ++ ":\n" -- lab :
                                    , llab = lab}
 
 
@@ -98,7 +155,8 @@ munchExp (Const i) = result (\t -> emit $ OPER{ oassem = "addi %d0, $zero, " ++ 
                                               , osrc   = []
                                               , odst   = [t]
                                               , ojmp   = Nothing})
-munchExp (Name l) = undefined
+munchExp (Name l) = result (\t -> emit $ LABEL{ lassem = T.unpack l
+                                              , llab   = l}) --TODO: consultar si debe tener definicion
 munchExp (Temp t) = return t
 munchExp (Binop Plus e1 (Const i)) = do me1 <- munchExp e1
                                         result (\t -> emit $ OPER{ oassem = "addi %d0, %s0, " ++ show i ++ "\n" -- ADDI %d0 <- %s0 + i
@@ -189,6 +247,12 @@ munchExp (Mem e1) = do me1 <- munchExp e1
                                                 , osrc   = [me1]
                                                 , odst   = [t]
                                                 , ojmp   = Nothing})
-munchExp (Call e1 []) = undefined
+-- Primeros 4 params en $a0 a $a3 (agregar a TigerFrame?)
+-- Parametros subsecuentes en el stack
+-- Primeros 16 bytes del stack no usados
+-- 1er param en 16($sp), 2do en 20($sp), nesimo en 14+4n($sp)
+-- Return value en $v0
+munchExp (Call (Name f) []) = undefined
 munchExp (Call e1 es) = undefined
-munchExp (Eseq s1 e1) = undefined
+munchExp (Eseq s1 e1) = do munchStm s1 --TODO: preguntar
+                           munchExp e1
