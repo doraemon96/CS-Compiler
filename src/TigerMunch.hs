@@ -6,7 +6,8 @@ import TigerTree
 import TigerUnique
 
 import Control.Monad.Trans.State.Lazy
-import Data.Text                    as T
+import qualified Data.Text          as T
+import qualified Data.List.Utils    as LU
 
 data Instr = OPER { oassem :: String
                   , odst   :: [Temp.Temp]
@@ -32,7 +33,22 @@ instance Emitter Monadita where
                     return t
 
 format :: (Temp.Temp -> String) -> Instr -> String
-format = undefined
+format f ins = case ins of
+                    OPER{}  -> let seps = LU.split "%" $ oassem ins
+                                in replace f seps (osrc ins) (odst ins)
+                    MOVE{}  -> let seps = LU.split "%" $ massem ins
+                                in replace f seps [msrc ins] [mdst ins]
+                    LABEL{} -> lassem ins
+
+-- replace :: SeparatedString -> Source -> Destination -> Result
+replace :: (Temp.Temp -> String) -> [String] -> [Temp.Temp] -> [Temp.Temp] -> String
+replace _ []       _    _    = ""
+replace f (s:strs) srcs dsts = (s ++ (replace' f strs srcs dsts))
+
+replace' _ []       _    _    = ""
+replace' f (s:strs) srcs dsts | head s == 's' = (f (srcs !! (read [head (tail s)] :: Int)) ++ (tail (tail s))) ++ replace' f strs srcs dsts
+                              | head s == 'd' = (f (dsts !! (read [head (tail s)] :: Int)) ++ (tail (tail s))) ++ replace' f strs srcs dsts
+                              | otherwise = undefined
 
 -- MUNCH STM
 munchStm :: (Emitter w) => Stm -> w ()
