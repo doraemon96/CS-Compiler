@@ -53,6 +53,7 @@ library
                        -- QuasiQuoting things
                        , syb
                        , template-haskell
+                       , MissingH
   default-language:    Haskell2010
   default-extensions: FlexibleInstances
                     , TypeFamilies

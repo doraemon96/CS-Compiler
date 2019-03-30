@@ -499,7 +499,6 @@ instance (MemM w) => IrGen w where
             Abs.DivideOp -> return $ Ex $ Binop Div ele ere
             _ -> internal $ pack "BASSSURA JAPISHH #25j"
     -- binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
-    -- CONSULTAR: Permitimos comparaciones <, > en strings?
     binOpStrExp strl op strr = do
         estrl <- unEx strl
         estrr <- unEx strr

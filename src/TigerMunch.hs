@@ -102,11 +102,15 @@ munchStm (Move e1 e2) = do me1 <- munchExp e1
                                       , ojmp   = Nothing}
 munchStm (ExpS e1) = do munchExp e1 --TODO: preguntar
                         return ()
-munchStm (Jump (Name lab1) lab2) | lab1 == lab2 =
+munchStm (Jump (Name lab1) lab2) | lab1 == lab2 = do
                                         emit $ OPER{ oassem = "j " ++ (T.unpack lab1) ++ "\n"
                                                    , osrc   = []
                                                    , odst   = []
                                                    , ojmp   = Just [lab2]}
+                                        emit $ OPER{ oassem = "nop\n"
+                                                   , osrc   = []
+                                                   , odst   = []
+                                                   , ojmp   = Nothing}
 munchStm (Jump e1 lab) = undefined --TODO: preguntar
 -- Sabemos que lab2 (porque viene de Canon) es 
 munchStm (CJump rop e1 e2 lab1 lab2) = do me1 <- munchExp e1
@@ -196,7 +200,6 @@ munchExp (Binop Minus e1 e2) = do me1 <- munchExp e1
                                                            , osrc   = [me1, me2]
                                                            , odst   = [t]
                                                            , ojmp   = Nothing})
---TODO: Mul o Mult? Que version de mips simularemos? La respuesta los sorprendera
 munchExp (Binop Mul e1 e2) = do me1 <- munchExp e1
                                 me2 <- munchExp e2
                                 result (\t -> emit $ OPER{ oassem = "mul %d0, %s0, %s1\n" -- MUL $d0 <- %s0 * %s1
@@ -268,7 +271,22 @@ munchExp (Mem e1) = do me1 <- munchExp e1
 -- Primeros 16 bytes del stack no usados
 -- 1er param en 16($sp), 2do en 20($sp), nesimo en 14+4n($sp)
 -- Return value en $v0
-munchExp (Call (Name f) []) = undefined
-munchExp (Call e1 es) = undefined
+munchExp (Call (Name f) es) = do args <- munchArgs es
+                                 result (\t -> emit $ OPER{ oassem = "jal " ++ (T.unpack f) ++ "\n"
+                                                          , osrc   = args
+                                                          , odst   = calldefs -- TODO
+                                                          , ojmp   = Just [] })
 munchExp (Eseq s1 e1) = do munchStm s1 --TODO: preguntar
                            munchExp e1
+
+calldefs = []
+--
+munchArgs :: (Emitter w) => [Exp] -> w [Temp.Temp]
+munchArgs = munchArgs' 0
+
+munchArgs' :: (Emitter w) => Int -> [Exp] -> w [Temp.Temp]
+munchArgs' _ []     = return []
+munchArgs' n (e:es) = do t    <- Temp.newTemp
+                         args <- munchArgs' (n+1) es
+                         return (t:args)
+

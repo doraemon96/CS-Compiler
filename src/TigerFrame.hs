@@ -8,21 +8,72 @@ import           TigerAbs                       ( Escapa(..) )
 import           TigerSymbol
 
 import           Prelude                 hiding ( exp )
+import           Data.Map                as Map
 
 --
 
 -- | Registros muy usados.
-fp, sp, rv, hi, lo:: Temp
+fp, sp, rv, hi, lo :: Temp
 -- | Frame pointer
-fp = pack "FP"
+fp = pack "$fp"
 -- | Stack pointer
-sp = pack "SP"
--- | Return value
-rv = pack "RV"
+sp = pack "$sp"
+-- | Return value -- FIXME
+rv = pack "$rv"
 -- | HI registro-ro
 hi = pack "HI"
 -- | LO registro-ro
 lo = pack "LO"
+-- | ZERO
+zero = pack "$zero"
+-- | Return Adress
+ra = pack "$ra"
+
+
+a0, a1, a2, a3 :: Temp
+a0 = pack "$a0"
+a1 = pack "$a1"
+a2 = pack "$a2"
+a3 = pack "$a3"
+
+s0, s1, s2, s3, s4, s5, s6, s7, s8 :: Temp
+s0 = pack "$s0"
+s1 = pack "$s1"
+s2 = pack "$s2"
+s3 = pack "$s3"
+s4 = pack "$s4"
+s5 = pack "$s5"
+s6 = pack "$s6"
+s7 = pack "$s7"
+s8 = pack "$s8"
+
+t0, t1, t2, t3, t4, t5, t6, t7, t8 :: Temp
+t0 = pack "$t0"
+t1 = pack "$t1"
+t2 = pack "$t2"
+t3 = pack "$t3"
+t4 = pack "$t4"
+t5 = pack "$t5"
+t6 = pack "$t6"
+t7 = pack "$t7"
+t8 = pack "$t8"
+t9 = pack "$t9" 
+
+-- | Mapping from special temps to their names TODO
+tempMap = empty :: Map.Map Temp String
+
+
+-- CONSULTAR: Agregamos hi y lo a algun lado?
+specialregs, argregs, calleesaves, callersaves :: [Temp]
+-- | Special Regs
+specialregs = [fp, sp, rv, zero, ra]
+-- | Argument Regs
+argregs     = [a0, a1, a2, a3]
+-- | Callee Saves
+calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7, s8]
+-- | Caller Saves
+callersaves = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9]
+
 
 -- | Word size in bytes
 wSz :: Int
@@ -180,3 +231,9 @@ exp (InFrame k) e = Mem (Binop Plus (auxexp e) (Const k))
   -- nivel tendría que ser el mismo, sino hay un error en el calculo de escapes.
 exp (InReg l) c | c == 0    = error "Megaerror en el calculo de escapes?"
                 | otherwise = Temp l
+
+procEntryExit2 :: Frame -> [TigerMunch.Instr] -> [TigerMunch.Instr]
+procEntryExit2 fram bod = bod ++ [TigerMunch.OPER{ oassem = ""
+                                                 , osrc   = [zero, ra, sp] ++ calleesaves
+                                                 , odst   = []
+                                                 , ojmp   = Just []}]

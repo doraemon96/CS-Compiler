@@ -226,22 +226,12 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 transDecs :: (MemM w, Manticore w) => [Dec] -> w (BExp,Tipo) -> w ([BExp],Tipo)
 transDecs [] m = do (x,y) <- m
                     return ([x],y)
--- CONSULTAR: como llevamos la lista de bexp? y habria que llevar... asignaciones de bexp a algo no?
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
                                                         when (et == TNil) $ addpos (derror (pack "No se puede inferir tipo de record inicializado a nil.")) p
                                                         lev     <- TTr.getActualLevel
                                                         acc     <- TTr.allocLocal escap
                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
                                                         return (eb:bexps, tipo)
--- ..1..
--- var a = [init]
--- ..2..
--- init \in AST
--- transExp init \mapsto eb \in BExp (IR)
---
--- IR(..1..) ++ eb ++ IR(..2..)
---  En realidad, por cada let voy a tener
---  CodigoIR inicial de cada variable, seq [eb1,eb2,eb3,...] ++ CodBody
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp init
                                                          wt      <- addpos (getTipoT t) p 
                                                          bt      <- tiposIguales et wt
@@ -321,7 +311,7 @@ transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ der
                                                            insertTipoT s (t' uNicos flds') $ propagarS s (t' uNicos flds') nicos m
                                                                where ordered = List.sortBy (Ord.comparing fst) flds
                                                                      (syms , tys) = unzip ordered
-                                                                     t' u f = TRecord (zip3 syms (P.map (undoRef s (t' u f)) f) [0..]) u --TODO: cambiar nombres
+                                                                     t' u f = TRecord (zip3 syms (P.map (undoRef s (t' u f)) f) [0..]) u
 
                                                     propagarS :: (Manticore w) => Symbol -> Tipo -> [Symbol] -> w a -> w a
                                                     propagarS s t [] m = m
@@ -467,7 +457,6 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        unless (esInt tlo) $ addpos (derror (pack "Limite inferior no es entero.")) p
                                        (ehi,thi) <- transExp hi
                                        unless (esInt thi) $ addpos (derror (pack "Limite superior no es entero.")) p
-                                       --(env,tnv) <- transVar (SimpleVar nv) --TODO: testear, si descomentamos deberia romper
                                        TTr.preWhileforExp
                                        acc <- TTr.allocLocal mb
                                        lev <- TTr.getActualLevel
@@ -497,7 +486,6 @@ transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
 data Estado = Est {
                 vEnv     :: M.Map Symbol EnvEntry 
                 , tEnv   :: M.Map Symbol Tipo
-                -- CONSULTAR level deberia ser Level o [Level]?
                 , level  :: [Level]
                 , salida :: [Maybe Label]
                 , frag   :: [Frag]
