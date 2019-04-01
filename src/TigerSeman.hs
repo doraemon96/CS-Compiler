@@ -171,7 +171,8 @@ transVar :: (MemM w, Manticore w) => Var -> w (BExp, Tipo)
 -- ** transVar :: (Manticore w) => Var -> w ( () , Tipo)
 transVar (SimpleVar s)      = do 
                                 (ty, acc, lev) <- getTipoValV s
-                                (,ty) <$> TTr.simpleVar acc lev
+                                lvl <- getActualLevel
+                                (,ty) <$> TTr.simpleVar acc (lvl - lev)
 transVar (FieldVar v s)     = transVar v >>= \case
                                     (brec , TRecord lt _) -> maybe (derror (pack "Not a record field")) 
                                                                    (\(t, i) -> (,t) <$> TTr.fieldVar brec i) --chequear i
@@ -460,9 +461,7 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        TTr.preWhileforExp
                                        acc <- TTr.allocLocal mb
                                        lev <- TTr.getActualLevel
-                                       env <- TTr.simpleVar acc lev 
-                                       -- ^ CONSULTAR si esta bien definido env asi. Segun simpleVar, en su llamada a exp,
-                                       -- lev es la diferencia de niveles... why?
+                                       env <- TTr.simpleVar acc 0
                                        (ebo,tbo) <- insertVRO nv acc lev (transExp bo)
                                        b   <- tiposIguales TUnit tbo
                                        unless b $ addpos (derror (pack "El for retorna algo (y no debe).")) p

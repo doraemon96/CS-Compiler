@@ -8,9 +8,8 @@ import           TigerAbs                       ( Escapa(..) )
 import           TigerSymbol
 
 import           Prelude                 hiding ( exp )
-import           Data.Map                as Map
+--import           Data.Map                as Map
 
---
 
 -- | Registros muy usados.
 fp, sp, rv, hi, lo :: Temp
@@ -18,9 +17,9 @@ fp, sp, rv, hi, lo :: Temp
 fp = pack "$fp"
 -- | Stack pointer
 sp = pack "$sp"
--- | Return value -- FIXME
-rv = pack "$rv"
--- | HI registro-ro
+-- | Return value --TODO: ojo las runtime
+rv = pack "$v0"
+-- | HI registro-ro  --TODO: borrar
 hi = pack "HI"
 -- | LO registro-ro
 lo = pack "LO"
@@ -60,20 +59,7 @@ t8 = pack "$t8"
 t9 = pack "$t9" 
 
 -- | Mapping from special temps to their names TODO
-tempMap = empty :: Map.Map Temp String
-
-
--- CONSULTAR: Agregamos hi y lo a algun lado?
-specialregs, argregs, calleesaves, callersaves :: [Temp]
--- | Special Regs
-specialregs = [fp, sp, rv, zero, ra]
--- | Argument Regs
-argregs     = [a0, a1, a2, a3]
--- | Callee Saves
-calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7, s8]
--- | Caller Saves
-callersaves = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9]
-
+--tempMap = empty :: Map.Map Temp String
 
 -- | Word size in bytes
 wSz :: Int
@@ -105,12 +91,19 @@ argsInicial = 0
 regInicial = 1
 localsInicial = 0
 
--- | Listas de regustros que define la llamada y registros especiales
-calldefs, specialregs :: [Temp]
-calldefs = [rv]
-specialregs = [rv, fp, sp]
-
+-- | Listas de registros que define la llamada y registros especiales
+specialregs, argregs, calleesaves, callersaves, calldefs :: [Temp]
+-- | Special Regs
+specialregs = [fp, sp, rv, zero, ra, lo]
+-- | Argument Regs
+argregs     = [a0, a1, a2, a3]
+-- | Callee Saves
+calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7, s8]
+-- | Caller Saves
+callersaves = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9]
 -- | Tipo de dato que define el acceso a variables.
+calldefs = rv : ra : callersaves
+
 data Access =
   -- | En memoria, acompañada de una dirección
   InFrame Int
@@ -232,8 +225,8 @@ exp (InFrame k) e = Mem (Binop Plus (auxexp e) (Const k))
 exp (InReg l) c | c == 0    = error "Megaerror en el calculo de escapes?"
                 | otherwise = Temp l
 
-procEntryExit2 :: Frame -> [TigerMunch.Instr] -> [TigerMunch.Instr]
-procEntryExit2 fram bod = bod ++ [TigerMunch.OPER{ oassem = ""
-                                                 , osrc   = [zero, ra, sp] ++ calleesaves
-                                                 , odst   = []
-                                                 , ojmp   = Just []}]
+--procEntryExit2 :: Frame -> [TigerMunch.Instr] -> [TigerMunch.Instr]
+--procEntryExit2 fram bod = bod ++ [TigerMunch.OPER{ oassem = ""
+--                                                 , osrc   = [zero, ra, sp] ++ calleesaves
+--                                                 , odst   = []
+--                                                 , ojmp   = Just []}]

@@ -10,8 +10,8 @@ import qualified Data.Text          as T
 import qualified Data.List.Utils    as LU
 
 data Instr = OPER { oassem :: String
-                  , odst   :: [Temp.Temp]
-                  , osrc   :: [Temp.Temp]
+                  , odst   :: [Temp.Temp] -- kill, use
+                  , osrc   :: [Temp.Temp] -- gen, def
                   , ojmp   :: Maybe [Temp.Label] } 
            | MOVE { massem :: String
                   , mdst   :: Temp.Temp
@@ -89,18 +89,22 @@ munchStm (Move (Mem e1) e2) = do me1 <- munchExp e1
                                             , osrc   = [me1, me2]
                                             , odst   = [] 
                                             , ojmp   = Nothing}
+munchStm (Move (Temp i1) (Temp i2)) = do emit $ MOVE{ massem = "move %d0, %s0\n" -- MOVE %d0 <- %s0
+                                                    , msrc   = i2
+                                                    , mdst   = i1} 
 munchStm (Move (Temp i) e2) = do me2 <- munchExp e2
                                  emit $ OPER{ oassem = "add %d0, %s0, $zero\n" -- ADD %d0 <- %s0 + %r0
                                             , osrc   = [me2]
                                             , odst   = [i] 
                                             , ojmp   = Nothing}
+-- TODO: ambos exp reducen a temps, se puede reducir? (es decir, le ponemos MOVE o OPER?)
 munchStm (Move e1 e2) = do me1 <- munchExp e1
                            me2 <- munchExp e2
                            emit $ OPER{ oassem = "move %d0, %s0\n" -- MOVE %d0 <- %s0
                                       , osrc   = [me2]
                                       , odst   = [me1]
                                       , ojmp   = Nothing}
-munchStm (ExpS e1) = do munchExp e1 --TODO: preguntar
+munchStm (ExpS e1) = do munchExp e1 --TODO: testear que modifica el state
                         return ()
 munchStm (Jump (Name lab1) lab2) | lab1 == lab2 = do
                                         emit $ OPER{ oassem = "j " ++ (T.unpack lab1) ++ "\n"
@@ -206,7 +210,6 @@ munchExp (Binop Mul e1 e2) = do me1 <- munchExp e1
                                                          , osrc   = [me1, me2]
                                                          , odst   = [t]
                                                          , ojmp   = Nothing})
---TODO: consultar LO (aparte: que hacemos con el resto? nada?)
 munchExp (Binop Div e1 e2) = do me1 <- munchExp e1
                                 me2 <- munchExp e2
                                 result (\t -> emit $ OPER{ oassem = "div %s0, %s1\nmflo %d0\n" -- DIV %d0 <- %s0 / %s1
@@ -274,13 +277,12 @@ munchExp (Mem e1) = do me1 <- munchExp e1
 munchExp (Call (Name f) es) = do args <- munchArgs es
                                  result (\t -> emit $ OPER{ oassem = "jal " ++ (T.unpack f) ++ "\n"
                                                           , osrc   = args
-                                                          , odst   = calldefs -- TODO
+                                                          , odst   = Frame.calldefs
                                                           , ojmp   = Just [] })
-munchExp (Eseq s1 e1) = do munchStm s1 --TODO: preguntar
+munchExp (Eseq s1 e1) = do munchStm s1
                            munchExp e1
 
-calldefs = []
---
+-- MUNCH ARGS
 munchArgs :: (Emitter w) => [Exp] -> w [Temp.Temp]
 munchArgs = munchArgs' 0
 

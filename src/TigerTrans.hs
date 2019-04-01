@@ -28,6 +28,7 @@ import           Data.Ord                      as Ord hiding ( EQ
                                                 , LT
                                                 )
 import           Data.Text
+import           Data.Maybe                     (isJust)
 
 
 import           Debug.Trace
@@ -499,17 +500,25 @@ instance (MemM w) => IrGen w where
             Abs.DivideOp -> return $ Ex $ Binop Div ele ere
             _ -> internal $ pack "BASSSURA JAPISHH #25j"
     -- binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
+    -- TODO: llamar a _stringCompare y pasarle el rv a CJUMP
     binOpStrExp strl op strr = do
         estrl <- unEx strl
         estrr <- unEx strr
-        case op of  
-            Abs.EqOp  -> return $ Cx $ (\(t,f) -> CJump EQ estrl estrr t f)
-            Abs.NeqOp -> return $ Cx $ (\(t,f) -> CJump NE estrl estrr t f)
-            Abs.LtOp  -> return $ Cx $ (\(t,f) -> CJump LT estrl estrr t f)
-            Abs.LeOp  -> return $ Cx $ (\(t,f) -> CJump LE estrl estrr t f)
-            Abs.GtOp  -> return $ Cx $ (\(t,f) -> CJump GT estrl estrr t f)
-            Abs.GeOp  -> return $ Cx $ (\(t,f) -> CJump GE estrl estrr t f)
-            _ -> internal $ pack "MASTURBACION ACADEMICA #12n"
+        t     <- newTemp
+        let jmpop' = case op of
+                        Abs.EqOp  -> Just EQ
+                        Abs.NeqOp -> Just NE
+                        Abs.LtOp  -> Just LT
+                        Abs.LeOp  -> Just LE
+                        Abs.GtOp  -> Just GT
+                        Abs.GeOp  -> Just GE
+                        _         -> Nothing
+        maybe (internal (pack "MASTURBACION ACADEMICA #12n"))
+              (\jmpop -> return $ Cx $ (\(t,f) -> seq [ ExpS $ externalCall "_stringCompare" [estrl, estrr]
+                                                      , Move (Temp t) (Temp rv)
+                                                      , CJump jmpop (Temp t) (Const 0) t f]
+                                       ))
+              (jmpop')
     --binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
     binOpIntRelExp le op re = do
         ele <- unEx le
