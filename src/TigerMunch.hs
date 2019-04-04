@@ -17,7 +17,7 @@ data Instr = OPER { oassem :: String
                   , mdst   :: Temp.Temp
                   , msrc   :: Temp.Temp } 
            | LABEL { lassem :: String
-                   , llab   :: Temp.Label }
+                   , llab   :: Temp.Label } deriving (Show, Eq)
 
 type Monadita = StateT [Instr] StGen
 
