@@ -2,7 +2,9 @@ module TigerLiveness where
 
 import Data.List                               (nub)
 import Data.Map.Strict                      as M
+import Data.Maybe
 import qualified Control.Monad.State.Strict as ST
+import Control.Monad.Extra
 
 import TigerTemp                            as Temp
 import TigerMunch                           as Mn
@@ -36,16 +38,13 @@ emptyFG = FGRAPH{ control = G.empty
 
 -- | Toma una lista de instrucciones y devuelve un grafo de flujo
 --   junto a una lista de nodos que corresponde exactamente a las instrucciones
-
--- TODO: revisar funciones instrs2graph e instrs2graph'
 instrs2graph :: [Mn.Instr] -> FlowGraph
-instrs2graph = let ((def, use, isMove), graph) = ST.runState instrs2graph' emptyFG
-               in  FGRAPH graph def use isMove
+instrs2graph inss = let ((def, use, isMove), graph) = ST.runState (instrs2graph' inss) G.empty
+                    in  FGRAPH graph def use isMove
 
 instrs2graph' :: [Mn.Instr] -> ST.State GraphFG (M.Map NodeFG [Temp.Temp], M.Map NodeFG [Temp.Temp], M.Map NodeFG Bool)
-instrs2graph' inss = do mlab               <- insertLabels inss
-                        (def, use, isMove) <- insertInstrs inss mlab
-                        return (def, use, isMove)
+instrs2graph' inss = do mlab <- insertLabels inss
+                        insertInstrs inss mlab
 
 -- | Primera pasada, inserto solo los labels para poder referenciarlos
 --   mas adelante (en los Jump)
@@ -58,10 +57,35 @@ insertLabels inss = insertLabels' inss M.empty
                                                                 _       -> insertLabels' inss labelMap
                             
 
-insertInstrs :: [Mn.Instr] -> (Temp.Label -> Mn.Instr) -> ST.State GraphFG (M.Map NodeFG [Temp.Temp], M.Map NodeFG [Temp.Temp], M.Map NodeFG Bool)
-insertInstrs inss labfn = undefined
-
-
+insertInstrs :: [Mn.Instr] -> M.Map Temp.Label (Node Mn.Instr) -> ST.State GraphFG (M.Map NodeFG [Temp.Temp], M.Map NodeFG [Temp.Temp], M.Map NodeFG Bool)
+insertInstrs inss labmap = let getNode ins = case ins of
+                                                LABEL{} -> return $ fromJust $ M.lookup (llab ins) labmap -- si no encuentra, rompe
+                                                _       -> G.newNode ins
+                               insertInstrs' []         (def, use, isMove) lastNode = return (def, use, isMove)
+                               insertInstrs' (ins:inss) (def, use, isMove) lastNode = do
+                                    node <- getNode ins
+                                    let def' = M.insert node (case ins of 
+                                                                  OPER{} -> odst ins
+                                                                  MOVE{} -> [mdst ins]
+                                                                  _      -> []         ) def
+                                        use' = M.insert node (case ins of 
+                                                                  OPER{} -> osrc ins
+                                                                  MOVE{} -> [msrc ins]
+                                                                  _      -> []         ) use
+                                        isMove' = M.insert node (case ins of 
+                                                                     MOVE{} -> True
+                                                                     _      -> False ) isMove
+                                    -- Agregamos la arista unicamente si el ultimo nodo no era un jump
+                                    whenJust lastNode (\ln -> case G.content ln of
+                                                                op@OPER{} -> maybe (return ()) (const (G.newEdge ln node)) (ojmp op)
+                                                                _         -> G.newEdge ln node)
+                                    case ins of
+                                        OPER{} -> whenJust (ojmp ins) (mapM_ (\jmp -> whenJust (M.lookup jmp labmap) (G.newEdge node)))
+                                        _      -> return () 
+                                    insertInstrs' inss (def', use', isMove') (Just node)
+                           in insertInstrs' inss (M.empty, M.empty, M.empty) Nothing
+                                     
+                                    
 {-
  -  LIVENESS  -
  -}
