@@ -50,6 +50,12 @@ replace' f (s:strs) srcs dsts | head s == 's' = (f (srcs !! (read [head (tail s)
                               | head s == 'd' = (f (dsts !! (read [head (tail s)] :: Int)) ++ (tail (tail s))) ++ replace' f strs srcs dsts
                               | otherwise = undefined
 
+
+-- CODEGEN
+-- TODO: Para que usamos el Frame aca?
+codeGen :: Frame.Frame -> Stm -> [Instr]
+codeGen frame stm = reverse $ snd $ fst $ TigerUnique.evalState (runStateT (munchStm stm :: Monadita ()) []) 0
+
 -- MUNCH STM
 munchStm :: (Emitter w) => Stm -> w ()
 munchStm (Move (Mem (Binop Plus e1 (Const i))) e2) = do me1 <- munchExp e1
