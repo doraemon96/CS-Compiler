@@ -3,6 +3,7 @@ module TigerLiveness where
 import Data.List                               (nub)
 import Data.Map.Strict                      as M
 import Data.Maybe
+import Data.Set                             as Set
 import qualified Control.Monad.State.Strict as ST
 import Control.Monad.Extra
 
@@ -90,17 +91,49 @@ insertInstrs inss labmap = let getNode ins = case ins of
  -  LIVENESS  -
  -}
 
---class Liveness where
---    data IGraph = IGRAPH {
---                           graph :: ()
+class Liveness where
+-- OLD
+--    data IGraph = IGRAPH { graph :: ()
 --                         , tnode :: ()
 --                         , gtemp :: ()
 --                         , moves :: ()
 --                         } deriving (Show, Eq)
---
----- | Toma un grafo de flujo y devuelve: un grafo de interferencia y una tabla
-----   que mapea cada nodo del grafo de flujo al conjunto de temporarios que estan
-----   vivos-en-salida
 --interferenceGraph :: FlowGraph -> (IGraph, M.Map Node [Temp.Temp])
---interferenceGraph = undefined
+-- \OLD
 
+    -- LivenessMap lleva un par (liveIn, liveOut)
+    type LivenessMap =  M.Map Node (Set.Set Temp.Temp, Set.Set Temp.Temp)
+
+-- | Toma un grafo de flujo y devuelve: un grafo de interferencia y una tabla
+--   que mapea cada nodo del grafo de flujo al conjunto de temporarios que estan
+--   vivos-en-salida
+interferenceGraph :: FlowGraph -> LivenessMap
+interferenceGraph flow = 
+    let fcontrol = control flow
+        fdef     = def flow
+        fuse     = use flow
+--      _        = ismove flow
+
+        computeLiveness :: NodeFG -> ST.State LivenessMap ()
+        computeLiveness node =
+            let ndef   = Set.fromList (fdef node)
+                nuse   = Set.fromList (fuse node)
+                nsuuccs = (succs fcontrol) M.! node -- PRECAUCION (puede tirar error) 
+                getLiveIn lout = Set.union nuse (Set.difference lout ndef)
+                getLiveOut st  = Set.unions $ map (\succ -> fst . fromMaybe (Set.empty, Set.empty) (M.lookup succ st)) nsuccs
+                
+                loop (liveIn, liveOut) = do 
+                    st <- ST.get
+                    liveOut' = getLiveOut st
+                    liveIn'  = getLiveIn liveOut'
+                    ST.modify (M.insert node (liveIn', liveOut'))
+                    if liveIn == liveIn' && liveOut == liveOut'
+                    then return ()
+                    else loop (liveIn', liveOut')
+                
+            in loop (Set.empty, Set.empty)
+
+        -- mapM concatena los efectos? TODO
+        buildIntereference = mapM_ computeLiveness
+
+    in ST.execState (buildInterference (gnodes control :: [NodeFG])) M.empty
