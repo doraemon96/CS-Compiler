@@ -91,18 +91,8 @@ insertInstrs inss labmap = let getNode ins = case ins of
  -  LIVENESS  -
  -}
 
-class Liveness where
--- OLD
---    data IGraph = IGRAPH { graph :: ()
---                         , tnode :: ()
---                         , gtemp :: ()
---                         , moves :: ()
---                         } deriving (Show, Eq)
---interferenceGraph :: FlowGraph -> (IGraph, M.Map Node [Temp.Temp])
--- \OLD
-
-    -- LivenessMap lleva un par (liveIn, liveOut)
-    type LivenessMap =  M.Map Node (Set.Set Temp.Temp, Set.Set Temp.Temp)
+-- LivenessMap lleva un par (liveIn, liveOut)
+type LivenessMap =  M.Map NodeFG (Set.Set Temp.Temp, Set.Set Temp.Temp)
 
 -- | Toma un grafo de flujo y devuelve: un grafo de interferencia y una tabla
 --   que mapea cada nodo del grafo de flujo al conjunto de temporarios que estan
@@ -116,16 +106,16 @@ interferenceGraph flow =
 
         computeLiveness :: NodeFG -> ST.State LivenessMap ()
         computeLiveness node =
-            let ndef   = Set.fromList (fdef node)
-                nuse   = Set.fromList (fuse node)
-                nsuuccs = (succs fcontrol) M.! node -- PRECAUCION (puede tirar error) 
+            let ndef   = Set.fromList (fdef M.! node)
+                nuse   = Set.fromList (fuse M.! node)
+                nsuccs = (succs fcontrol) M.! node -- PRECAUCION (puede tirar error) 
                 getLiveIn lout = Set.union nuse (Set.difference lout ndef)
-                getLiveOut st  = Set.unions $ map (\succ -> fst . fromMaybe (Set.empty, Set.empty) (M.lookup succ st)) nsuccs
+                getLiveOut st  = Set.unions $ Prelude.map (\succ -> fst (fromMaybe (Set.empty, Set.empty) (M.lookup succ st))) nsuccs
                 
                 loop (liveIn, liveOut) = do 
                     st <- ST.get
-                    liveOut' = getLiveOut st
-                    liveIn'  = getLiveIn liveOut'
+                    let liveOut' = getLiveOut st
+                        liveIn'  = getLiveIn liveOut'
                     ST.modify (M.insert node (liveIn', liveOut'))
                     if liveIn == liveIn' && liveOut == liveOut'
                     then return ()
@@ -134,6 +124,6 @@ interferenceGraph flow =
             in loop (Set.empty, Set.empty)
 
         -- mapM concatena los efectos? TODO
-        buildIntereference = mapM_ computeLiveness
+        buildInterference = mapM_ computeLiveness
 
-    in ST.execState (buildInterference (gnodes control :: [NodeFG])) M.empty
+    in ST.execState (buildInterference (gnodes fcontrol)) M.empty
