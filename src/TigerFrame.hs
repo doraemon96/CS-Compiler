@@ -75,6 +75,7 @@ fpPrev :: Int
 fpPrev = 0
 -- | Donde se encuentra el FP del nivel anterior (no necesariamente el llamante?)
 -- CONSULTAR que valor toma fpPrevLev
+-- RESPUESTA: es donde esta el primer arg, o sea, el static-link!
 fpPrevLev :: Int
 fpPrevLev = 0
 

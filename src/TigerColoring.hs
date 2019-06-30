@@ -12,7 +12,6 @@ import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
 
-type ColorGen = ST.State Int
 
 --data WorkSets = { precolored :: ()
 --                , initial :: ()
@@ -54,13 +53,13 @@ data ColorSets = {
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
 -- y también generar colores únicos para coloreo.
-type ColorMonad = ST.StateT ColorSets ColorGen
+type ColorMonad = ST.State ColorSets ()
 
 -- coloring es la función general, que toma el codigo assembler y
 -- busca un coloreo factible para los nodos de dicho código
 coloring :: [Mn.Instr] -> ColorMonad
 coloring inss = do let flowgraph = instrs2graph inss
-                       livegraph   = interferenceGraph flowgraph
+                       livemap   = interferenceGraph flowgraph
                    -- build construye el grafo de interferencia y llena el
                    -- conjunto worklistMoves
                    build livegraph
