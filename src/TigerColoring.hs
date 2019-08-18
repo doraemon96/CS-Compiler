@@ -11,7 +11,10 @@ import TigerLiveness              as Lv
 import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
+import qualified Data.Set         as Set
 
+
+type ColorGen = ST.State Int
 
 --data WorkSets = { precolored :: ()
 --                , initial :: ()
@@ -53,32 +56,32 @@ data ColorSets = {
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
 -- y también generar colores únicos para coloreo.
-type ColorMonad = ST.State ColorSets ()
+type ColorMonad = ST.StateT ColorSets ColorGen
 
 -- coloring es la función general, que toma el codigo assembler y
 -- busca un coloreo factible para los nodos de dicho código
 coloring :: [Mn.Instr] -> ColorMonad
 coloring inss = do let flowgraph = instrs2graph inss
-                       livemap   = interferenceGraph flowgraph
-                   -- build construye el grafo de interferencia y llena el
-                   -- conjunto worklistMoves
-                   build livegraph
-                   -- makeWorkList llena todas los conjuntos worklist
-                   -- (pasamos el flowgraph para que pueda ver los degree)
-                   makeWorkList flowgraph
-                   -- intentamos simplify, coalesce, freeze y selectspill
-                   -- hasta que no tengamos mas nodos para trabajar
-                   until (coloreoCondition ({-ColorSets-})) coloreoLoop
-                   -- asignamos colores
-                   -- (pasamos el flowgraph para que pueda ver los degree)
-                   assignColors flowgraph
-                   -- si la asignación hace spilll, alocamos memoria para los
-                   -- temporarios spilled y reintentamos
-                   if MONADA.spilledNodes != empty 
-                   then do rewriteProgram ({-?-})
-                           coloring inss
-                   -- sino, hemos finalizado
-                   return ({-?-})
+                       livegraph   = interferenceGraph flowgraph
+                       -- build construye el grafo de interferencia y llena el
+                       -- conjunto worklistMoves
+                       build livegraph
+                       -- makeWorkList llena todas los conjuntos worklist
+                       -- (pasamos el flowgraph para que pueda ver los degree)
+                       makeWorkList flowgraph
+                       -- intentamos simplify, coalesce, freeze y selectspill
+                       -- hasta que no tengamos mas nodos para trabajar
+                       until (coloreoCondition ({-ColorSets-})) coloreoLoop
+                       -- asignamos colores
+                       -- (pasamos el flowgraph para que pueda ver los degree)
+                       assignColors flowgraph
+                       -- si la asignación hace spilll, alocamos memoria para los
+                       -- temporarios spilled y reintentamos
+                       if MONADA.spilledNodes != empty 
+                       then do rewriteProgram ({-?-})
+                               coloring inss
+                       -- sino, hemos finalizado
+                       return ({-?-})
 
 -- coloreoCondition nos informa si ya no tenemos nada que hacer en el loop
 -- principal de coloring
@@ -88,3 +91,28 @@ coloreoCondition = undefined
 -- coloreoLoop hace una pasada de simplify, coalesce, freeze o selectspill
 coloreoLoop :: ColorMonad
 coloreoLoop = undefined
+
+
+--Julio
+
+nodeMoves :: NodeFG -> Set NodeFG
+nodeMoves n = Set.intersection (moveList n) (Set.union (activeMoves) (worklistMoves)) 
+
+simpleAlloc :: NodeFG -> Bool
+simpleAlloc n = Set.null (nodeMoves n)
+
+addWorkList :: NodeFG -> a
+addWorkList u = if ((Set.member u precolored) && (not (moveRelated u)) && (degree u < K))
+                then freezeWorklist = Set.difference freezeWorklist (Set.singleton u)
+                     simplifyWorklist = Set.union simplifyWorklist (Set.singleton u)
+
+ok :: NodeFG -> NodeFG -> Bool
+ok t r = (degree t < K) || (Set.member t precolored) || (Set.member (t,r) adjSet) 
+
+makeWorklist
+
+moveRelated
+
+rewriteProgram
+
+sethiUllman
