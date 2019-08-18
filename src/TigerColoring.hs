@@ -11,7 +11,6 @@ import TigerLiveness              as Lv
 import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
-import qualified Data.Set         as Set
 
 
 type ColorGen = ST.State Int
@@ -98,8 +97,7 @@ coloreoLoop = undefined
 nodeMoves :: NodeFG -> Set NodeFG
 nodeMoves n = Set.intersection (moveList n) (Set.union (activeMoves) (worklistMoves)) 
 
-simpleAlloc :: NodeFG -> Bool
-simpleAlloc n = Set.null (nodeMoves n)
+simpleAlloc :: a
 
 addWorkList :: NodeFG -> a
 addWorkList u = if ((Set.member u precolored) && (not (moveRelated u)) && (degree u < K))
@@ -109,9 +107,15 @@ addWorkList u = if ((Set.member u precolored) && (not (moveRelated u)) && (degre
 ok :: NodeFG -> NodeFG -> Bool
 ok t r = (degree t < K) || (Set.member t precolored) || (Set.member (t,r) adjSet) 
 
-makeWorklist
+makeWorklist :: [NodeFG] -> a
+makeWorklist n:initial = if degree n >= K
+                         then Set.union spillWorklist n
+                         else if moveRelated n
+                         then Set.union freezeWorklist n
+                         else Set.union simplifyWorklist n   
 
-moveRelated
+moveRelated :: NodeFG -> Bool
+moveRelated n = Set.null (nodeMoves n)
 
 rewriteProgram
 
