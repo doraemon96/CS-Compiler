@@ -1,10 +1,5 @@
-{- 
- - Estructuras de datos y algoritmos de Coloreo
- -
- -}
 module TigerColoring where
 
---Tiger Imports
 import TigerMunch                 as Mn
 import TigerLiveness              as Lv
 
@@ -12,26 +7,7 @@ import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
 
-
 type ColorGen = ST.State Int
-
---data WorkSets = { precolored :: ()
---                , initial :: ()
---                , simplifyWorklist:: ()
---                , freezeWorklist :: ()
---                , spillWorklist :: ()
---                , spilledNodes :: ()
---                , coalescedNodes :: ()
---                , coloredNodes :: ()
---                , selectStack :: ()
---                }
---
---data MoveSets = { coalescedMoves :: ()
---                , constrainedMoves :: ()
---                , frozenMoves :: ()
---                , worklistMoves :: ()
---                , activeMoves :: ()
---                }
 
 data ColorSets = {
                  -- WorkSets
@@ -55,7 +31,8 @@ data ColorSets = {
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
 -- y también generar colores únicos para coloreo.
-type ColorMonad = ST.StateT ColorSets ColorGen
+
+type ColorMonad a = ST.StateT ColorSets a
 
 -- coloring es la función general, que toma el codigo assembler y
 -- busca un coloreo factible para los nodos de dicho código
@@ -92,42 +69,48 @@ coloreoLoop :: ColorMonad
 coloreoLoop = undefined
 
 
---Julio
-nodeMoves :: NodeFG -> ColorMonad -> ColorMonad
-nodeMoves n m = do color_set <- get m
-                   return (Set.intersection (moveList n) Set.union (activeMoves color_set) (worklistMoves color_set))
 
+addWorkList :: NodeFG -> ColorMonad () --TO DO: change "degree" and K
+addWorkList n = do color_set <- get
+move_related <- moveRelated n
+when (Set.member n (precolored color_set) && (not move_related) && (degree n < K))
+put (color_set { freezeWorklist = freezeWorklist',
+simplifyWorklist = simplifyWorklist' })
+where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
+simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
+
+ok :: NodeFG -> NodeFG -> ColorMonad Bool --TO DO: change "degree", K and adjSet ???
+ok t r = do color_set <- get
+return (degree t < K) || (Set.member t (precolored color_set)) || (Set.member (t,r) adjSet) 
+
+
+
+makeWorklist :: [NodeFG] -> ColorMonad ()--TO DO: change "degree" and K
+makeWorklist x:xs = do color_set <- get
+                       let spillWorklist' = Set.union (spillWorklist color_set) x
+                           freezeWorklist' = Set.union (freezeWorklist color_set) x
+                           simplifyWorklist' = Set.union (simplifyWorklist color_set) x
+                    if degree x >= K
+                    then do put (color_set { spillWorklist = spillWorklist' })
+                            makeWorklist xs
+                    else if moveRelated x
+                    then do put (color_set { freezeWorklist = freezeWorklist' })
+                            makeWorklist xs
+                    else 
+                            do put (color_set { simplifyWorklist = simplifyWorklist' })
+                               makeWorklist xs
+                                       
+                                    
+nodeMoves :: NodeFG -> ColorMonad (Set.Set Lv.NodeFG)
+nodeMoves n = do color_set <- get
+                 return (Set.intersection (moveList n) Set.union (activeMoves color_set) (worklistMoves color_set))
+
+moveRelated :: NodeFG -> ColorMonad Bool
+moveRelated n = do node_moves <- nodeMoves n
+                   return Set.null node_moves
+                                    
 simpleAlloc :: a
 
-addWorkList :: NodeFG -> ColorMonad -> ColorMonad --TO DO: change "degree" and K
-addWorkList n m = do color_set <- get m
-                     when (Set.member n (precolored color_set) && (not (moveRelated n)) && (degree n < K))
-                     put (color_set { freezeWorklist = freezeWorklist',
-                                      simplifyWorklist = simplifyWorklist' })
-                     where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
-                           simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
+rewriteProgram :: a
 
-ok :: NodeFG -> NodeFG -> Bool --"ColorMonad Bool" seria ???
-ok t r = (degree t < K) || (Set.member t precolored) || (Set.member (t,r) adjSet) 
-
-
-
-makeWorklist :: [NodeFG] -> ColorMonad -> ColorMonad --TO DO: change "degree" and K
-makeWorklist x:xs m = do color_set <- get m
-                         let spillWorklist' = Set.union (spillWorklist m) x
-                             freezeWorklist' = Set.union (freezeWorklist m) x
-                             simplifyWorklist' = Set.union (simplifyWorklist m) x
-                         if degree x >= K
-                            then makeWorklist xs (put ( color_set { spillWorklist = spillWorklist' }))
-                         else if moveRelated x
-                            then makeWorklist xs (put (color_set { freezeWorklist = freezeWorklist' }))
-                         else 
-                            makeWorklist xs (put (color_set { simplifyWorklist = simplifyWorklist' }))
-
-
-moveRelated :: NodeFG -> Bool
-moveRelated n = Set.null (nodeMoves n)
-
-rewriteProgram
-
-sethiUllman
+sethiUllman :: a
