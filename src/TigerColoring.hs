@@ -99,7 +99,7 @@ nodeMoves n m = do color_set <- get m
 
 simpleAlloc :: a
 
-addWorkList :: NodeFG -> ColorMonad -> ColorMonad
+addWorkList :: NodeFG -> ColorMonad -> ColorMonad --TO DO: change "degree" and K
 addWorkList n m = do color_set <- get m
                      when (Set.member n (precolored color_set) && (not (moveRelated n)) && (degree n < K))
                      put (color_set { freezeWorklist = freezeWorklist',
@@ -107,12 +107,12 @@ addWorkList n m = do color_set <- get m
                      where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
                            simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
 
-ok :: NodeFG -> NodeFG -> Bool --ColorMonad Bool ???
+ok :: NodeFG -> NodeFG -> Bool --"ColorMonad Bool" seria ???
 ok t r = (degree t < K) || (Set.member t precolored) || (Set.member (t,r) adjSet) 
 
 
 
-makeWorklist :: [NodeFG] -> ColorMonad -> ColorMonad
+makeWorklist :: [NodeFG] -> ColorMonad -> ColorMonad --TO DO: change "degree" and K
 makeWorklist x:xs m = do color_set <- get m
                          let spillWorklist' = Set.union (spillWorklist m) x
                              freezeWorklist' = Set.union (freezeWorklist m) x
