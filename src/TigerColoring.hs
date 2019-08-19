@@ -72,16 +72,15 @@ coloreoLoop = undefined
 
 addWorkList :: NodeFG -> ColorMonad () --TO DO: change "degree" and K
 addWorkList n = do color_set <- get
-move_related <- moveRelated n
-when (Set.member n (precolored color_set) && (not move_related) && (degree n < K))
-put (color_set { freezeWorklist = freezeWorklist',
-simplifyWorklist = simplifyWorklist' })
-where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
-simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
+                   move_related <- moveRelated n
+                   when (Set.member n (precolored color_set) && (not move_related) && (degree n < K)) (put (color_set { freezeWorklist = freezeWorklist',
+                                                                                                                        simplifyWorklist = simplifyWorklist' }))
+                   where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
+                         simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
 
 ok :: NodeFG -> NodeFG -> ColorMonad Bool --TO DO: change "degree", K and adjSet ???
 ok t r = do color_set <- get
-return (degree t < K) || (Set.member t (precolored color_set)) || (Set.member (t,r) adjSet) 
+            return (degree t < K) || (Set.member t (precolored color_set)) || (Set.member (t,r) adjSet) 
 
 
 
