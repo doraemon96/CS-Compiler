@@ -93,26 +93,37 @@ coloreoLoop = undefined
 
 
 --Julio
-
-nodeMoves :: NodeFG -> Set NodeFG
-nodeMoves n = Set.intersection (moveList n) (Set.union (activeMoves) (worklistMoves)) 
+nodeMoves :: NodeFG -> ColorMonad -> ColorMonad
+nodeMoves n m = do color_set <- get m
+                   return (Set.intersection (moveList n) Set.union (activeMoves color_set) (worklistMoves color_set))
 
 simpleAlloc :: a
 
-addWorkList :: NodeFG -> a
-addWorkList u = if ((Set.member u precolored) && (not (moveRelated u)) && (degree u < K))
-                then freezeWorklist = Set.difference freezeWorklist (Set.singleton u)
-                     simplifyWorklist = Set.union simplifyWorklist (Set.singleton u)
+addWorkList :: NodeFG -> ColorMonad -> ColorMonad
+addWorkList n m = do color_set <- get m
+                     when (Set.member n (precolored color_set) && (not (moveRelated n)) && (degree n < K))
+                     put (color_set { freezeWorklist = freezeWorklist',
+                                      simplifyWorklist = simplifyWorklist' })
+                     where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
+                           simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
 
-ok :: NodeFG -> NodeFG -> Bool
+ok :: NodeFG -> NodeFG -> Bool --ColorMonad Bool ???
 ok t r = (degree t < K) || (Set.member t precolored) || (Set.member (t,r) adjSet) 
 
-makeWorklist :: [NodeFG] -> a
-makeWorklist n:initial = if degree n >= K
-                         then Set.union spillWorklist n
-                         else if moveRelated n
-                         then Set.union freezeWorklist n
-                         else Set.union simplifyWorklist n   
+
+
+makeWorklist :: [NodeFG] -> ColorMonad -> ColorMonad
+makeWorklist x:xs m = do color_set <- get m
+                         let spillWorklist' = Set.union (spillWorklist m) x
+                             freezeWorklist' = Set.union (freezeWorklist m) x
+                             simplifyWorklist' = Set.union (simplifyWorklist m) x
+                         if degree x >= K
+                            then makeWorklist xs (put ( color_set { spillWorklist = spillWorklist' }))
+                         else if moveRelated x
+                            then makeWorklist xs (put (color_set { freezeWorklist = freezeWorklist' }))
+                         else 
+                            makeWorklist xs (put (color_set { simplifyWorklist = simplifyWorklist' }))
+
 
 moveRelated :: NodeFG -> Bool
 moveRelated n = Set.null (nodeMoves n)
