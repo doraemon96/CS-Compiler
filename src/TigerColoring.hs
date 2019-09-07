@@ -3,11 +3,11 @@ module TigerColoring where
 import TigerMunch                 as Mn
 import TigerLiveness              as Lv
 
+import qualified Data.Map         as M
 import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
-import Control.Monad.State.Strict as ST
+import Control.Monad.State
 
-type ColorGen = ST.State Int
 
 data ColorSets = ColorSetConstructor { precolored :: Set.Set Lv.NodeFG  --nodos que ya poseen un color
                  , initial :: Set.Set Lv.NodeFG  --nodos no procesados
@@ -32,7 +32,7 @@ data ColorSets = ColorSetConstructor { precolored :: Set.Set Lv.NodeFG  --nodos 
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
 -- y también generar colores únicos para coloreo.
 
-type ColorMonad a = ST.StateT ColorSets a
+type ColorMonad = State ColorSets
 
 -- coloring es la función general, que toma el codigo assembler y
 -- busca un coloreo factible para los nodos de dicho código
@@ -65,7 +65,7 @@ coloreoCondition :: ColorSets -> Bool
 coloreoCondition = undefined
 
 -- coloreoLoop hace una pasada de simplify, coalesce, freeze o selectspill
-coloreoLoop :: ColorMonad
+coloreoLoop :: ColorMonad ()
 coloreoLoop = undefined
 
 
@@ -73,11 +73,11 @@ coloreoLoop = undefined
 addWorkList :: NodeFG -> ColorMonad () --TO DO: change  K
 addWorkList n = do color_set <- get
                    move_related <- moveRelated n
+                   let freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
+                       simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n) 
                    n_degree <- maybe (error "dalequenosovo9") id (M.lookup (degree color_set) n)
                    when (Set.member n (precolored color_set) && (not move_related) && (n_degree < K)) (put (color_set { freezeWorklist = freezeWorklist',
                                                                                                                         simplifyWorklist = simplifyWorklist' }))
-                   where freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
-                         simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n)
 
 ok :: NodeFG -> NodeFG -> ColorMonad Bool --TO DO: change "degree", K
 ok t r = do color_set <- get
@@ -102,16 +102,17 @@ makeWorklist (x:xs) = do color_set <- get
                                  do put (color_set { simplifyWorklist = simplifyWorklist' })
                                     makeWorklist xs              
                                     
-nodeMoves :: NodeFG -> ColorMonad (Set.Set Lv.NodeFG)
+nodeMoves :: NodeFG -> ColorMonad (Set.Set Lv.NodeFG) --TODO: agregar moveList
 nodeMoves n = do color_set <- get
-                 return (Set.intersection (moveList n) Set.union (activeMoves color_set) (worklistMoves color_set))
+                 return (Set.intersection (moveList n) (Set.union (activeMoves color_set) (worklistMoves color_set)))
 
 moveRelated :: NodeFG -> ColorMonad Bool
 moveRelated n = do node_moves <- nodeMoves n
                    return Set.null node_moves
                                     
 simpleAlloc :: a
-
+simpleAlloc = undefined
 rewriteProgram :: a
-
+rewriteProgram = undefined
 sethiUllman :: a
+sethiUllman = undefined
