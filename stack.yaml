@@ -2,5 +2,5 @@ flags: {}
 extra-package-dbs: []
 packages:
 - .
-extra-deps: []
+extra-deps: [Stack-0.4.0, deepseq-1.4.4.0, stm-2.5.0.0]
 resolver: lts-12.6
