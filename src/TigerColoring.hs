@@ -70,45 +70,52 @@ coloreoLoop = undefined
 
 
 
-addWorkList :: NodeFG -> ColorMonad () --TO DO: change  K
+addWorkList :: Lv.NodeFG -> ColorMonad () --TO DO: change  k
 addWorkList n = do color_set <- get
                    move_related <- moveRelated n
                    let freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
                        simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n) 
-                   n_degree <- maybe (error "dalequenosovo9") id (M.lookup (degree color_set) n)
-                   when (Set.member n (precolored color_set) && (not move_related) && (n_degree < K)) (put (color_set { freezeWorklist = freezeWorklist',
+                       n_degree = maybe (error "dalequenosovo9") id (M.lookup n (degree color_set))
+                   when (Set.member n (precolored color_set) && (not move_related) && (n_degree < k)) (put (color_set { freezeWorklist = freezeWorklist',
                                                                                                                         simplifyWorklist = simplifyWorklist' }))
 
-ok :: NodeFG -> NodeFG -> ColorMonad Bool --TO DO: change "degree", K
+ok :: Lv.NodeFG -> Lv.NodeFG -> ColorMonad Bool --TO DO: change "degree", k
 ok t r = do color_set <- get
-            n_degree <- maybe (error "dalequenosovo7") id (M.lookup (degree color_set) n)
-            return (n_degree t < K) || (Set.member t (precolored color_set)) || (Set.member (t,r) (color_set adjSet)) 
+            let n_degree = maybe (error "dalequenosovo7") id (M.lookup t (degree color_set))
+            return $ (n_degree < k) || (Set.member t (precolored color_set)) || (Set.member (t,r) (adjSet color_set)) 
 
 
 
-makeWorklist :: [NodeFG] -> ColorMonad ()--TO DO: change  K
+makeWorklist :: [Lv.NodeFG] -> ColorMonad ()--TO DO: change  k
 makeWorklist (x:xs) = do color_set <- get
-                         let spillWorklist' = Set.union (spillWorklist color_set) x
-                             freezeWorklist' = Set.union (freezeWorklist color_set) x
-                             simplifyWorklist' = Set.union (simplifyWorklist color_set) x
-                         n_degree <- maybe (error "dalequenosovo154") id (M.lookup (degree color_set) n)
-                         if n_degree x >= K
+                         let spillWorklist' = Set.insert x (spillWorklist color_set)
+                             freezeWorklist' = Set.insert x (freezeWorklist color_set)
+                             simplifyWorklist' = Set.insert x (simplifyWorklist color_set)
+                             x_degree = maybe (error "dalequenosovo154") id (M.lookup x (degree color_set))
+                         is_move_related <- moveRelated x
+                         if x_degree >= k
                          then do put (color_set { spillWorklist = spillWorklist' })
                                  makeWorklist xs
-                         else if moveRelated x
+                         else if is_move_related
                          then do put (color_set { freezeWorklist = freezeWorklist' })
                                  makeWorklist xs
                          else 
                                  do put (color_set { simplifyWorklist = simplifyWorklist' })
                                     makeWorklist xs              
                                     
-nodeMoves :: NodeFG -> ColorMonad (Set.Set Lv.NodeFG) --TODO: agregar moveList
+nodeMoves :: Lv.NodeFG -> ColorMonad (Set.Set (Lv.NodeFG, Lv.NodeFG)) --TODO: agregar moveList
 nodeMoves n = do color_set <- get
                  return (Set.intersection (moveList n) (Set.union (activeMoves color_set) (worklistMoves color_set)))
 
-moveRelated :: NodeFG -> ColorMonad Bool
+moveList = undefined
+
+adjSet = undefined
+
+k = undefined
+
+moveRelated :: Lv.NodeFG -> ColorMonad Bool
 moveRelated n = do node_moves <- nodeMoves n
-                   return Set.null node_moves
+                   return $ Set.null node_moves
                                     
 simpleAlloc :: a
 simpleAlloc = undefined
