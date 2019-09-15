@@ -87,6 +87,7 @@ ok t r = do color_set <- get
 
 
 makeWorklist :: [Lv.NodeFG] -> ColorMonad ()--TO DO: change  k
+makeWorkList []     = return () 
 makeWorklist (x:xs) = do color_set <- get
                          let spillWorklist' = Set.insert x (spillWorklist color_set)
                              freezeWorklist' = Set.insert x (freezeWorklist color_set)
