@@ -31,9 +31,7 @@ import Control.Monad.State.Strict as ST
 --                , activeMoves :: ()
 --                }
 
-data ColorSets = {
-                 -- WorkSets
-                   precolored :: Set.Set Lv.NodeFG  --nodos que ya poseen un color
+data ColorSets = ColorSetConstructor { precolored :: Set.Set Lv.NodeFG  --nodos que ya poseen un color
                  , initial :: Set.Set Lv.NodeFG  --nodos no procesados
                  , simplifyWorklist:: Set.Set Lv.NodeFG  --nodos low-degree non-moves
                  , freezeWorklist :: Set.Set Lv.NodeFG  --nodos low-degree moves
@@ -43,11 +41,18 @@ data ColorSets = {
                  , coloredNodes :: Set.Set Lv.NodeFG  --nodos coloreados con exito
                  , selectStack :: Stack.Stack Lv.NodeFG --stack de temporarios removidos del grafo
                  -- MoveSets
-                 , coalescedMoves :: () --moves coalescidos
-                 , constrainedMoves :: ()  --moves cuyo source y target interfieren
-                 , frozenMoves :: ()  --moves no considerados para coalescing
-                 , worklistMoves :: ()  --moves listos para coalescing
-                 , activeMoves :: ()  --moves no listos para coalescing
+                 , coalescedMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG) --moves coalescidos
+                 , constrainedMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves cuyo source y target interfieren
+                 , frozenMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves no considerados para coalescing
+                 , worklistMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves listos para coalescing
+                 , activeMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves no listos para coalescing
+                 -- Aditional structures
+                 , degree :: M.Map Lv.NodeFG Int
+                 , adjSet :: Set.Set (Lv.NodeFG, Lv.NodeFG)
+                 , adjList :: M.Map Lv.NodeFG (Set.Set Lv.NodeFG)
+                 , moveList :: M.Map Lv.NodeFG (Set.Set (Lv.NodeFG, Lv.NodeFG)) 
+                 , alias :: M.Map Lv.NodeFG Lv.NodeFG
+                 , k :: Int
                  }
 
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
