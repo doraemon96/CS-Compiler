@@ -24,8 +24,13 @@ data ColorSets = ColorSetConstructor { precolored :: Set.Set Lv.NodeFG  --nodos 
                  , frozenMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves no considerados para coalescing
                  , worklistMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves listos para coalescing
                  , activeMoves :: Set.Set (Lv.NodeFG, Lv.NodeFG)  --moves no listos para coalescing
-                 -- Aditional functions
+                 -- Aditional structures
                  , degree :: M.Map Lv.NodeFG Int
+                 , adjSet :: Set.Set (Lv.NodeFG, Lv.NodeFG)
+                 , adjList :: M.Map Lv.NodeFG (Set.Set Lv.NodeFG)
+                 , moveList :: M.Map Lv.NodeFG (Set.Set (Lv.NodeFG, Lv.NodeFG)) 
+                 , alias :: M.Map Lv.NodeFG Lv.NodeFG
+                 , k :: Int
                  }
 
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
@@ -40,7 +45,7 @@ type ColorMonad = State ColorSets
 -- coloring inss = do let flowgraph = instrs2graph inss
 --                        livegraph   = interferenceGraph flowgraph
 --                        -- build construye el grafo de interferencia y llena el
---                        -- conjunto worklistMoves
+--                        -- conjunto worklistMovesk
 --                        build livegraph
 --                        -- makeWorkList llena todas los conjuntos worklist
 --                        -- (pasamos el flowgraph para que pueda ver los degree)
@@ -70,23 +75,23 @@ coloreoLoop = undefined
 
 
 
-addWorkList :: Lv.NodeFG -> ColorMonad () --TO DO: change  k
+addWorkList :: Lv.NodeFG -> ColorMonad ()
 addWorkList n = do color_set <- get
                    move_related <- moveRelated n
                    let freezeWorklist' = Set.difference (freezeWorklist color_set) (Set.singleton n)
                        simplifyWorklist' =  Set.union (simplifyWorklist color_set) (Set.singleton n) 
                        n_degree = maybe (error "dalequenosovo9") id (M.lookup n (degree color_set))
-                   when (Set.member n (precolored color_set) && (not move_related) && (n_degree < k)) (put (color_set { freezeWorklist = freezeWorklist',
+                   when (Set.member n (precolored color_set) && (not move_related) && (n_degree < k color_set)) (put (color_set { freezeWorklist = freezeWorklist',
                                                                                                                         simplifyWorklist = simplifyWorklist' }))
 
-ok :: Lv.NodeFG -> Lv.NodeFG -> ColorMonad Bool --TO DO: change "degree", k
+ok :: Lv.NodeFG -> Lv.NodeFG -> ColorMonad Bool
 ok t r = do color_set <- get
             let n_degree = maybe (error "dalequenosovo7") id (M.lookup t (degree color_set))
-            return $ (n_degree < k) || (Set.member t (precolored color_set)) || (Set.member (t,r) (adjSet color_set)) 
+            return $ (n_degree < k color_set) || (Set.member t (precolored color_set)) || (Set.member (t,r) (adjSet color_set)) 
 
 
 
-makeWorklist :: [Lv.NodeFG] -> ColorMonad ()--TO DO: change  k
+makeWorklist :: [Lv.NodeFG] -> ColorMonad ()
 makeWorkList []     = return () 
 makeWorklist (x:xs) = do color_set <- get
                          let spillWorklist' = Set.insert x (spillWorklist color_set)
@@ -94,7 +99,7 @@ makeWorklist (x:xs) = do color_set <- get
                              simplifyWorklist' = Set.insert x (simplifyWorklist color_set)
                              x_degree = maybe (error "dalequenosovo154") id (M.lookup x (degree color_set))
                          is_move_related <- moveRelated x
-                         if x_degree >= k
+                         if x_degree >= k color_set
                          then do put (color_set { spillWorklist = spillWorklist' })
                                  makeWorklist xs
                          else if is_move_related
@@ -104,15 +109,13 @@ makeWorklist (x:xs) = do color_set <- get
                                  do put (color_set { simplifyWorklist = simplifyWorklist' })
                                     makeWorklist xs              
                                     
-nodeMoves :: Lv.NodeFG -> ColorMonad (Set.Set (Lv.NodeFG, Lv.NodeFG)) --TODO: agregar moveList
+nodeMoves :: Lv.NodeFG -> ColorMonad (Set.Set (Lv.NodeFG, Lv.NodeFG))
 nodeMoves n = do color_set <- get
-                 return (Set.intersection (moveList n) (Set.union (activeMoves color_set) (worklistMoves color_set)))
+                 let move_list = moveList color_set
+                     node_moves = maybe (error "dalequenosovo87") id (M.lookup n move_list)
+                 return (Set.intersection node_moves (Set.union (activeMoves color_set) (worklistMoves color_set)))
 
-moveList = undefined
 
-adjSet = undefined
-
-k = undefined
 
 moveRelated :: Lv.NodeFG -> ColorMonad Bool
 moveRelated n = do node_moves <- nodeMoves n
