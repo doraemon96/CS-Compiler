@@ -14,21 +14,31 @@ import           TigerPretty
 import           TigerSeman
 import           TigerTemp
 import           TigerUnique
+import           TigerFrame
+import           TigerCanon
+import qualified TigerTree             as Tree
+import qualified TigerSymbol           as Symb
+import qualified TigerMunch2           as Munch
+import qualified TigerAsm              as Asm
 
 import           Text.Parsec           (runParser)
+
+import Debug.Trace
 
 data Options = Options {
         optArbol     :: Bool
         ,optDebEscap :: Bool
+        ,optIR       :: Bool
     }
     deriving Show
 
 defaultOptions :: Options
-defaultOptions = Options {optArbol = False, optDebEscap = False }
+defaultOptions = Options {optArbol = False, optDebEscap = False, optIR = False }
 
 options :: [OptDescr (Options -> Options)]
 options = [ Option ['a'] ["arbol"] (NoArg (\opts -> opts {optArbol = True})) "Muestra el AST luego de haber realizado el cálculo de escapes"
-            , Option ['e'] ["escapada"] (NoArg (\opts -> opts {optDebEscap = True})) "Stepper escapadas"]
+            , Option ['e'] ["escapada"] (NoArg (\opts -> opts {optDebEscap = True})) "Stepper escapadas"
+            , Option ['i'] ["ir"] (NoArg (\opts -> opts {optIR = True})) "Muestra la representacion intermedia"]
 
 compilerOptions :: [String] -> IO (Options, [String])
 compilerOptions argv = case getOpt Permute options argv of
@@ -39,8 +49,24 @@ compilerOptions argv = case getOpt Permute options argv of
 
 showExp :: Exp -> IO ()
 showExp e = do
-    putStrLn "Mostramos el AST (PP Gracias a Emilio Lopez Junior)"
+    putStrLn ""
+    putStrLn "## Mostramos el AST (PP Gracias a Emilio Lopez Junior) ##"
     putStrLn $ renderExp e
+    putStrLn "#########################################################"
+    putStrLn ""
+
+showIR :: ([Frag], [([Tree.Stm], Frame)]) -> IO ()
+showIR (chars,procs) = do
+    putStrLn ""
+    putStrLn "## Mostramos la IR (Gracias a Maradona Senior) ##"
+    putStrLn "Strings:"
+    putStrLn $ show chars
+    putStrLn "Procs:"
+    let stms = concat . fst $ unzip procs
+    foldMap (putStrLn . show) stms
+    putStrLn "#################################################"
+    putStrLn ""
+
 
 calculoEscapadas :: Exp -> Options -> IO Exp
 calculoEscapadas rawAST opts =
@@ -53,11 +79,35 @@ calculoEscapadas rawAST opts =
                fail (show err)
            ) return (calcularEEsc rawAST)
 
-templabRel :: Exp -> StGen ()
+-- | templabRel does all generic unique computations (Seman -> Canon)
+templabRel :: Exp -> StGen (Either Symb.Symbol ([Frag], [([Tree.Stm], Frame)]))
 templabRel ast = do
-  treeS <- runSeman ast
-  -- something <- canonM sometree :: StGen [Stm]
-  return ()
+  -- recover Frags from Semantic Analysis
+  frags <- runFrags ast -- runFrags ast :: StGen (Either Symbol [Frag])
+  --traceShow frags $ return () -- FIXME: remove trace after debug
+  either  (return . Left) -- return error
+          (\frags -> do
+              let (chars, procs) = sepFrag frags -- sepFrag frags :: ([Frag],[(Stm,Frame)])
+              canon <- mapM (\(st,fr) -> (flip evalStateT firstTank (canonM st)) >>= \st' -> return (st',fr)) procs -- canonize stm fragments
+              return $ Right (chars, canon)
+          )
+          frags
+
+-- | makeAssembly does all assembly related computations (Munch -> Live -> Color)
+makeAssembly :: ([Frag], [([Tree.Stm], Frame)]) -> StGen (Either Symb.Symbol [String])
+makeAssembly (chars,procs) = do
+  let (stms, frms) = unzip procs
+  -- Munch
+  inss <- mapM Munch.codeGen stms
+  -- procEntryExit2
+  inss' <- return $ zipWith procEntryExit2 frms inss
+  -- Live
+  -- Color
+  -- procEntryExit3
+  --return $ [strings ++ body]
+  --return (Right [])
+  let body = map (Asm.format show) (concat inss')
+  return $ Right $ body
 
 -- Toma opciones, nombre del archivo, source code
 -- Devuelve el archivo parseado o el error
@@ -67,13 +117,25 @@ parserStep opts nm sc = either
   return
   $ runParser expression () nm sc
 
+
 main :: IO ()
 main = do
+    -- getArgs returns a list of command line arguments (not including program name)
+    -- s is a tiger program file, opts are the tiger compiler options
     s:opts <- Env.getArgs
     (opts', _) <- compilerOptions opts
     sourceCode <- readFile s
+    -- parse source code of tiger program, returning an Exp
     rawAst <- parserStep opts' s sourceCode
+    -- calculate escapes
     ast <- calculoEscapadas rawAst opts'
+    --traceShow ast $ return () --FIXME: remove trace after debug
+    -- option to show ast tree
     when (optArbol opts') (showExp ast)
-    let _ = evalState (templabRel ast) 0
-    print "Genial!"
+    -- Semantic analysis & Canonization
+        -- canons,stgenCounter :: (Either Symb.Symbol ([Frag], [([Tree.Stm], Frame)]), Integer)
+    let (canons, stgenCounter) = evalState (templabRel ast) 0
+    when (optIR opts') (either print showIR canons)
+    let assembly = canons >>= return . makeAssembly
+    either print (print . (flip evalState stgenCounter)) assembly
+    putStrLn "Tiger Compiler finished"

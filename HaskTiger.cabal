@@ -41,10 +41,11 @@ library
         , TigerInterp
         , TigerQQ
       -- Tercer entrega. So vo.
-        , TigerMunch
+        , TigerMunch2
+        , TigerAsm
         , TigerGraph
-        , TigerLiveness
-        , TigerColoring
+        --, TigerLiveness
+        --, TigerColoring
   build-depends:       base
                        , containers
                        , text

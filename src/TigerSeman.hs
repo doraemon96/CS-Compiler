@@ -31,7 +31,7 @@ import           Prelude                    as P
 
 -- Debugging. 'trace :: String -> a -> a'
 -- imprime en pantalla la string cuando se ejecuta.
-import           Debug.Trace                (trace, traceM)
+import           Debug.Trace                
 
 -- * Análisis Semántico, aka Inferidor de Tipos
 
@@ -226,23 +226,28 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
 transDecs :: (MemM w, Manticore w) => [Dec] -> w (BExp,Tipo) -> w ([BExp],Tipo)
 transDecs [] m = do (x,y) <- m
+                    --frags <- getFrags --FIXME: remove trace after debug
+                    --traceShow (frags) $ return ()
                     return ([x],y)
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
                                                         when (et == TNil) $ addpos (derror (pack "No se puede inferir tipo de record inicializado a nil.")) p
                                                         lev     <- TTr.getActualLevel
                                                         acc     <- TTr.allocLocal escap
+                                                        bvar    <- TTr.simpleVar acc lev -- creo una variable
+                                                        bass    <- TTr.assignExp bvar eb -- le asigno el valor inicial
                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
-                                                        return (eb:bexps, tipo)
+                                                        return (bass:bexps, tipo)
 transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp init
                                                          wt      <- addpos (getTipoT t) p 
                                                          bt      <- tiposIguales et wt
                                                          unless bt $ derror (pack "Tipos no compatibles #1")
                                                          lev     <- TTr.getActualLevel
                                                          acc     <- TTr.allocLocal escap
+                                                         bvar    <- TTr.simpleVar acc lev -- creo una variable
+                                                         bass    <- TTr.assignExp bvar eb -- le asigno el valor inicial
                                                          (bexps,tipo) <- insertValV nm (wt,acc,lev) (transDecs xs m)
-                                                         return (eb:bexps, tipo)
+                                                         return (bass:bexps, tipo)
 transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_ , _) -> nm) fs in
-                                                --TODO: agregar pos a la dup dec
                                                 if P.length fs' /= P.length (nub fs') then derror (pack "Declaracion duplicada") else
                                                 P.foldr insertf (mapM_ inserte fs >> transDecs xs m) fs
                                                    where
@@ -250,28 +255,38 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                     insertf (nm,args,Nothing,_,p)  m' =
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            lvl   <- TTr.topLevel
-                                                           insertFunV nm (lvl, genlab nm p, largs, TUnit, Propia) m'
+                                                           let flab = genlab nm p -- function label
+                                                               escs = P.map snd3 args -- escape lists
+                                                               nlvl = TTr.newLevel lvl flab escs -- new level
+                                                           insertFunV nm (nlvl, flab, largs, TUnit, Propia) m'
                                                     insertf (nm,args,Just s,_,p) m' = 
                                                         do largs <- mapM (\(_,_,at) -> fromTy at) args
                                                            t     <- addpos (getTipoT s) p
                                                            lvl   <- TTr.topLevel
-                                                           insertFunV nm (lvl, genlab nm p, largs, t, Propia) m'
+                                                           let flab = genlab nm p -- function label
+                                                               escs = P.map snd3 args -- escape lists
+                                                               nlvl = TTr.newLevel lvl flab escs -- new level
+                                                           insertFunV nm (nlvl, flab, largs, t, Propia) m'
 
                                                     genlab t p = pack $ show t ++ "_" ++ show (line p)
                                                       
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
-                                                    inserte (_,args,Nothing,exp,p) =
+                                                    inserte (nm,args,Nothing,exp,p) =
                                                         do largs   <- mapM (\(n,esc,t) -> (n,,) <$> fromTy t <*> TTr.allocArg esc) args
                                                            i       <- getActualLevel
-                                                           (_, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
+                                                           (be, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
                                                            unless (TUnit ?= et) $ addpos (derror (pack "Tipo de exp no es Unit")) p
-                                                    inserte (_,args,Just s,exp,p) =
+                                                           (lvl,_,_,_,_) <- getTipoFunV nm
+                                                           TTr.envFunctionDec lvl (TTr.functionDec be lvl IsProc)
+                                                    inserte (nm,args,Just s,exp,p) =
                                                         do largs   <- mapM (\(n,esc,t) -> (n,,) <$> fromTy t <*> TTr.allocArg esc) args
                                                            i       <- getActualLevel
-                                                           (_, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
+                                                           (be, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
                                                            t       <- addpos (getTipoT s) p
                                                            bt      <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
+                                                           (lvl,_,_,_,_) <- getTipoFunV nm
+                                                           TTr.envFunctionDec lvl (TTr.functionDec be lvl IsFun)
 transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ derror (pack "Se ha encontrado un ciclo.")
                                                     makeRefs sorted' $ undoRefs sorted' $ transDecs xss m
                                                     -- insertar todos los xs con posibles referencias
@@ -469,6 +484,7 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        TTr.posWhileforExp
                                        return (fex,TUnit)
 transExp(LetExp dcs body p) = do (bexps,tipo) <- transDecs dcs (transExp body)
+                                 traceShow "DEBUG: transExp (LetExp)" $ return ()
                                  (,tipo) <$> TTr.letExp (init bexps) (last bexps)
 transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p
 transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
@@ -653,3 +669,19 @@ runMonada =  flip evalStateT initConf . runExceptT
 
 runSeman :: Exp -> StGen (Either Symbol (BExp, Tipo))
 runSeman = runMonada . transExp
+
+transProc :: (Manticore w, MemM w) => Exp -> w [Frag]
+transProc ex = do
+  let pos = Simple {line = 0, col = 0}
+  let procExp = LetExp
+        [FunctionDec [(pack "_tigermain", [], Just (pack "int"), ex, pos)]]
+        (UnitExp pos)
+        pos
+  transExp procExp
+  getFrags
+
+runMonadaF :: Monada [Frag] -> StGen (Either Symbol [Frag])
+runMonadaF =  flip evalStateT initConf . runExceptT
+
+runFrags :: Exp -> StGen (Either Symbol [Frag])
+runFrags e = runMonadaF (transProc e)

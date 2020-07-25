@@ -3,7 +3,8 @@ module TigerFrame where
 import           TigerTemp
 import           TigerTree
 
-import           TigerAbs                       ( Escapa(..) )
+import           TigerAbs                ( Escapa(..) )
+import qualified TigerAsm
 
 import           TigerSymbol
 
@@ -28,14 +29,15 @@ zero = pack "$zero"
 -- | Return Adress
 ra = pack "$ra"
 
-
+-- | primeros 4 parametros pasados a una subrutina
 a0, a1, a2, a3 :: Temp
 a0 = pack "$a0"
 a1 = pack "$a1"
 a2 = pack "$a2"
 a3 = pack "$a3"
 
-s0, s1, s2, s3, s4, s5, s6, s7, s8 :: Temp
+-- | callee-saves (tienen que reestablecerse al finalizar la subrutina)
+s0, s1, s2, s3, s4, s5, s6, s7:: Temp
 s0 = pack "$s0"
 s1 = pack "$s1"
 s2 = pack "$s2"
@@ -44,9 +46,10 @@ s4 = pack "$s4"
 s5 = pack "$s5"
 s6 = pack "$s6"
 s7 = pack "$s7"
-s8 = pack "$s8"
+-- s8 = pack "$s8" {- NO! $s8 == $fp -}
 
-t0, t1, t2, t3, t4, t5, t6, t7, t8 :: Temp
+-- | caller-saves (guardados por el llamante, libres para la subrutina)
+t0, t1, t2, t3, t4, t5, t6, t7, t8, t9 :: Temp
 t0 = pack "$t0"
 t1 = pack "$t1"
 t2 = pack "$t2"
@@ -88,7 +91,7 @@ localsGap = 4
 -- | Dan inicio a los contadores de argumentos, variables y registros usados.
 -- Ver |defaultFrame|
 argsInicial, regInicial, localsInicial :: Int
-argsInicial = 0
+argsInicial = 4 -- MIPS reserva 4 lugares para los 4 argregs
 regInicial = 1
 localsInicial = 0
 
@@ -99,7 +102,7 @@ specialregs = [fp, sp, rv, zero, ra, lo]
 -- | Argument Regs
 argregs     = [a0, a1, a2, a3]
 -- | Callee Saves
-calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7, s8]
+calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7]
 -- | Caller Saves
 callersaves = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9]
 -- | Tipo de dato que define el acceso a variables.
@@ -170,6 +173,23 @@ defaultFrame = Frame
 --
 --------------------------------------------------------------------------------
 
+-- | formals extrae una lista de accesos denotando la ubicación donde los parámetros
+-- serán mantenidos en tiempo de ejecución, es decir, como se verán dentro del callee
+-- (Appel, pág 135)
+-- MIPS requiere primeros 4 a registro y el resto a stack, todos los argumentos son
+-- buscados por el callee en stack en: $sp + frameSize + n
+prepFormals :: Frame -> [Access]
+prepFormals fr = 
+  let (a,b) = splitAt 4 (formals fr)
+  in (regFormals a) ++ (stackFormals b)
+    where regFormals xs = map InReg $ take (Prelude.length xs) argregs
+          stackFormals xs = reverse $ snd
+                              (foldl (\(n,rs) _ -> (n + argsGap, InFrame n:rs))
+                                     (argsInicial * argsGap, [])
+                                     xs
+                              )
+
+{-
 -- TODOS A stack por i386
 prepFormals :: Frame -> [Access]
 prepFormals fs = reverse $ snd
@@ -177,6 +197,17 @@ prepFormals fs = reverse $ snd
          (argsInicial, [])
          (formals fs)
   )
+
+prepFormals :: Frame -> [Access]
+prepFormals fr = reverse $ snd
+  (foldl (\(n,rs) esc -> 
+            case esc of Escapa -> (n + argsGap, InFrame n:rs)
+                        NoEscapa -> (n, InReg ():rs)
+         )
+    (argsInicial, [])
+    (formals fs)
+  )
+-}
 
 newFrame :: Symbol -> [Escapa] -> Frame
 newFrame nm fs = defaultFrame { name = nm, formals = fs }
@@ -191,20 +222,20 @@ externalCall s = Call (Name $ pack s)
 allocArg :: (Monad w, TLGenerator w) => Frame -> Escapa -> w (Frame, Access)
 allocArg fr Escapa =
   let actual = actualArg fr
-      acc    = InFrame $ actual * wSz + argsGap
-  in  return (fr { actualArg = actual + 1 }, acc)
+      acc    = InFrame $ actual * wSz + argsGap -- formals en sp + n
+  in  return (fr { formals = formals fr ++ [Escapa], actualArg = actual + 1 }, acc)
 allocArg fr NoEscapa = do
   s <- newTemp
-  return (fr, InReg s)
+  return (fr {formals = formals fr ++ [NoEscapa]}, InReg s)
 
 allocLocal :: (Monad w, TLGenerator w) => Frame -> Escapa -> w (Frame, Access)
 allocLocal fr Escapa =
   let actual = actualLocal fr
-      acc    = InFrame $ actual * wSz + localsGap
-  in  return (fr { actualLocal = actual + 1 }, acc)
+      acc    = InFrame $ -(actual * wSz + localsGap) -- locals en sp - n
+  in  return (fr { locals = locals fr ++ [Escapa], actualLocal = actual + 1 }, acc)
 allocLocal fr NoEscapa = do
   s <- newTemp
-  return (fr, InReg s)
+  return (fr {locals = locals fr ++ [NoEscapa]}, InReg s)
 
 -- Función auxiliar par el calculo de acceso a una variable, siguiendo el Static Link.
 -- Revisar bien antes de usarla, pero ajustando correctamente la variable |fpPrevLev|
@@ -223,11 +254,25 @@ exp
 exp (InFrame k) e = Mem (Binop Plus (auxexp e) (Const k))
   -- Si esta en un registro, directamente damos ese acceso. Por definición el
   -- nivel tendría que ser el mismo, sino hay un error en el calculo de escapes.
-exp (InReg l) c | c == 0    = error "Megaerror en el calculo de escapes?"
-                | otherwise = Temp l
+exp (InReg l) _ = Temp l
 
---procEntryExit2 :: Frame -> [TigerMunch.Instr] -> [TigerMunch.Instr]
---procEntryExit2 fram bod = bod ++ [TigerMunch.OPER{ oassem = ""
---                                                 , osrc   = [zero, ra, sp] ++ calleesaves
---                                                 , odst   = []
---                                                 , ojmp   = Just []}]
+
+-- procEntryExit2 marks special registers as source to keep them live and prevent
+-- the register allocator to try and use them for some other purpose
+procEntryExit2 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
+procEntryExit2 fram bod = bod ++ [TigerAsm.IOPER{ TigerAsm.oassem = TigerAsm.NOOP
+                                                , TigerAsm.osrc   = [zero, ra, sp] ++ calleesaves
+                                                , TigerAsm.odst   = []
+                                                , TigerAsm.ojmp   = Just []}]
+
+
+-- procEntryExit3 does several things, using info about the frame size:
+--  1. assembly function prologue
+--  2. stack pointer entry adjustment
+--  3. stack pointer exit adjustment
+--  4. assembly function epilogue
+procEntryExit3 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
+procEntryExit3 fr inss = let
+    prologue = [] --TODO
+    epilogue = [] --TODO
+  in prologue ++ inss ++ epilogue
