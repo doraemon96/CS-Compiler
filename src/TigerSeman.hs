@@ -497,7 +497,9 @@ transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p
                                                                (,t) <$> (TTr.arrayExp bcant binit)
                                            _             -> addpos (derror (pack "El array no tiene tipo ahrey")) p
 
--- Un ejemplo de estado que alcanzaría para realizar todas la funciones es:
+
+{-
+-- Viejo estado, acopla environment y frame! (BORRAR)
 data Estado = Est {
                 vEnv     :: M.Map Symbol EnvEntry 
                 , tEnv   :: M.Map Symbol Tipo
@@ -509,6 +511,8 @@ data Estado = Est {
     deriving Show
 -- data EstadoG = G {vEnv :: [M.Map Symbol EnvEntry], tEnv :: [M.Map Symbol Tipo]}
 --     deriving Show
+
+
 --
 -- Estado Inicial con los entornos
 -- * int y string como tipos básicos. -> tEnv
@@ -534,6 +538,58 @@ initConf = Est
            , frag   = []
            , maxlvl = -1
            }
+-}
+
+-- Separamos estado de Environments de estado de Frames:
+data Env = Env {
+  vEnv     :: M.Map Symbol EnvEntry 
+  , tEnv   :: M.Map Symbol Tipo
+} deriving Show
+data Fra = Fra {
+  level  :: [Level]
+  , salida :: [Maybe Label]
+  , frag   :: [Frag]
+  , maxlvl :: Int
+} deriving Show
+
+-- Y los juntamos en un estado común
+data Estado = Est {
+  env :: Env
+  , fra :: Fra
+} deriving Show
+
+--
+-- Estado Inicial con los entornos
+-- env: * int y string como tipos básicos. -> tEnv
+--      * todas las funciones del *runtime* disponibles. -> vEnv
+-- fra: * acumulación de niveles -> level
+--      * etiquetas de salida de expresiones -> salida
+--      * acumulado de fragmentos (funciones y strings) -> frag
+--      * nivel actual/maximo -> maxlvl
+--
+initConf :: Estado
+initConf = Est {
+  env = Env { tEnv = M.insert (pack "int") (TInt RW) (M.singleton (pack "string") TString)
+              , vEnv = M.fromList
+                [(pack "print", Func (TTr.outermost,pack "print",[TString], TUnit, Runtime))
+                ,(pack "flush", Func (TTr.outermost,pack "flush",[],TUnit, Runtime))
+                ,(pack "getchar",Func (TTr.outermost,pack "getchar",[],TString,Runtime))
+                ,(pack "ord",Func (TTr.outermost,pack "ord",[TString],TInt RW,Runtime))
+                ,(pack "chr",Func (TTr.outermost,pack "chr",[TInt RW],TString,Runtime))
+                ,(pack "size",Func (TTr.outermost,pack "size",[TString],TInt RW,Runtime))
+                ,(pack "substring",Func (TTr.outermost,pack "substring",[TString,TInt RW, TInt RW],TString,Runtime))
+                ,(pack "concat",Func (TTr.outermost,pack "concat",[TString,TString],TString,Runtime))
+                ,(pack "not",Func (TTr.outermost,pack "not",[TBool],TBool,Runtime))
+                ,(pack "exit",Func (TTr.outermost,pack "exit",[TInt RW],TUnit,Runtime))
+                ]
+            }
+  , fra = Fra { level  = [TTr.outermost]
+              , salida = []
+              , frag   = []
+              , maxlvl = -1
+              }
+}
+
 
 -- Utilizando alguna especie de run de la monada definida, obtenemos algo así
 type Monada = ExceptT Symbol (StateT Estado StGen)
@@ -551,60 +607,64 @@ instance Manticore Monada where
       -- | Guardamos el estado actual
       oldEst <- get
       -- | Insertamos la variable al entorno (sobrescribiéndolo)
-      put (oldEst{ vEnv = M.insert sym (Var ventry) (vEnv oldEst) })
+      put (oldEst{ env = (env oldEst){vEnv = M.insert sym (Var ventry) (vEnv (env oldEst)) }})
       -- | ejecutamos la computación que tomamos como argumentos una vez que expandimos el entorno
       a <- m
       -- | Volvemos a poner el entorno viejo
-      put oldEst
+      newEst <- get
+      put (newEst{ env = (env oldEst) })
       -- | retornamos el valor que resultó de ejecutar la monada en el entorno expandido.
       return a
   -- | Inserta una Función al entorno
   --   insertFunV :: Symbol -> FunEntry -> w a -> w a
     insertFunV sym fentry m = do
       oldEst <- get
-      put (oldEst{ vEnv = M.insert sym (Func fentry) (vEnv oldEst) })
+      put (oldEst{ env = (env oldEst){vEnv = M.insert sym (Func fentry) (vEnv (env oldEst)) }})
       a <- m
-      put oldEst
+      newEst <- get
+      put (newEst { env = (env oldEst) })
       return a
   -- | Inserta una Variable de sólo lectura al entorno
   --   insertVRO :: Symbol -> Access -> Int -> w a -> w a
     insertVRO sym acc lev m = do
       oldEst <- get
-      put (oldEst{ vEnv = M.insert sym (Var (TInt RO,acc,lev)) (vEnv oldEst)})
+      put (oldEst{ env = (env oldEst){vEnv = M.insert sym (Var (TInt RO,acc,lev)) (vEnv (env oldEst)) }})
       a <- m
-      put oldEst
+      newEst <- get
+      put (newEst { env = (env oldEst) })
       return a
   -- | Inserta una variable de tipo al entorno
   --   insertTipoT :: Symbol -> Tipo -> w a -> w a
     insertTipoT sym tentry m = do
       oldEst <- get
-      put (oldEst{ tEnv = M.insert sym tentry (tEnv oldEst)})
+      put (oldEst{ env = (env oldEst){tEnv = M.insert sym tentry (tEnv (env oldEst)) }})
       a <- m
-      put oldEst
+      newEst <- get
+      put (newEst { env = (env oldEst) })
       return a
   -- | Busca una función en el entorno
   --   getTipoFunV :: Symbol -> w FunEntry
     getTipoFunV sym = do
       est <- get
       maybe (derror (pack ("No se encontro el tipo de la fun "++ show sym ++ " en el map."))) 
-            (\case (Func f) -> return f ; _ -> (derror (pack "Undefined Fun"))) (M.lookup sym (vEnv est))
+            (\case (Func f) -> return f ; _ -> (derror (pack "Undefined Fun"))) (M.lookup sym (vEnv (env est)))
   -- | Busca una variable en el entorno. Ver [1]
   --   getTipoValV :: Symbol -> w ValEntry
     getTipoValV sym = do
       est <- get
       maybe (derror (pack ("No se encontro el tipo de la var " ++ show sym ++ " en el map."))) 
-            (\case (Var f) -> return f ; _ -> (derror (pack "Undefined Var"))) (M.lookup sym (vEnv est))
+            (\case (Var f) -> return f ; _ -> (derror (pack "Undefined Var"))) (M.lookup sym (vEnv (env est)))
   -- | Busca un tipo en el entorno
   --   getTipoT :: Symbol -> w Tipo
     getTipoT sym = do
       est <- get
       maybe (derror (pack ("No se encontro el tipo "++ show sym ++ " en el map."))) 
-            (\t -> return t) (M.lookup sym (tEnv est))
+            (\t -> return t) (M.lookup sym (tEnv (env est)))
   -- | Funciones de Debugging!
   --   showVEnv :: w a -> w a
-    showVEnv w = gets vEnv >>= flip trace w . show
+    showVEnv w = gets (vEnv . env) >>= flip trace w . show
   --   showTEnv :: w a -> w a
-    showTEnv w = gets tEnv >>= flip trace w . show
+    showTEnv w = gets (tEnv . env) >>= flip trace w . show
     ugen = mkUnique
 
 instance MemM Monada where
@@ -613,43 +673,43 @@ instance MemM Monada where
     --upLvl :: w () 
     upLvl = do
       st <- get
-      put (st{ maxlvl = maxlvl st + 1})
+      put (st{ fra = (fra st){ maxlvl = maxlvl (fra st) + 1 }})
     --downLvl :: w ()
     downLvl = do
       st <- get
-      put (st{ maxlvl = maxlvl st - 1})
+      put (st{ fra = (fra st){ maxlvl = maxlvl (fra st) - 1 }})
     -- | Salida management.
     -- Esta etiqueta la necesitamos porque es la que nos va permitir saltar a la
     -- salida de un while (Ver código intermedio de While). Usada en el break.
     --pushSalida :: Maybe Label -> w ()
     pushSalida ml = do
       st <- get
-      put (st{ salida = ml : (salida st) })
+      put (st{ fra = (fra st){ salida = ml : (salida (fra st)) }})
     --topSalida :: w (Maybe Label)
     topSalida = do
       st <- get
-      case salida st of
+      case salida (fra st) of
         [] -> derror (pack "Unethical break.")
-        _  -> return $ head $ salida st
+        _  -> return $ head $ salida (fra st)
     --popSalida :: w ()
     popSalida = do
       st <- get
-      put (st{ salida = tail $ salida st })
+      put (st{ fra = (fra st){ salida = tail $ salida (fra st) }})
     -- | Level management Cont. El nivel en esta etapa es lo que llamamos el
     -- marco de activación virtual o dinámico (no me acuerdo). Pero es lo que
     -- eventualmente va a ser el marco de activación
     --pushLevel :: Level -> w ()
     pushLevel lvl = do
       st <- get
-      put (st{ level = lvl : (level st) })
+      put (st{ fra = (fra st){ level = lvl : (level (fra st)) }})
     --popLevel  :: w ()
     popLevel = do
       st <- get
-      put (st{ level = tail $ level st })
+      put (st{ fra = (fra st){ level = tail $ level (fra st) }})
     --topLevel  :: w Level
     topLevel = do
       st <- get
-      return $ head $ level st
+      return $ head $ level (fra st)
     -- | Frag management
     -- Básicamente los fragmentos van a ser un efecto lateral de la computación.
     -- Recuerden que los fragmentos son pedazos de código intermedio que se van
@@ -658,11 +718,11 @@ instance MemM Monada where
     --pushFrag  :: Frag -> w ()
     pushFrag fr = do
       st <- get
-      put (st{ frag = fr : (frag st) })
+      put (st{ fra = (fra st){ frag = fr : (frag (fra st)) }})
     --getFrags  :: w [Frag]
     getFrags = do
       st <- get
-      return $ frag st
+      return $ frag (fra st)
 
 runMonada :: Monada (BExp, Tipo) -> StGen (Either Symbol (BExp, Tipo))
 runMonada =  flip evalStateT initConf . runExceptT
