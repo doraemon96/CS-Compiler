@@ -1,6 +1,9 @@
 {-# LANGUAGE GADTs #-}
 module TigerAsm where
 
+import Data.Text (pack, unpack)
+
+import TigerSymbol
 import TigerTemp (Temp, Label)
 
 --TODO: Change assem to corresponding types (lassem is directive?)
@@ -44,6 +47,7 @@ data MIPSAsm =
         | MOVE Temp Temp
         -- other
         | LABEL Label | NOOP
+  deriving Show
 
 -- | MIPSDir represents MIPS assembly directives.
 data MIPSDir =
@@ -52,11 +56,13 @@ data MIPSDir =
         | DATA | DATAA Int
         | TEXT | TEXTA Int
         | WORD [Int]
+  deriving Show
 
 -- | MipsCom represents MIPS assembly comments. (ToDo)
 data MIPSCom = COMMENT String
+  deriving Show
 
-
+{-
 instance Show MIPSAsm where
     show (ADD t1 t2 t3) = ws ["add", cm [show t1, show t2, show t3]]
     show (ADDI t1 t2 i) = ws ["addi", cm [show t1, show t2, show i]]
@@ -94,14 +100,15 @@ instance Show MIPSAsm where
     show (MOVE t1 t2) = ws ["move", cm [show t1, show t2]]
     show (LABEL l) = show l ++ ":"
     show (NOOP) = "noop"
+-}
 
-format :: (Temp -> String) -> Instr -> String
+format :: (Temp -> String) -> Instr -> Symbol
 format f ins@(IOPER{}) = format' f (oassem ins)
 format f ins@(IMOVE{}) = format' f (massem ins)
 format f ins@(ILABEL{}) = format' f (lassem ins)
 
 
-format' :: (Temp -> String) -> MIPSAsm -> String
+format' :: (Temp -> String) -> MIPSAsm -> Symbol
 format' f (ADD t1 t2 t3) = ws ["add", cm (map f [t1, t2, t3])]
 format' f (ADDI t1 t2 i) = ws ["addi", cm ((map f [t1,  t2]) ++ [show i])]
 format' f (ADDIU t1 t2 i) = ws ["addiu", cm ((map f [t1,  t2]) ++ [show i])]
@@ -112,17 +119,17 @@ format' f (MULT t1 t2) = ws ["mult", cm (map f [t1,  t2])]
 format' f (MULTU t1 t2) = ws ["multu", cm (map f [t1,  t2])]
 format' f (DIV t1 t2) = ws ["div", cm (map f [t1,  t2])]
 format' f (DIVU t1 t2) = ws ["divu", cm (map f [t1,  t2])]
-format' f (BEQ t1 t2 l) = ws ["beq", cm ((map f [t1,  t2]) ++ [show l])]
-format' f (BNE t1 t2 l) = ws ["bne", cm ((map f [t1,  t2]) ++ [show l])]
-format' f (BGTZ t1 l) = ws ["bgtz", cm ([f t1, show l])]
-format' f (BGEZ t1 l) = ws ["bgez", cm ([f t1, show l])]
-format' f (BLTZ t1 l) = ws ["bltz", cm ([f t1, show l])]
-format' f (BLEZ t1 l) = ws ["blez", cm ([f t1, show l])]
+format' f (BEQ t1 t2 l) = ws ["beq", cm ((map f [t1,  t2]) ++ [unpack l])]
+format' f (BNE t1 t2 l) = ws ["bne", cm ((map f [t1,  t2]) ++ [unpack l])]
+format' f (BGTZ t1 l) = ws ["bgtz", cm ([f t1, unpack l])]
+format' f (BGEZ t1 l) = ws ["bgez", cm ([f t1, unpack l])]
+format' f (BLTZ t1 l) = ws ["bltz", cm ([f t1, unpack l])]
+format' f (BLEZ t1 l) = ws ["blez", cm ([f t1, unpack l])]
 format' f (SLT t1 t2 t3) = ws ["slt", cm (map f [t1,  t2,  t3])]
 format' f (SLTU t1 t2 t3) = ws ["sltu", cm (map f [t1,  t2,  t3])]
-format' f (J l) = ws ["j", show l]
-format' f (JAL l) = ws ["jal", show l]
-format' f (JR l) = ws ["jr", show l]
+format' f (J l) = ws ["j", unpack l]
+format' f (JAL l) = ws ["jal", unpack l]
+format' f (JR l) = ws ["jr", unpack l]
 format' f (SLL t1 t2 i) = ws ["sll", cm ((map f [t1,  t2]) ++ [show i])]
 format' f (SRL t1 t2 i) = ws ["srl", cm ((map f [t1,  t2]) ++ [show i])]
 format' f (SLLV t1 t2 t3) = ws ["sllv", cm (map f [t1,  t2,  t3])]
@@ -136,14 +143,14 @@ format' f (LA t1 l1) = ws ["la", cm (map f [t1,  l1])]
 format' f (MFHI t) = ws ["mfhi", f t]
 format' f (MFLO t) = ws ["mflo", f t]
 format' f (MOVE t1 t2) = ws ["move", cm (map f [t1,  t2])]
-format' f (LABEL l) =  (show l) ++ ":"
-format' f (NOOP) = "noop"
+format' f (LABEL l) =  appends [l, pack ":"]
+format' f (NOOP) = pack "noop"
 
 
 -- add whitespace between args
-ws :: [String] -> String
-ws (x:[])   = x
-ws (x:y:ys) = x ++ " " ++ (ws (y:ys))
+ws :: [String] -> Symbol
+ws (x:[])   = pack x
+ws (x:y:ys) = appends [pack x , pack " " , (ws (y:ys))]
 -- add commas between args
 cm :: [String] -> String
 cm (x:[])   = x
@@ -155,8 +162,8 @@ os offset temp = offset ++ "(" ++ temp ++ ")"
 
 --instance Show MIPSDir where
 
-instance Show MIPSCom where
-    show (COMMENT s) = "# " ++ s
+--instance Show MIPSCom where
+--  show (COMMENT s) = "# " ++ s
 
 
 replaceMIPS :: (Temp -> String) -> MIPSAsm -> MIPSAsm

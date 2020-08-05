@@ -6,6 +6,7 @@ import           Data.Maybe
 import           System.Console.GetOpt
 import qualified System.Environment    as Env
 import           System.Exit
+import           System.IO
 
 import           TigerAbs
 import           TigerEscap
@@ -29,16 +30,19 @@ data Options = Options {
         optArbol     :: Bool
         ,optDebEscap :: Bool
         ,optIR       :: Bool
+        ,optFile     :: String
     }
     deriving Show
 
 defaultOptions :: Options
-defaultOptions = Options {optArbol = False, optDebEscap = False, optIR = False }
+defaultOptions = Options {optArbol = False, optDebEscap = False, optIR = False, optFile = "out.s"}
 
 options :: [OptDescr (Options -> Options)]
 options = [ Option ['a'] ["arbol"] (NoArg (\opts -> opts {optArbol = True})) "Muestra el AST luego de haber realizado el cálculo de escapes"
             , Option ['e'] ["escapada"] (NoArg (\opts -> opts {optDebEscap = True})) "Stepper escapadas"
-            , Option ['i'] ["ir"] (NoArg (\opts -> opts {optIR = True})) "Muestra la representacion intermedia"]
+            , Option ['i'] ["ir"] (NoArg (\opts -> opts {optIR = True})) "Muestra la representacion intermedia"
+            , Option ['f'] ["file"] (NoArg (\opts -> opts {optFile = "out.s"})) "Imprime assembly al archivo nombrado" 
+          ]
 
 compilerOptions :: [String] -> IO (Options, [String])
 compilerOptions argv = case getOpt Permute options argv of
@@ -84,7 +88,7 @@ templabRel :: Exp -> StGen (Either Symb.Symbol ([Frag], [([Tree.Stm], Frame)]))
 templabRel ast = do
   -- recover Frags from Semantic Analysis
   frags <- runFrags ast -- runFrags ast :: StGen (Either Symbol [Frag])
-  --traceShow frags $ return () -- FIXME: remove trace after debug
+  traceShow frags $ return ()
   either  (return . Left) -- return error
           (\frags -> do
               let (chars, procs) = sepFrag frags -- sepFrag frags :: ([Frag],[(Stm,Frame)])
@@ -107,7 +111,7 @@ makeAssembly (chars,procs) = do
   --return $ [strings ++ body]
   --return (Right [])
   let body = map (Asm.format show) (concat inss')
-  return $ Right $ body
+  return $ Right $ map Symb.unpack body
 
 -- Toma opciones, nombre del archivo, source code
 -- Devuelve el archivo parseado o el error
@@ -117,6 +121,10 @@ parserStep opts nm sc = either
   return
   $ runParser expression () nm sc
 
+writeToFile :: String -> Either Symb.Symbol [String] -> IO ()
+writeToFile name asm =
+  let f = foldr (\a as -> a ++ "\n" ++ as ) "\n"
+  in either print (writeFile name . f) asm
 
 main :: IO ()
 main = do
@@ -129,7 +137,6 @@ main = do
     rawAst <- parserStep opts' s sourceCode
     -- calculate escapes
     ast <- calculoEscapadas rawAst opts'
-    --traceShow ast $ return () --FIXME: remove trace after debug
     -- option to show ast tree
     when (optArbol opts') (showExp ast)
     -- Semantic analysis & Canonization
@@ -137,5 +144,5 @@ main = do
     let (canons, stgenCounter) = evalState (templabRel ast) 0
     when (optIR opts') (either print showIR canons)
     let assembly = canons >>= return . makeAssembly
-    either print (print . (flip evalState stgenCounter)) assembly
+    either print ((writeToFile (optFile opts')) . fst . (flip evalState stgenCounter)) assembly
     putStrLn "Tiger Compiler finished"

@@ -226,8 +226,6 @@ fromTy _ = P.error "no debería haber una definición de tipos en los args..."
 --  **transDecs :: (Manticore w) => [Dec] -> w a -> w a
 transDecs :: (MemM w, Manticore w) => [Dec] -> w (BExp,Tipo) -> w ([BExp],Tipo)
 transDecs [] m = do (x,y) <- m
-                    --frags <- getFrags --FIXME: remove trace after debug
-                    --traceShow (frags) $ return ()
                     return ([x],y)
 transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
                                                         when (et == TNil) $ addpos (derror (pack "No se puede inferir tipo de record inicializado a nil.")) p
@@ -268,7 +266,7 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                                nlvl = TTr.newLevel lvl flab escs -- new level
                                                            insertFunV nm (nlvl, flab, largs, t, Propia) m'
 
-                                                    genlab t p = pack $ show t ++ "_" ++ show (line p)
+                                                    genlab t p = appends [t, pack "_", pack (show $ line p)]
                                                       
                                                     -- Segunda pasada: inserto las exp que pueden usar las funciones
                                                     inserte (nm,args,Nothing,exp,p) =
@@ -484,7 +482,6 @@ transExp(ForExp nv mb lo hi bo p) = do (elo,tlo) <- transExp lo
                                        TTr.posWhileforExp
                                        return (fex,TUnit)
 transExp(LetExp dcs body p) = do (bexps,tipo) <- transDecs dcs (transExp body)
-                                 traceShow "DEBUG: transExp (LetExp)" $ return ()
                                  (,tipo) <$> TTr.letExp (init bexps) (last bexps)
 transExp(BreakExp p) = addpos ((,TUnit) <$> TTr.breakExp) p
 transExp(ArrayExp sn cant init p) = do t <- addpos (getTipoT sn) p

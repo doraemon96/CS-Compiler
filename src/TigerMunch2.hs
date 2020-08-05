@@ -10,6 +10,9 @@ import Control.Monad.Trans.State.Lazy
 import qualified Data.Text          as T
 import qualified Data.List.Utils    as LU
 
+import Debug.Trace
+
+
 type Monadita = StateT [Instr] StGen
 
 class (Monad w, Temp.TLGenerator w) => Emitter w where
