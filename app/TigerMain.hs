@@ -30,18 +30,20 @@ data Options = Options {
         optArbol     :: Bool
         ,optDebEscap :: Bool
         ,optIR       :: Bool
-        ,optFile     :: String
+        ,optAsm      :: Bool
+        ,optFile     :: Bool
     }
     deriving Show
 
 defaultOptions :: Options
-defaultOptions = Options {optArbol = False, optDebEscap = False, optIR = False, optFile = "out.s"}
+defaultOptions = Options {optArbol = False, optDebEscap = False, optIR = False, optAsm = False, optFile = False}
 
 options :: [OptDescr (Options -> Options)]
 options = [ Option ['a'] ["arbol"] (NoArg (\opts -> opts {optArbol = True})) "Muestra el AST luego de haber realizado el cálculo de escapes"
             , Option ['e'] ["escapada"] (NoArg (\opts -> opts {optDebEscap = True})) "Stepper escapadas"
             , Option ['i'] ["ir"] (NoArg (\opts -> opts {optIR = True})) "Muestra la representacion intermedia"
-            , Option ['f'] ["file"] (NoArg (\opts -> opts {optFile = "out.s"})) "Imprime assembly al archivo nombrado" 
+            , Option ['s'] ["asm"] (NoArg (\opts -> opts {optAsm = True})) "Imprime el assembly en pantalla" 
+            , Option ['f'] ["file"] (NoArg (\opts -> opts {optFile = True})) "Imprime el assembly a un archivo .s" 
           ]
 
 compilerOptions :: [String] -> IO (Options, [String])
@@ -66,7 +68,7 @@ showIR (chars,procs) = do
     putStrLn "Strings:"
     putStrLn $ show chars
     putStrLn "Procs:"
-    let stms = concat . fst $ unzip procs
+    let stms = concat $ fst $ unzip procs
     foldMap (putStrLn . show) stms
     putStrLn "#################################################"
     putStrLn ""
@@ -88,7 +90,6 @@ templabRel :: Exp -> StGen (Either Symb.Symbol ([Frag], [([Tree.Stm], Frame)]))
 templabRel ast = do
   -- recover Frags from Semantic Analysis
   frags <- runFrags ast -- runFrags ast :: StGen (Either Symbol [Frag])
-  traceShow frags $ return ()
   either  (return . Left) -- return error
           (\frags -> do
               let (chars, procs) = sepFrag frags -- sepFrag frags :: ([Frag],[(Stm,Frame)])
@@ -111,7 +112,8 @@ makeAssembly (chars,procs) = do
   --return $ [strings ++ body]
   --return (Right [])
   let body = map (Asm.format show) (concat inss')
-  return $ Right $ map Symb.unpack body
+  let body2 = map Symb.unpack body
+  return $ Right $ body2
 
 -- Toma opciones, nombre del archivo, source code
 -- Devuelve el archivo parseado o el error
@@ -124,7 +126,9 @@ parserStep opts nm sc = either
 writeToFile :: String -> Either Symb.Symbol [String] -> IO ()
 writeToFile name asm =
   let f = foldr (\a as -> a ++ "\n" ++ as ) "\n"
-  in either print (writeFile name . f) asm
+      filename = name ++ ".s"
+  in either print (writeFile filename . f) asm
+
 
 main :: IO ()
 main = do
@@ -144,5 +148,6 @@ main = do
     let (canons, stgenCounter) = evalState (templabRel ast) 0
     when (optIR opts') (either print showIR canons)
     let assembly = canons >>= return . makeAssembly
-    either print ((writeToFile (optFile opts')) . fst . (flip evalState stgenCounter)) assembly
+        namep = take ((length s) - 4) s -- name prefix
+    when (optFile opts') $ either print ((writeToFile namep) . fst . (flip evalState stgenCounter)) assembly
     putStrLn "Tiger Compiler finished"
