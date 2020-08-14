@@ -231,7 +231,7 @@ transDecs ((VarDec nm escap Nothing init p): xs) m = do (eb,et) <- transExp init
                                                         when (et == TNil) $ addpos (derror (pack "No se puede inferir tipo de record inicializado a nil.")) p
                                                         lev     <- TTr.getActualLevel
                                                         acc     <- TTr.allocLocal escap
-                                                        bvar    <- TTr.simpleVar acc lev -- creo una variable
+                                                        bvar    <- TTr.simpleVar acc 0 -- creo una variable
                                                         bass    <- TTr.assignExp bvar eb -- le asigno el valor inicial
                                                         (bexps,tipo) <- insertValV nm (et,acc,lev) (transDecs xs m)
                                                         return (bass:bexps, tipo)
@@ -241,7 +241,7 @@ transDecs ((VarDec nm escap (Just t) init p): xs) m = do (eb,et) <- transExp ini
                                                          unless bt $ derror (pack "Tipos no compatibles #1")
                                                          lev     <- TTr.getActualLevel
                                                          acc     <- TTr.allocLocal escap
-                                                         bvar    <- TTr.simpleVar acc lev -- creo una variable
+                                                         bvar    <- TTr.simpleVar acc 0 -- creo una variable
                                                          bass    <- TTr.assignExp bvar eb -- le asigno el valor inicial
                                                          (bexps,tipo) <- insertValV nm (wt,acc,lev) (transDecs xs m)
                                                          return (bass:bexps, tipo)
@@ -583,7 +583,7 @@ initConf = Est {
   , fra = Fra { level  = [TTr.outermost]
               , salida = []
               , frag   = []
-              , maxlvl = -1
+              , maxlvl = 0
               }
 }
 
@@ -670,11 +670,11 @@ instance MemM Monada where
     --upLvl :: w () 
     upLvl = do
       st <- get
-      put (st{ fra = (fra st){ maxlvl = maxlvl (fra st) + 1 }})
+      put (st{ fra = (fra st){ maxlvl = (maxlvl (fra st) + 1) }})
     --downLvl :: w ()
     downLvl = do
       st <- get
-      put (st{ fra = (fra st){ maxlvl = maxlvl (fra st) - 1 }})
+      put (st{ fra = (fra st){ maxlvl = (maxlvl (fra st) - 1) }})
     -- | Salida management.
     -- Esta etiqueta la necesitamos porque es la que nos va permitir saltar a la
     -- salida de un while (Ver código intermedio de While). Usada en el break.
@@ -698,7 +698,7 @@ instance MemM Monada where
     --pushLevel :: Level -> w ()
     pushLevel lvl = do
       st <- get
-      put (st{ fra = (fra st){ level = lvl : (level (fra st)) }})
+      put (st{ fra = (fra st){ level = lvl : (level (fra st)), maxlvl = getNlvl lvl }})
     --popLevel  :: w ()
     popLevel = do
       st <- get
@@ -732,7 +732,7 @@ transProc ex = do
   let pos = Simple {line = 0, col = 0}
   let procExp = LetExp
         [FunctionDec [(pack "_tigermain", [], Just (pack "int"), ex, pos)]]
-        (UnitExp pos)
+        (IntExp 0 pos)
         pos
   transExp procExp
   getFrags

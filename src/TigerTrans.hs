@@ -273,6 +273,7 @@ instance (MemM w) => IrGen w where
         fun <- funDec
         -- posFunctionDec
         -- | Cuando salimos de la función sacamos el 'Nothing' que agregamos en 'preFunctionDec'.
+        popLevel
         popSalida
         downLvl
         -- devolvemos el código en el entorno donde fue computada.
