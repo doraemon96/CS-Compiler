@@ -283,7 +283,8 @@ instance (MemM w) => IrGen w where
         body <- case proc of
                   IsProc -> unNx bd
                   IsFun  -> Move (Temp rv) <$> unEx bd
-        procEntryExit lvl (Nx body)
+        let frame = getFrame lvl
+        procEntryExit lvl (Nx $ Seq (Label $ name frame) body)
         return $ Ex $ Const 0
     -- simpleVar :: Access -> Int -> w BExp
     simpleVar acc lvl = return $ Ex $ exp acc lvl
