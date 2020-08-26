@@ -21,7 +21,7 @@ class (Monad w, Temp.TLGenerator w) => Emitter w where
 
 instance Emitter Monadita where
     emit i = do st <- get
-                put $ i:st
+                put $ st ++ [i]
     result gen = do t <- Temp.newTemp
                     gen t
                     return t
