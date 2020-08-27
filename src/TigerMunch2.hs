@@ -75,10 +75,9 @@ munchStm (Move (Temp t) c@(Call _ _)) = do
     emit $ IMOVE{ massem = MOVE t Frame.rv
                 , mdst = t
                 , msrc = Frame.rv}
-munchStm (ExpS c@(Call f args)) = do -- TODO: what if not Name?
-    f'    <- munchExp f
+munchStm (ExpS c@(Call e@(Name l) args)) = do
     args' <- munchArgs args
-    emit $ IOPER{ oassem = JAL f'
+    emit $ IOPER{ oassem = JAL l
                 , osrc   = args'
                 , odst   = Frame.calldefs
                 , ojmp   = Nothing}
