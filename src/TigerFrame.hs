@@ -261,7 +261,7 @@ exp (InReg l) _ = Temp l
 -- the register allocator to try and use them for some other purpose
 procEntryExit2 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
 procEntryExit2 fram bod = bod ++ [TigerAsm.IOPER{ TigerAsm.oassem = TigerAsm.NOOP
-                                                , TigerAsm.osrc   = [zero, ra, sp] ++ calleesaves
+                                                , TigerAsm.osrc   = specialregs ++ calleesaves
                                                 , TigerAsm.odst   = []
                                                 , TigerAsm.ojmp   = Just []}]
 
