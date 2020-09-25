@@ -257,6 +257,29 @@ exp (InFrame k) e = Mem (Binop Plus (auxexp e) (Const k))
 exp (InReg l) _ = Temp l
 
 
+saverestore_callee :: (Monad w, TLGenerator w) => w ([Stm],[Stm])
+saverestore_callee = do
+  temps <- mapM (\_ -> newTemp) calleesaves
+  let ziptemps = zip temps [0..]
+      sav = map (\(t, i) -> Move (Temp t) (Temp $ calleesaves !! i)) ziptemps
+      res = map (\(t, i) -> Move (Temp $ calleesaves !! i) (Temp t)) ziptemps
+  return (sav, res)
+
+-- procEntryExit1 does the view-shift (places incoming arguments where they belong)
+-- and implements the save and restore of callee-save registers.
+--  + save "escaping" arguments (including SL) into the frame
+--  + move nonescaping arguments into fresh temporaries
+--  + store instructions to save any callee-save registers (including RA) used withing the fn
+--  ++ fn ++
+--  + load instructions to restore the callee-save registers
+procEntryExit1 :: (Monad w, TLGenerator w) => Frame -> Stm -> w Stm
+procEntryExit1 frame body = do
+  (save,restore) <- saverestore_callee
+  return $ sequence $ save ++ [body] ++ restore
+    where sequence [st]     = st
+          sequence (st:sts) = Seq st (sequence sts)
+
+
 -- procEntryExit2 marks special registers as source to keep them live and prevent
 -- the register allocator to try and use them for some other purpose
 procEntryExit2 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]

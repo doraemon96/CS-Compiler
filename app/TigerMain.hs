@@ -57,7 +57,10 @@ showExp :: Exp -> IO ()
 showExp e = do
     putStrLn ""
     putStrLn "## Mostramos el AST (PP Gracias a Emilio Lopez Junior) ##"
-    putStrLn $ renderExp e
+    --putStrLn $ renderExp e
+    putStrLn "#########################################################"
+    putStrLn "######### Mostramos el AST (plano para debugeo) #########"
+    putStrLn $ show e
     putStrLn "#########################################################"
     putStrLn ""
 
