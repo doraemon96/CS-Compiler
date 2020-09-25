@@ -132,7 +132,7 @@ munchStm (Move (Temp i1) (Temp i2)) = do
                 , mdst   = i1} 
 munchStm (Move (Temp i) e2) = do 
     me2 <- munchExp e2
-    emit $ IOPER{ oassem = ADD me2 i Frame.zero -- ADD %d0 <- %s0 + %r0
+    emit $ IOPER{ oassem = ADD i me2 Frame.zero -- ADD %d0 <- %s0 + %r0
             , osrc   = [me2]
             , odst   = [i] 
             , ojmp   = Nothing}
