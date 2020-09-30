@@ -16,7 +16,7 @@ data Instr = IOPER { oassem :: MIPSAsm
                   , msrc   :: Temp }
            | ILABEL { lassem :: MIPSAsm
                    , llab   :: Label }
-    deriving (Show) --Eq
+    deriving (Show, Eq, Ord)
 
 -- | MIPSAsm represents MIPS assembly instructions in a way that Haskell can
 -- manipulate it (so that replacing labels and temps is easier).
@@ -47,7 +47,7 @@ data MIPSAsm =
         | MOVE Temp Temp
         -- other
         | LABEL Label | NOOP
-  deriving Show
+  deriving (Show, Eq, Ord)
 
 -- | MIPSDir represents MIPS assembly directives.
 data MIPSDir =

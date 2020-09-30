@@ -107,6 +107,8 @@ calleesaves = [s0, s1, s2, s3, s4, s5, s6, s7]
 callersaves = [t0, t1, t2, t3, t4, t5, t6, t7, t8, t9]
 -- | Tipo de dato que define el acceso a variables.
 calldefs = rv : ra : callersaves
+-- | Registros
+registers = specialregs ++ argregs ++ calleesaves ++ callersaves
 
 data Access =
   -- | En memoria, acompañada de una dirección

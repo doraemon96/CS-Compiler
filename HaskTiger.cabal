@@ -45,7 +45,7 @@ library
         , TigerAsm
         , TigerGraph
         --, TigerLiveness
-        --, TigerColoring
+        , TigerColoring
   build-depends:       base
                        , containers
                        , text
