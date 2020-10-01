@@ -75,36 +75,57 @@ data ColorSets = ColorSetConstructor {
 -- y también generar colores únicos para coloreo.
 type ColorMonad = ST.State ColorSets
 
--- -- coloring es la función general, que toma el codigo assembler y
--- -- busca un coloreo factible para los nodos de dicho código
--- coloring :: [As.Instr] -> ColorMonad ()
--- coloring inss = do 
---                    -- build construye el grafo de interferencia y llena el
---                    -- conjunto worklistMoves
---                    build
---                    -- makeWorkList llena todas los conjuntos worklist
---                    makeWorkList
---                    -- intentamos simplify, coalesce, freeze y selectspill
---                    -- hasta que no tengamos mas nodos para trabajar
---                    until (coloreoCondition ({-ColorSets-})) coloreoLoop
---                    -- asignamos colores
---                    assignColors
---                    -- si la asignación hace spilll, alocamos memoria para los
---                    -- temporarios spilled y reintentamos
---                    if MONADA.spilledNodes /= empty 
---                    then do rewriteProgram ({-?-})
---                            coloring ({-?-})
---                    -- sino, hemos finalizado
---                    return ()
+-- coloring es la función general, que toma el codigo assembler y
+-- busca un coloreo factible para los nodos de dicho código
+coloring :: [As.Instr] -> ColorMonad ()
+coloring inss = do 
+                   -- build construye el grafo de interferencia y llena el
+                   -- conjunto worklistMoves
+                   --build --FIXME
+                   -- makeWorkList llena todas los conjuntos worklist
+                   makeWorkList
+                   -- intentamos simplify, coalesce, freeze y selectspill
+                   -- hasta que no tengamos mas nodos para trabajar
+                   untilM_ coloreoLoop coloreoCondition
+                   -- asignamos colores
+                   assignColors
+                   -- si la asignación hace spilll, alocamos memoria para los
+                   -- temporarios spilled y reintentamos
+                   rewrite <- rewriteCondition
+                   when rewrite $ do
+                            rewriteProgram
+                            --coloring --FIXME
+                   -- sino, hemos finalizado
+
 
 -- coloreoCondition nos informa si ya no tenemos nada que hacer en el loop
 -- principal de coloring
-coloreoCondition :: ColorSets -> Bool
-coloreoCondition = undefined
+coloreoCondition :: ColorMonad Bool
+coloreoCondition = do
+    st <- get
+    let siw = Set.null (simplifyWorklist st)
+    let wom = Set.null (worklistMoves st)
+    let frw = Set.null (freezeWorklist st)
+    let spw = Set.null (spillWorklist st)
+    return $ and [siw, wom, frw, spw]
 
 -- coloreoLoop hace una pasada de simplify, coalesce, freeze o selectspill
 coloreoLoop :: ColorMonad ()
-coloreoLoop = undefined
+coloreoLoop = do
+    st <- get
+    if (not $ Set.null $ simplifyWorklist st) then simplify
+    else if (not $ Set.null $ worklistMoves st) then coalesce
+    else if (not $ Set.null $ freezeWorklist st) then freeze
+    else if (not $ Set.null $ spillWorklist st) then selectSpill
+    else error "How did you manage to get here? You are a monster! #ffff"
+
+
+-- rewriteCondition
+rewriteCondition :: ColorMonad Bool
+rewriteCondition = do
+    st <- get
+    return $ Set.null (spilledNodes st)
+
 
 
 -- INVARIANT CHECKING --
