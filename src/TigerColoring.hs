@@ -6,7 +6,7 @@ module TigerColoring where
 
 --Tiger Imports
 import TigerTemp
-import TigerMunch                 as Mn
+import TigerMunch2                as Mn
 import TigerLiveness              as Lv
 import TigerAsm                   as As
 import TigerFrame                 as Fr
@@ -15,7 +15,11 @@ import qualified Data.Map         as M
 import qualified Data.Set         as Set
 import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
+import Control.Monad.Loops
 
+
+availableColors :: Set.Set Temp
+availableColors = Set.fromList [] --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
 
 --data WorkSets = { precolored :: ()
 --                , initial :: ()
@@ -58,10 +62,12 @@ data ColorSets = ColorSetConstructor {
     , moveList :: M.Map Temp (Set.Set As.Instr) --mapa de nodo a lista de moves con las que esta asociado
     , alias :: M.Map Temp Temp
     , k :: Int
+    , color :: M.Map Temp Temp -- color asignado a un nodo
     -- Aditional states
 --    , livenessMap :: LivenessMap
 --    , flowGraph :: FlowGraph
     , live :: Set.Set Temp
+    , okColors :: Set.Set Temp -- colors internal state
 }
 
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
@@ -402,12 +408,53 @@ freezeMoves' v = do
 -- SelectSpill
 
 selectSpill :: ColorMonad ()
-selectSpill = undefined
+selectSpill = do
+    m <- selectSpillHeuristic
+    st <- get
+    put (st{spillWorklist = (spillWorklist st) Set.\\ (Set.singleton m),
+            simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton m)})
+    freezeMoves m
+
+
+selectSpillHeuristic :: ColorMonad Temp
+selectSpillHeuristic = do
+    st <- get
+    return $ head $ Set.elems (spillWorklist st)
 
 
 -- AssignColors
 assignColors :: ColorMonad ()
-assignColors = undefined
+assignColors = do
+    whileM_ ((not . Stack.stackIsEmpty) <$> (gets selectStack))
+            (do
+                st <- get
+                let (stack',n) = maybe (error "Impossible #3333") (id) $ Stack.stackPop (selectStack st)
+                put (st{selectStack = stack',
+                        okColors = availableColors})
+                st' <- get
+                let adjListN = (adjList st') M.! n
+                mapM_ (\w -> do
+                        aliasW <- getAlias w
+                        st <- get
+                        when (Set.member aliasW ((coloredNodes st) `Set.union` (precolored st)))
+                            $ put (st{okColors = (okColors st) Set.\\ (Set.singleton aliasW)})
+                    )
+                    (Set.elems adjListN)
+                st'' <- get
+                if (Set.null (okColors st'')) then do
+                    put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
+                else do
+                    let c = head $ Set.elems (okColors st'')
+                    put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
+                              color = M.insert n c (color st'')})
+            )
+    st <- get
+    mapM_ (\n -> do
+            st <- get
+            aliasN <- getAlias n
+            put (st{color = M.insert n aliasN (color st)})
+            )
+            (coalescedNodes st)
 
 
 -- RewriteProgram
