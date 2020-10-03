@@ -8,8 +8,11 @@ module TigerColoring where
 import TigerTemp
 import TigerMunch2                as Mn
 import TigerLiveness              as Lv
+import TigerGraph                 as Gr
 import TigerAsm                   as As
 import TigerFrame                 as Fr
+import TigerAbs                   as Abs
+import TigerUnique                as Uq
 
 import qualified Data.Map         as M
 import qualified Data.Set         as Set
@@ -21,23 +24,6 @@ import Control.Monad.Loops
 availableColors :: Set.Set Temp
 availableColors = Set.fromList [] --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
 
---data WorkSets = { precolored :: ()
---                , initial :: ()
---                , simplifyWorklist:: ()
---                , freezeWorklist :: ()
---                , spillWorklist :: ()
---                , spilledNodes :: ()
---                , coalescedNodes :: ()
---                , coloredNodes :: ()
---                , selectStack :: ()
---                }
---
---data MoveSets = { coalescedMoves :: ()
---                , constrainedMoves :: ()
---                , frozenMoves :: ()
---                , worklistMoves :: ()
---                , activeMoves :: ()
---                }
 
 data ColorSets = ColorSetConstructor { 
     precolored :: Set.Set Temp  --nodos que ya poseen un color
@@ -64,38 +50,76 @@ data ColorSets = ColorSetConstructor {
     , k :: Int
     , color :: M.Map Temp Temp -- color asignado a un nodo
     -- Aditional states
---    , livenessMap :: LivenessMap
---    , flowGraph :: FlowGraph
+    --  input states
+    , instructions :: [As.Instr]
+    , frame :: Fr.Frame
+    --  graph states
+    , livenessMap :: Lv.LivenessMap
+    , flowGraph :: Lv.FlowGraph
+    --  build states
     , live :: Set.Set Temp
-    , okColors :: Set.Set Temp -- colors internal state
+    , defs :: Set.Set Temp
+    , uses :: Set.Set Temp
+    --  color states
+    , okColors :: Set.Set Temp -- colors internal
+    --  rewrite states
+    , newTempMap :: M.Map Temp Temp
+    --  temp generation states
+    , unique :: Uq.Unique
 }
+
+initColorSets :: Fr.Frame -> [As.Instr] -> ColorSets
+initColorSets = undefined -- FIXME
 
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
 -- y también generar colores únicos para coloreo.
 type ColorMonad = ST.State ColorSets
 
+-- runColoring corre todo
+runColoring :: Fr.Frame -> [As.Instr] -> (Fr.Frame, [As.Instr])
+runColoring fr inss = 
+    let (_, st) = ST.runState coloring (initColorSets fr inss)
+    in ((frame st),(instructions st))
+
+-- TLGenerator para colormonad por rewriteProgram
+instance {-# OVERLAPS #-} TLGenerator ColorMonad where
+    newTemp = detgenTemp <$> mkUnique
+    newLabel = detgenLabel <$> mkUnique
+
+-- UniqueGenerator para colormonad por TLGenerator
+instance {-# OVERLAPS #-} UniqueGenerator ColorMonad where
+    mkUnique = do
+        modify (\st -> st{unique = (unique st)+1})
+        gets unique
+      
+
 -- coloring es la función general, que toma el codigo assembler y
 -- busca un coloreo factible para los nodos de dicho código
-coloring :: [As.Instr] -> ColorMonad ()
-coloring inss = do 
-                   -- build construye el grafo de interferencia y llena el
-                   -- conjunto worklistMoves
-                   --build --FIXME
-                   -- makeWorkList llena todas los conjuntos worklist
-                   makeWorkList
-                   -- intentamos simplify, coalesce, freeze y selectspill
-                   -- hasta que no tengamos mas nodos para trabajar
-                   untilM_ coloreoLoop coloreoCondition
-                   -- asignamos colores
-                   assignColors
-                   -- si la asignación hace spilll, alocamos memoria para los
-                   -- temporarios spilled y reintentamos
-                   rewrite <- rewriteCondition
-                   when rewrite $ do
-                            rewriteProgram
-                            --coloring --FIXME
-                   -- sino, hemos finalizado
+coloring :: ColorMonad ()
+coloring = do
+            inss <- gets instructions
+            let flowGraph = instrs2graph inss
+            let livenessMap = interferenceGraph flowGraph
+            modify (\st -> st{flowGraph = flowGraph,
+                                livenessMap = livenessMap})
+            -- build construye el grafo de interferencia y llena el
+            -- conjunto worklistMoves
+            build
+            -- makeWorkList llena todas los conjuntos worklist
+            makeWorkList
+            -- intentamos simplify, coalesce, freeze y selectspill
+            -- hasta que no tengamos mas nodos para trabajar
+            untilM_ coloreoLoop coloreoCondition
+            -- asignamos colores
+            assignColors
+            -- si la asignación hace spilll, alocamos memoria para los
+            -- temporarios spilled y reintentamos
+            rewrite <- rewriteCondition
+            when rewrite $ do
+                    rewriteProgram
+                    coloring
+            -- sino, hemos finalizado
 
 
 -- coloreoCondition nos informa si ya no tenemos nada que hacer en el loop
@@ -142,60 +166,46 @@ spillWorklistInvariant :: ColorMonad Bool
 spillWorklistInvariant = undefined
 
 
--- FUNCTIONS DEFINITION --
--- initialize :: [As.Instr] -> ColorMonad ()
--- initialize = do
---     let precolored = Fr.registers
---         initial = [] --TODO
---         degree = []
---         adjSet = []
---         adjList = []
---         moveList = []
---         alias = []
---         k = 0
---         livenessmap = []
---         flowgraph = []
---     put { precolored = Set.fromList precolored  --nodos que ya poseen un color
---         , initial = Set.fromList initial  --nodos no procesados
---         , simplifyWorklist = Set.empty  --nodos low-degree non-moves
---         , freezeWorklist = Set.empty  --nodos low-degree moves
---         , spillWorklist = Set.empty  --nodos high-degree
---         , spilledNodes = Set.empty  --nodos potential spill
---         , coalescedNodes = Set.empty  --nodos coalescidos
---         , coloredNodes = Set.empty  --nodos coloreados con exito
---         , selectStack = Stack.stackNew --stack de temporarios removidos del grafo
---         -- MoveSets
---         , coalescedMoves = Set.empty --moves coalescidos
---         , constrainedMoves = Set.empty  --moves cuyo source y target interfieren
---         , frozenMoves = Set.empty  --moves no considerados para coalescing
---         , worklistMoves = Set.empty  --moves listos para coalescing
---         , activeMoves = Set.empty  --moves no listos para coalescing
---         -- Aditional structures
---         , degree :: M.Map Temp Int
---         , adjSet :: Set.Set (Temp, Temp) --conjunto de aristas de interferencia
---         , adjList :: M.Map Temp (Set.Set Temp) --adjList[u] := nodos que interfieren con u
---         , moveList :: M.Map Temp (Set.Set As.Instr) --mapa de nodo a lista de moves con las que esta asociado
---         , alias :: M.Map Temp Temp
---         , k :: Int
---         -- Aditional states
---         , livenessMap :: LivenessMap
---         , flowGraph :: FlowGraph
---         , live :: Set.Set Temp
---     }
+-- Build
+build :: ColorMonad ()
+build = do
+    lv <- gets livenessMap
+    -- put all liveOut, defs and uses in an internal state
+    mapM_ (\(node, (liveIn, liveOut)) -> do
+            modify (\st -> st{live = liveOut})
+            fg <- gets flowGraph
+            let defN = (Lv.def fg) M.! node
+            let useN = (Lv.use fg) M.! node
+            modify (\st -> st{defs = Set.fromList defN,
+                              uses = Set.fromList useN})
+            buildInstr (Gr.content node)
+        )
+        (M.toList lv) 
 
--- build :: ColorMonad ()
--- build = do
-    
-
--- buildBlock :: [Temp] -> ColorMonad ()
--- buildBlock inss = do
---     let live = 
-
--- buildInstr :: As.Instr -> ColorMonad 
--- buildInstr ins@(IMOVE{}) = do
---     st <- get
---     let uses = (use (flowGraph st)) ! ins
---     put (st{live = (live st) Set.\\ })
+buildInstr :: As.Instr -> ColorMonad ()
+buildInstr ins = do
+    case ins of 
+        (IMOVE{}) -> do
+            modify (\st -> st{live = (live st) Set.\\ (uses st)})
+            st <- get
+            mapM_ (\n -> do
+                    st <- get
+                    let moveListN = (moveList st) M.! n
+                    modify (\st -> st{moveList = M.insert n (moveListN `Set.union` (Set.singleton ins)) (moveList st)})
+                ) 
+                (Set.elems $ (defs st) `Set.union` (uses st))
+        _   -> do
+            return ()
+    modify (\st -> st{live = (live st) `Set.union` (defs st)})
+    st <- get
+    mapM_ (\d -> do
+            st <- get
+            mapM_ (\l -> do
+                    addEdge l d
+                )
+                (Set.elems $ live st)
+        )
+        (Set.elems $ defs st)
 
 addEdge :: Temp -> Temp -> ColorMonad ()
 addEdge u v = do
@@ -235,13 +245,13 @@ makeWorkList = do
 adjacent :: Temp -> ColorMonad (Set.Set Temp)
 adjacent n = do
     st <- get
-    let adjListN = (adjList st) M.! n --TODO: check that it never fails
+    let adjListN = (adjList st) M.! n
     return $ adjListN Set.\\ ((toSet (selectStack st)) `Set.union` (coalescedNodes st))
 
 nodeMoves :: Temp -> ColorMonad (Set.Set As.Instr)
 nodeMoves n = do
     st <- get
-    let moveListN = (moveList st) M.! n --TODO: check that it never fails
+    let moveListN = (moveList st) M.! n
     return $ moveListN `Set.intersection` ((activeMoves st) `Set.union` (worklistMoves st))
 
 moveRelated :: Temp -> ColorMonad Bool
@@ -480,7 +490,105 @@ assignColors = do
 
 -- RewriteProgram
 rewriteProgram :: ColorMonad ()
-rewriteProgram = undefined
+rewriteProgram = do
+    spills <- gets spilledNodes
+    let spillslist = Set.elems spills --ordered list
+    -- allocate memory locations
+    accesses <- mapM allocSpilled spillslist
+    -- create a new temp for each def and use
+    -- in instruction insert store after each definition of v
+    -- in instruction insert fetch before each use of v
+    inss <- gets instructions
+    (insss,temps) <- unzip <$> (mapM (rewriteSpilled accesses) (inss))
+    -- put all v in a set newTemps
+    let newTemps = Set.fromList $ concat temps
+    modify (\st -> st{spilledNodes = Set.empty
+                      ,initial = ((coloredNodes st) `Set.union` (coalescedNodes st)) `Set.union` newTemps
+                      ,coloredNodes = Set.empty
+                      ,coalescedNodes = Set.empty
+                      ,instructions = concat insss
+                      ,newTempMap = M.empty
+                      })
+
+allocSpilled :: Temp -> ColorMonad (Temp, Fr.Access)
+allocSpilled t = do
+    fr <- gets frame
+    (fr', acc) <- allocLocal fr Abs.Escapa
+    modify (\st -> st{frame = fr'})
+    return (t,acc)
+
+rewriteSpilled :: [(Temp, Fr.Access)] -> As.Instr -> ColorMonad ([As.Instr], [Temp])
+rewriteSpilled tmap (IOPER oassem odst osrc ojmp) = do
+    spilled <- gets spilledNodes
+    -- create store after each definition
+    dstTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.fromList odst)
+    storeInss <- mapM (createStore tmap) $ concat dstTemps
+    -- create fetch before each use
+    srcTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.fromList osrc)
+    fetchInss <- mapM (createFetch tmap) $ concat srcTemps
+    reDst <- (rewriteTemps odst)
+    reSrc <- (rewriteTemps osrc)
+    let rewrittenOp = As.IOPER oassem reDst reSrc ojmp
+    return (fetchInss ++ [rewrittenOp] ++ storeInss, concat $ dstTemps ++ srcTemps)
+rewriteSpilled tmap (IMOVE massem mdst msrc) = do
+    spilled <- gets spilledNodes
+    -- create store after each definition
+    dstTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.singleton mdst)
+    storeInss <- mapM (createStore tmap) $ concat dstTemps
+    -- create fetch before each use
+    srcTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.singleton msrc)
+    fetchInss <- mapM (createFetch tmap) $ concat srcTemps
+    reDst <- (rewriteTemp mdst)
+    reSrc <- (rewriteTemp msrc)
+    let rewrittenOp = As.IMOVE massem reDst reSrc
+    return (fetchInss ++ [rewrittenOp] ++ storeInss, concat $ dstTemps ++ srcTemps)
+rewriteSpilled tmap other = return ([other],[])
+
+createTemp :: Temp -> ColorMonad [Temp]
+createTemp t = do
+    ntempmap <- gets newTempMap
+    if M.member t ntempmap then do
+        return []
+    else do
+        s <- newTemp
+        modify (\st -> st{newTempMap = M.insert t s (newTempMap st)})
+        return [s]
+
+createStore :: [(Temp, Fr.Access)] -> Temp -> ColorMonad As.Instr
+createStore tmap t = do
+    let tmap' = M.fromList tmap
+    let acc = tmap' M.! t
+    let offset = case acc of (InFrame dir) -> dir
+                             _                -> error "Esto no debe pasar #199"
+    return $ IOPER{oassem = SW t offset Fr.fp
+                    , odst = []
+                    , osrc = [Fr.fp, t]
+                    , ojmp = Nothing}
+
+createFetch :: [(Temp, Fr.Access)] -> Temp -> ColorMonad As.Instr
+createFetch tmap t = do
+    let tmap' = M.fromList tmap
+    let acc = tmap' M.! t
+    let offset = case acc of (InFrame dir) -> dir
+                             _              -> error "Esto no debe pasar #198"
+    return $ IOPER{oassem = LW t offset Fr.fp
+                    , odst = [t]
+                    , osrc = [Fr.sp]
+                    , ojmp = Nothing}
+
+rewriteTemp :: Temp -> ColorMonad Temp
+rewriteTemp t = do
+    ntempmap <- gets newTempMap
+    let newt = maybe (t) (id) (M.lookup t ntempmap)
+    return $ newt
+
+rewriteTemps :: [Temp] -> ColorMonad [Temp]
+rewriteTemps []     = return []
+rewriteTemps (t:ts) = do
+    ntempmap <- gets newTempMap
+    let newt = maybe (t) (id) (M.lookup t ntempmap)
+    newts <- rewriteTemps ts
+    return $ newt:newts
 
 
 -- Stack helper functions

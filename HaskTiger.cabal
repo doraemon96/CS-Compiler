@@ -44,7 +44,7 @@ library
         , TigerMunch2
         , TigerAsm
         , TigerGraph
-        --, TigerLiveness
+        , TigerLiveness
         , TigerColoring
   build-depends:       base
                        , containers
@@ -60,6 +60,7 @@ library
                        , MissingH
                        , extra
                        , Stack
+                       , monad-loops
   default-language:    Haskell2010
   default-extensions: FlexibleInstances
                     , TypeFamilies

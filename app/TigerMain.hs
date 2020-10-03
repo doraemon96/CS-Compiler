@@ -17,6 +17,7 @@ import           TigerTemp
 import           TigerUnique
 import           TigerFrame
 import           TigerCanon
+import           TigerColoring
 import qualified TigerTree             as Tree
 import qualified TigerSymbol           as Symb
 import qualified TigerMunch2           as Munch
@@ -108,9 +109,9 @@ makeAssembly (chars,procs) = do
   -- Munch
   inss <- mapM Munch.codeGen stms
   -- procEntryExit2
-  inss' <- return $ zipWith procEntryExit2 frms inss
-  -- Live
+  let inss' = zipWith procEntryExit2 frms inss
   -- Color
+  let inss'' = zipWith (\frm ins -> runColoring frm ins) frms inss' --TODO! APPLY COLORING
   -- procEntryExit3
   --return $ [strings ++ body]
   --return (Right [])
