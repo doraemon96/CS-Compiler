@@ -111,11 +111,12 @@ makeAssembly (chars,procs) = do
   -- procEntryExit2
   let inss' = zipWith procEntryExit2 frms inss
   -- Color
-  let inss'' = zipWith (\frm ins -> runColoring frm ins) frms inss' --TODO! APPLY COLORING
+  unq <- get
+  let (frms'',inss'') = unzip $ zipWith (\frm ins -> runColoring frm ins unq) frms inss'
   -- procEntryExit3
   --return $ [strings ++ body]
   --return (Right [])
-  let body = map (Asm.format show) (concat inss')
+  let body = map (Asm.format show) (concat inss'')
   let body2 = map Symb.unpack body
   return $ Right $ body2
 

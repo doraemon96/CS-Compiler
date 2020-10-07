@@ -2,6 +2,7 @@
 module TigerAsm where
 
 import Data.Text (pack, unpack)
+import qualified Data.Map as Map
 
 import TigerSymbol
 import TigerTemp (Temp, Label)
@@ -164,6 +165,52 @@ os offset temp = offset ++ "(" ++ temp ++ ")"
 
 --instance Show MIPSCom where
 --  show (COMMENT s) = "# " ++ s
+
+replaceInstr :: Map.Map Temp Temp -> Instr -> Instr
+replaceInstr m (IOPER oassem odst osrc ojmp) = IOPER (replaceAssem m oassem) odst osrc ojmp
+replaceInstr m (IMOVE massem mdst msrc) = IMOVE (replaceAssem m massem) mdst msrc
+replaceInstr m other = other
+
+replaceAssem :: Map.Map Temp Temp -> MIPSAsm -> MIPSAsm
+replaceAssem m (ADD t1 t2 t3) = ADD (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (ADDI t1 t2 i) = ADDI (m `getme` t1) (m `getme` t2) i
+replaceAssem m (ADDIU t1 t2 i) = ADDIU (m `getme` t1) (m `getme` t2) i
+replaceAssem m (ADDU t1 t2 t3) = ADDU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (SUB t1 t2 t3) = SUB (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (SUBU t1 t2 t3) = SUBU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (MULT t1 t2) = MULT (m `getme` t1) (m `getme` t2)
+replaceAssem m (MULTU t1 t2) = MULTU (m `getme` t1) (m `getme` t2)
+replaceAssem m (DIV t1 t2) = DIV (m `getme` t1) (m `getme` t2)
+replaceAssem m (DIVU t1 t2) = DIVU (m `getme` t1) (m `getme` t2)
+replaceAssem m (BEQ t1 t2 l) = BEQ (m `getme` t1) (m `getme` t2) l
+replaceAssem m (BNE t1 t2 l) = BNE (m `getme` t1) (m `getme` t2) l
+replaceAssem m (BGTZ t1 l) = BGTZ (m `getme` t1) l
+replaceAssem m (BGEZ t1 l) = BGEZ (m `getme` t1) l
+replaceAssem m (BLTZ t1 l) = BLTZ (m `getme` t1) l
+replaceAssem m (BLEZ t1 l) = BLEZ (m `getme` t1) l
+replaceAssem m (SLT t1 t2 t3) = SLT (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (SLTU t1 t2 t3) = SLTU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (J l) = J l
+replaceAssem m (JAL l) = JAL l
+replaceAssem m (JR l) = JR l
+replaceAssem m (SLL t1 t2 i) = SLL (m `getme` t1) (m `getme` t2) i
+replaceAssem m (SRL t1 t2 i) = SRL (m `getme` t1) (m `getme` t2) i
+replaceAssem m (SLLV t1 t2 t3) = SLLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (SRLV t1 t2 t3) = SRLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (AND t1 t2 t3) = AND (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (OR t1 t2 t3) = OR (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem m (LW t1 i t2) = LW (m `getme` t1) i (m `getme` t2)
+replaceAssem m (SW t1 i t2) = SW (m `getme` t1) i (m `getme` t2)
+replaceAssem m (LI t1 i) = LI (m `getme` t1) i
+replaceAssem m (LA t1 l1) = LA (m `getme` t1) l1
+replaceAssem m (MFHI t) = MFHI t
+replaceAssem m (MFLO t) = MFLO t
+replaceAssem m (MOVE t1 t2) = MOVE (m `getme` t1) (m `getme` t2)
+replaceAssem m (LABEL l) = LABEL l
+replaceAssem m (NOOP) = NOOP
+
+getme :: Map.Map Temp Temp -> Temp -> Temp
+getme m t = maybe (t) (id) (Map.lookup t m)
 
 
 replaceMIPS :: (Temp -> String) -> MIPSAsm -> MIPSAsm

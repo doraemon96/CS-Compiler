@@ -20,6 +20,7 @@ import qualified Data.Stack       as Stack
 import Control.Monad.State.Strict as ST
 import Control.Monad.Loops
 
+import Debug.Trace
 
 availableColors :: Set.Set Temp
 availableColors = Set.fromList [] --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -68,8 +69,53 @@ data ColorSets = ColorSetConstructor {
     , unique :: Uq.Unique
 }
 
-initColorSets :: Fr.Frame -> [As.Instr] -> ColorSets
-initColorSets = undefined -- FIXME
+-- initColorSets
+initColorSets :: Fr.Frame -> [As.Instr] -> Uq.Unique -> ColorSets
+initColorSets fr inss unq = ColorSetConstructor { 
+    precolored = Set.fromList Fr.registers -- Set.Set Temp  --nodos que ya poseen un color
+    , initial = (foldl (\nodes ins -> nodes `Set.union` (getNodes ins)) (Set.empty) inss) Set.\\ (Set.fromList Fr.registers) -- Set.Set Temp  --nodos no procesados
+    , simplifyWorklist = Set.empty -- Set.Set Temp  --nodos low-degree non-moves
+    , freezeWorklist = Set.empty -- Set.Set Temp  --nodos low-degree moves
+    , spillWorklist = Set.empty -- Set.Set Temp  --nodos high-degree
+    , spilledNodes = Set.empty -- Set.Set Temp  --nodos potential spill
+    , coalescedNodes = Set.empty -- Set.Set Temp  --nodos coalescidos
+    , coloredNodes = Set.empty -- Set.Set Temp  --nodos coloreados con exito
+    , selectStack = Stack.stackNew -- Stack.Stack Temp --stack de temporarios removidos del grafo
+    -- MoveSets
+    , coalescedMoves = Set.empty -- Set.Set As.Instr --moves coalescidos
+    , constrainedMoves = Set.empty -- Set.Set As.Instr  --moves cuyo source y target interfieren
+    , frozenMoves = Set.empty -- Set.Set As.Instr  --moves no considerados para coalescing
+    , worklistMoves = Set.empty -- Set.Set As.Instr  --moves listos para coalescing
+    , activeMoves = Set.empty -- Set.Set As.Instr  --moves no listos para coalescing
+    -- Aditional structures
+    , degree = M.empty -- M.Map Temp Int
+    , adjSet = Set.empty -- Set.Set (Temp, Temp) --conjunto de aristas de interferencia
+    , adjList = M.empty -- M.Map Temp (Set.Set Temp) --adjList[u] := nodos que interfieren con u
+    , moveList = M.empty -- M.Map Temp (Set.Set As.Instr) --mapa de nodo a lista de moves con las que esta asociado
+    , alias = M.empty -- M.Map Temp Temp
+    , k = length availableColors -- Int
+    , color = M.empty -- M.Map Temp Temp -- color asignado a un nodo
+    -- Aditional states
+    --  input states
+    , instructions = inss -- [As.Instr]
+    , frame = fr -- Fr.Frame
+    --  graph states
+    , livenessMap = M.empty -- Lv.LivenessMap
+    , flowGraph = Lv.emptyFG -- Lv.FlowGraph
+    --  build states
+    , live = Set.empty -- Set.Set Temp
+    , defs = Set.empty -- Set.Set Temp
+    , uses = Set.empty -- Set.Set Temp
+    --  color states
+    , okColors = Set.empty -- Set.Set Temp -- colors internal
+    --  rewrite states
+    , newTempMap = M.empty -- M.Map Temp Temp
+    --  temp generation states
+    , unique = unq -- Uq.Unique
+}
+    where getNodes (IOPER _ odst osrc _) = (Set.fromList odst) `Set.union` (Set.fromList osrc)
+          getNodes (IMOVE _ mdst msrc)   = (Set.singleton mdst) `Set.union` (Set.singleton msrc)
+          getNodes _                     = Set.empty
 
 -- WorkSets y MoveSets estan todos dentro de algo llamado ColorSets
 -- Luego nuestra ColorMonad debe llevar estos sets junto al grafo original,
@@ -77,9 +123,9 @@ initColorSets = undefined -- FIXME
 type ColorMonad = ST.State ColorSets
 
 -- runColoring corre todo
-runColoring :: Fr.Frame -> [As.Instr] -> (Fr.Frame, [As.Instr])
-runColoring fr inss = 
-    let (_, st) = ST.runState coloring (initColorSets fr inss)
+runColoring :: Fr.Frame -> [As.Instr] -> Uq.Unique -> (Fr.Frame, [As.Instr])
+runColoring fr inss unq = 
+    let (_, st) = ST.runState coloring (initColorSets fr inss unq)
     in ((frame st),(instructions st))
 
 -- TLGenerator para colormonad por rewriteProgram
@@ -116,9 +162,11 @@ coloring = do
             -- si la asignación hace spilll, alocamos memoria para los
             -- temporarios spilled y reintentamos
             rewrite <- rewriteCondition
-            when rewrite $ do
+            if rewrite then do
                     rewriteProgram
                     coloring
+            else 
+                applyColors
             -- sino, hemos finalizado
 
 
@@ -174,8 +222,8 @@ build = do
     mapM_ (\(node, (liveIn, liveOut)) -> do
             modify (\st -> st{live = liveOut})
             fg <- gets flowGraph
-            let defN = (Lv.def fg) M.! node
-            let useN = (Lv.use fg) M.! node
+            let defN = maybe (error "!.555") (id) $ (Lv.def fg) M.!? node
+            let useN = maybe (error "!.556") (id) $ (Lv.use fg) M.!? node
             modify (\st -> st{defs = Set.fromList defN,
                               uses = Set.fromList useN})
             buildInstr (Gr.content node)
@@ -190,12 +238,11 @@ buildInstr ins = do
             st <- get
             mapM_ (\n -> do
                     st <- get
-                    let moveListN = (moveList st) M.! n
+                    let moveListN = maybe (Set.empty) (id) $ (moveList st) M.!? n --NOTE: doy empty por default, capaz no esté bien
                     modify (\st -> st{moveList = M.insert n (moveListN `Set.union` (Set.singleton ins)) (moveList st)})
                 ) 
                 (Set.elems $ (defs st) `Set.union` (uses st))
-        _   -> do
-            return ()
+        _   -> return ()
     modify (\st -> st{live = (live st) `Set.union` (defs st)})
     st <- get
     mapM_ (\d -> do
@@ -212,18 +259,18 @@ addEdge u v = do
     st <- get
     when ((not (Set.member (u,v) (adjSet st))) && (u /= v)) $ do
         put (st{adjSet = (adjSet st) `Set.union` (Set.fromList [(u,v),(v,u)])})
-        when (not (Set.member u (precolored st))) $ do
+        (when (not (Set.member u (precolored st))) $ do
             st <- get
-            let adjListU = (adjList st) M.! u
-            let degreeU = (degree st) M.! u
+            let adjListU = maybe (Set.empty) (id) $ (adjList st) M.!? u
+            let degreeU = maybe (0) (id) $ (degree st) M.!? u
             put (st{adjList = M.insert u (adjListU `Set.union` (Set.singleton v)) (adjList st),
-                    degree = M.insert u (degreeU + 1) (degree st)})
-        when (not (Set.member v (precolored st))) $ do
+                    degree = M.insert u (degreeU + 1) (degree st)}))
+        (when (not (Set.member v (precolored st))) $ do
             st <- get
-            let adjListV = (adjList st) M.! v
-            let degreeV = (degree st) M.! v
+            let adjListV = maybe (Set.empty) (id) $ (adjList st) M.!? v
+            let degreeV = maybe (0) (id) $ (degree st) M.!? v
             put (st{adjList = M.insert v (adjListV `Set.union` (Set.singleton u)) (adjList st),
-                    degree = M.insert v (degreeV + 1) (degree st)})
+                    degree = M.insert v (degreeV + 1) (degree st)}))
 
 
 -- MakeWorklist
@@ -234,7 +281,8 @@ makeWorkList = do
             st' <- get
             put (st'{initial = (initial st') Set.\\ (Set.singleton n)})
             moveRelatedN <- moveRelated n
-            if ((degree st') M.! n) >= (k st') then
+            let degreeN = maybe (0) (id) $ (degree st') M.!? n --NOTE: doy cero por default, capaz no esté bien
+            if (degreeN >= (k st')) then
                 do modify (\st -> st{spillWorklist = (spillWorklist st) `Set.union` (Set.singleton n)})
             else if moveRelatedN then
                 do modify (\st -> st{freezeWorklist = (freezeWorklist st) `Set.union` (Set.singleton n)})
@@ -245,13 +293,13 @@ makeWorkList = do
 adjacent :: Temp -> ColorMonad (Set.Set Temp)
 adjacent n = do
     st <- get
-    let adjListN = (adjList st) M.! n
+    let adjListN = maybe (Set.empty) (id) $ (adjList st) M.!? n  --NOTE: doy empty por default, capaz no esté bien
     return $ adjListN Set.\\ ((toSet (selectStack st)) `Set.union` (coalescedNodes st))
 
 nodeMoves :: Temp -> ColorMonad (Set.Set As.Instr)
 nodeMoves n = do
     st <- get
-    let moveListN = (moveList st) M.! n
+    let moveListN = maybe (error "!.230") (id) $ (moveList st) M.!? n
     return $ moveListN `Set.intersection` ((activeMoves st) `Set.union` (worklistMoves st))
 
 moveRelated :: Temp -> ColorMonad Bool
@@ -274,7 +322,7 @@ simplify = do
 decrementDegree :: Temp -> ColorMonad ()
 decrementDegree m = do
     st <- get
-    let d = (degree st) M.! m
+    let d = maybe (0) (id) $ (degree st) M.!? m --NOTE: doy cero por default, capaz no esté bien
     put (st{degree = M.insert m (d-1) (degree st)})
     when (d == (k st)) $ do
         adjacentM <- adjacent m
@@ -346,7 +394,7 @@ addWorkList :: Temp -> ColorMonad ()
 addWorkList u = do
     st <- get
     moveRelatedU <- moveRelated u
-    let degreeU = (degree st) M.! u
+    let degreeU = maybe (error "!.232") (id) $ (degree st) M.!? u
     when ((not (Set.member u (precolored st))) && (not moveRelatedU) && (degreeU < (k st))) $ do
         put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
                 simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton u)})
@@ -354,7 +402,7 @@ addWorkList u = do
 ok :: Temp -> Temp -> ColorMonad Bool
 ok t r = do
     st <- get
-    let degreeT = (degree st) M.! t
+    let degreeT = maybe (error "!.233") (id) $ (degree st) M.!? t
     return $ (degreeT < (k st)) || (Set.member t (precolored st)) || (Set.member (t,r) (adjSet st))
 
 conservative :: Set.Set Temp -> ColorMonad Bool
@@ -383,10 +431,11 @@ combine u v = do
     else do
         put (st{spillWorklist = (spillWorklist st) Set.\\ (Set.singleton v)})  
     st <- get
-    let moveListU = (moveList st) M.! u
-    let moveListV = (moveList st) M.! v
+    let moveListU = maybe (error "!.234") (id) $ (moveList st) M.!? u
+    let moveListV = maybe (error "!.235") (id) $ (moveList st) M.!? v
     put (st{alias = M.insert v u (alias st),
             moveList = M.insert u (moveListU `Set.union` moveListV) (moveList st)})
+    enableMoves $ Set.singleton v --errata
     st <- get
     adjacentV <- adjacent v
     mapM_ (\t -> do
@@ -395,7 +444,7 @@ combine u v = do
             )
             (adjacentV)
     st <- get
-    let degreeU = (degree st) M.! u
+    let degreeU = maybe (error "!.236") (id) $ (degree st) M.!? u
     when ((degreeU >= (k st)) && (Set.member u (freezeWorklist st))) $ do
         put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
                 spillWorklist = (spillWorklist st) `Set.union` (Set.singleton u)})
@@ -414,23 +463,24 @@ freezeMoves :: Temp -> ColorMonad ()
 freezeMoves u = do
     st <- get
     nodeMovesU <- nodeMoves u
-    let m = head $ Set.elems nodeMovesU
-    put (st{activeMoves = (activeMoves st) Set.\\ (Set.singleton m),
-            frozenMoves = (frozenMoves st) `Set.union` (Set.singleton m)})
-    let (x,y) = (getSrc m, getDst m)
-    aliasX <- getAlias x
-    aliasY <- getAlias y
-    aliasU <- getAlias u
-    if aliasY == aliasU then do
-        freezeMoves' aliasX
-    else
-        freezeMoves' aliasY
+    when (not (Set.null nodeMovesU)) $ do
+        let m = head $ Set.elems nodeMovesU
+        put (st{activeMoves = (activeMoves st) Set.\\ (Set.singleton m),
+                frozenMoves = (frozenMoves st) `Set.union` (Set.singleton m)})
+        let (x,y) = (getSrc m, getDst m)
+        aliasX <- getAlias x
+        aliasY <- getAlias y
+        aliasU <- getAlias u
+        if aliasY == aliasU then do
+            freezeMoves' aliasX
+        else
+            freezeMoves' aliasY
 
 freezeMoves' :: Temp -> ColorMonad ()
 freezeMoves' v = do
     st <- get
     nodeMovesV <- nodeMoves v
-    let degreeV = (degree st) M.! v
+    let degreeV = maybe (error "!.237") (id) $ (degree st) M.!? v
     when ((Set.null nodeMovesV) && (degreeV < (k st))) $ do
         put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton v),
                 simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton v)})
@@ -463,7 +513,7 @@ assignColors = do
                 put (st{selectStack = stack',
                         okColors = availableColors})
                 st' <- get
-                let adjListN = (adjList st') M.! n
+                let adjListN = maybe (Set.empty) (id) $ (adjList st') M.!? n --NOTE: doy empty por default, capaz no esté bien
                 mapM_ (\w -> do
                         aliasW <- getAlias w
                         st <- get
@@ -589,6 +639,16 @@ rewriteTemps (t:ts) = do
     let newt = maybe (t) (id) (M.lookup t ntempmap)
     newts <- rewriteTemps ts
     return $ newt:newts
+
+
+-- applyColors
+applyColors :: ColorMonad ()
+applyColors = do
+    inss <- gets instructions
+    color <- gets color
+    let inss' = map (\ins -> As.replaceInstr color ins) inss
+    modify (\st -> st{instructions = inss'})
+
 
 
 -- Stack helper functions
