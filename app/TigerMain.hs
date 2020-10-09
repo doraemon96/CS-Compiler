@@ -26,6 +26,7 @@ import qualified TigerAsm              as Asm
 import           Text.Parsec           (runParser)
 
 import Debug.Trace
+import qualified TigerLiveness3 as LV
 
 data Options = Options {
         optArbol     :: Bool
@@ -109,7 +110,7 @@ makeAssembly (chars,procs) = do
   -- Munch
   inss <- mapM Munch.codeGen stms
   -- procEntryExit2
-  let inss' = zipWith procEntryExit2 frms inss
+  let inss' = traceShow (LV.defaultVis $ fst $ LV.instrs2graph (concat inss)) $ zipWith procEntryExit2 frms inss
   -- Color
   unq <- get
   let (frms'',inss'') = unzip $ zipWith (\frm ins -> runColoring frm ins unq) frms inss'
