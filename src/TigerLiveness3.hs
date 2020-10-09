@@ -161,9 +161,9 @@ interferenceGraph flow =
         computeLiveness node =
             let ndef   = Set.fromList (fdef M.! node)
                 nuse   = Set.fromList (fuse M.! node)
-                nsuccs = gsucc fcontrol node -- PRECAUCION (puede tirar error) 
+                nsuccs = gsucc fcontrol node
                 getLiveIn lout = Set.union nuse (Set.difference lout ndef)
-                getLiveOut st  = Set.unions $ P.map (\succ -> fst (fromMaybe (Set.empty, Set.empty) (M.lookup gsucc st))) nsuccs
+                getLiveOut st  = Set.unions $ P.map (\succ -> fst (fromMaybe (Set.empty, Set.empty) (M.lookup succ st))) nsuccs
                 
                 loop (liveIn, liveOut) = do 
                     st <- ST.get
