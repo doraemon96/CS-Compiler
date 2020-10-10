@@ -110,10 +110,10 @@ makeAssembly (chars,procs) = do
   -- Munch
   inss <- mapM Munch.codeGen stms
   -- procEntryExit2
-  let inss' = traceShow (LV.defaultVis $ fst $ LV.instrs2graph (concat inss)) $ zipWith procEntryExit2 frms inss
+  let inss' = zipWith procEntryExit2 frms inss
   -- Color
   unq <- get
-  let (frms'',inss'') = unzip $ zipWith (\frm ins -> runColoring frm ins unq) frms inss'
+  let (frms'',inss'') = unzip $ zipWith (\frm ins -> traceShow (LV.defaultVis $ LV.instrs2graph ins) $ runColoring frm ins unq) frms inss'
   -- procEntryExit3
   --return $ [strings ++ body]
   --return (Right [])
