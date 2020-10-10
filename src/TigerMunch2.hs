@@ -79,7 +79,7 @@ munchStm (ExpS c@(Call e@(Name l) args)) = do
     args' <- munchArgs args
     emit $ IOPER{ oassem = JAL l
                 , osrc   = args'
-                , odst   = Frame.calldefs
+                , odst   = Frame.calldefs -- TODO: ++ argregs ?
                 , ojmp   = Nothing}
     emit $ IOPER {oassem = NOOP, osrc = [], odst = [], ojmp = Nothing}
     -- TODO: Restore?
@@ -419,11 +419,11 @@ munchArgs' n (e:es) | n < (length Frame.argregs)  = do
                                         , msrc = t }
                             -- Store in stack (slower but easier to work with :sweatsmile:)
                             emit $ IOPER { oassem = SW t (n * Frame.wSz) Frame.sp
-                                        , osrc = [t]
-                                        , odst = [Frame.sp]
+                                        , osrc = [t, Frame.sp]
+                                        , odst = []
                                         , ojmp = Nothing}
                             args <- munchArgs' (n+1) es
-                            return (t:args)
+                            return (areg:args)
                     | n >= (length Frame.argregs) = do 
                             t <- munchExp e
                             emit $ IOPER { oassem = SW t (n * Frame.wSz) Frame.sp
@@ -431,5 +431,5 @@ munchArgs' n (e:es) | n < (length Frame.argregs)  = do
                                         , odst = [Frame.sp]
                                         , ojmp = Nothing}
                             args <- munchArgs' (n+1) es
-                            return (t:args)
+                            return args
 
