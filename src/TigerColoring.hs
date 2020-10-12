@@ -23,7 +23,7 @@ import Control.Monad.Loops
 import Debug.Trace
 
 availableColors :: Set.Set Temp
-availableColors = Set.fromList [] --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
+availableColors = Set.fromList (Fr.callersaves ++ Fr.calleesaves ++ Fr.argregs) --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 data ColorSets = ColorSetConstructor { 
@@ -94,7 +94,7 @@ initColorSets fr inss unq = ColorSetConstructor {
     , moveList = M.empty -- M.Map Temp (Set.Set As.Instr) --mapa de nodo a lista de moves con las que esta asociado
     , alias = M.empty -- M.Map Temp Temp
     , k = length availableColors -- Int
-    , color = M.empty -- M.Map Temp Temp -- color asignado a un nodo
+    , color = M.fromList $ zip Fr.registers Fr.registers -- M.Map Temp Temp -- color asignado a un nodo
     -- Aditional states
     --  input states
     , instructions = inss -- [As.Instr]
@@ -158,7 +158,7 @@ coloring = do
             -- hasta que no tengamos mas nodos para trabajar
             untilM_ coloreoLoop coloreoCondition
             -- asignamos colores
-            assignColors
+            traceShow "assi" $ assignColors
             -- si la asignación hace spilll, alocamos memoria para los
             -- temporarios spilled y reintentamos
             rewrite <- rewriteCondition
@@ -197,7 +197,7 @@ coloreoLoop = do
 rewriteCondition :: ColorMonad Bool
 rewriteCondition = do
     st <- get
-    return $ Set.null (spilledNodes st)
+    return $ not $ Set.null (spilledNodes st)
 
 
 
@@ -541,7 +541,8 @@ assignColors = do
     mapM_ (\n -> do
             st <- get
             aliasN <- getAlias n
-            put (st{color = M.insert n aliasN (color st)})
+            let colorAliasN = maybe (error "M.!#3334") (id) $ (color st) M.!? aliasN
+            put (st{color = M.insert n colorAliasN (color st)})
             )
             (coalescedNodes st)
 
@@ -552,7 +553,7 @@ rewriteProgram = do
     spills <- gets spilledNodes
     let spillslist = Set.elems spills --ordered list
     -- allocate memory locations
-    accesses <- mapM allocSpilled spillslist
+    accesses <- traceShow ("rewriting:",spillslist) $ mapM allocSpilled spillslist
     -- create a new temp for each def and use
     -- in instruction insert store after each definition of v
     -- in instruction insert fetch before each use of v
