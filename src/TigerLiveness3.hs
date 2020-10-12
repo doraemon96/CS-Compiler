@@ -64,18 +64,23 @@ data FlowGraph = FGraph {control :: Graph,
                          labmap :: TableLabel}
   deriving Show
 
-instrs2graph :: [Instr] -> (FlowGraph, [Vertex])
+emptyFG :: FlowGraph
+emptyFG = FGraph {
+    control = newGraph
+    , info = M.empty
+    , def = M.empty
+    , use = M.empty
+    , ismove = M.empty
+    , labmap = M.empty
+}
+
+instrs2graph :: [Instr] -> FlowGraph
 instrs2graph inss = let
     (f,v) = instrs2graph' inss
-    in i2gWithJumps inss (f,v) v 
+    in fst $ i2gWithJumps inss (f,v) v 
 
 instrs2graph' :: [Instr] -> (FlowGraph, [Vertex])
-instrs2graph' [] = (FGraph{control = newGraph,
-                          info = M.empty, 
-                          def = M.empty, 
-                          use = M.empty, 
-                          ismove = M.empty,
-                          labmap = M.empty}, [])
+instrs2graph' [] = (emptyFG, [])
 instrs2graph' (o@(IOPER a dst src j) : instrs) =
   (fres{control = if L.null vres then newNode $ control fres
                     else mkEdge (newNode $ control fres) (node, vres !! 0), 
@@ -114,7 +119,7 @@ i2gWithJumps (i : instrs) (f, vs) vlist = i2gWithJumps instrs (f, tail vs) vlist
 
 addJEdges :: Maybe [Tm.Label] -> Vertex -> TableLabel -> Graph -> Graph
 addJEdges Nothing _ _ g = g
-addJEdges (Just []) _ _ g = error "Revisar hasta liveness 1 -- TigerMakeGraph" 
+addJEdges (Just []) _ _ g = g --error "Revisar hasta liveness 1 -- TigerMakeGraph" 
 addJEdges (Just j) v tl g = 
   L.foldl (\g' j' -> case M.lookup j' tl of
                        Just jj -> let eds = edges g'
@@ -180,3 +185,53 @@ interferenceGraph flow =
         buildInterference = mapM_ computeLiveness
 
     in ST.execState (buildInterference (vertices fcontrol)) M.empty
+
+
+data Liveness = LIVE {
+    lin :: M.Map Vertex (Set.Set Tm.Temp)
+    , lout :: M.Map Vertex (Set.Set Tm.Temp)
+    , lin' :: M.Map Vertex (Set.Set Tm.Temp)
+    , lout' :: M.Map Vertex (Set.Set Tm.Temp)
+}
+
+interferenceGraph2 :: FlowGraph -> LivenessMap
+interferenceGraph2 flowgraph =
+    let fgr = control flowgraph
+        fdef = def flowgraph
+        fuse = use flowgraph
+        initial :: [Vertex] -> Liveness
+        initial [] = LIVE {lin = M.empty, lout = M.empty, lin' = M.empty, lout' = M.empty}
+        initial (v:vs) = let
+            live' = initial vs
+            in live'{lin = M.insert v Set.empty (lin live')
+                , lout = M.insert v Set.empty (lout live')
+                , lin' = M.insert v Set.empty (lin' live')
+                , lout' = M.insert v Set.empty (lout' live')
+            }
+        outloop :: [Vertex] -> ST.State Liveness ()
+        outloop vs = do
+            equals <- mapM inloop vs
+            if and equals
+            then return ()
+            else outloop vs
+        inloop :: Vertex -> ST.State Liveness Bool
+        inloop v = do
+            ST.modify (\st -> st{lin' = M.insert v ((lin st) M.! v) (lin' st), lout' = M.insert v ((lout st) M.! v) (lout' st)})
+            st <- ST.get
+            let thisthing = (((lout st) M.! v) Set.\\ (Set.fromList $ fdef M.! v))
+            let innew = (Set.fromList $ fuse M.! v) `Set.union` thisthing
+            ST.modify (\st -> st{lin = M.insert v innew (lin st)})
+            st' <- ST.get
+            let outnew = Set.unions $ P.map (\s -> (lin st') M.! s) (gsucc fgr v)
+            ST.modify (\st -> st{lout = M.insert v outnew (lout st)})
+            st'' <- ST.get
+            return $ (((lin' st'') M.! v) == innew) && (((lout' st'') M.! v) == outnew)
+        joinMaps :: [Vertex] -> M.Map Vertex a -> M.Map Vertex b -> M.Map Vertex (a,b)
+        joinMaps [] mapa mapb = M.empty
+        joinMaps (v:vs) mapa mapb = let
+            elema = mapa M.! v
+            elemb = mapb M.! v
+            in M.insert v (elema, elemb) $ joinMaps vs mapa mapb
+            
+        interLiveness = ST.execState (outloop (vertices fgr)) (initial (vertices fgr))
+    in traceShow (fdef,fuse) $ joinMaps (vertices fgr) (lin interLiveness) (lout interLiveness)

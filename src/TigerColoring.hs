@@ -7,7 +7,7 @@ module TigerColoring where
 --Tiger Imports
 import TigerTemp
 import TigerMunch2                as Mn
-import TigerLiveness              as Lv
+import TigerLiveness3             as Lv
 import TigerGraph                 as Gr
 import TigerAsm                   as As
 import TigerFrame                 as Fr
@@ -146,7 +146,7 @@ coloring :: ColorMonad ()
 coloring = do
             inss <- gets instructions
             let flowGraph = instrs2graph inss
-            let livenessMap = interferenceGraph flowGraph
+            let livenessMap = interferenceGraph2 flowGraph
             modify (\st -> st{flowGraph = flowGraph,
                                 livenessMap = livenessMap})
             -- build construye el grafo de interferencia y llena el
@@ -163,10 +163,11 @@ coloring = do
             -- temporarios spilled y reintentamos
             rewrite <- rewriteCondition
             if rewrite then do
-                    rewriteProgram
+                    traceShow "rewr" $ rewriteProgram
                     coloring
-            else 
-                applyColors
+            else do
+                st <- get
+                traceShow (color st) $ applyColors
             -- sino, hemos finalizado
 
 
@@ -185,10 +186,10 @@ coloreoCondition = do
 coloreoLoop :: ColorMonad ()
 coloreoLoop = do
     st <- get
-    if (not $ Set.null $ simplifyWorklist st) then simplify
-    else if (not $ Set.null $ worklistMoves st) then coalesce
-    else if (not $ Set.null $ freezeWorklist st) then freeze
-    else if (not $ Set.null $ spillWorklist st) then selectSpill
+    if (not $ Set.null $ simplifyWorklist st) then traceShow "simp" simplify
+    else if (not $ Set.null $ worklistMoves st) then traceShow "coal" coalesce
+    else if (not $ Set.null $ freezeWorklist st) then traceShow "free" freeze
+    else if (not $ Set.null $ spillWorklist st) then traceShow "sele" selectSpill
     else error "How did you manage to get here? You are a monster! #ffff"
 
 
@@ -220,15 +221,22 @@ build = do
     lv <- gets livenessMap
     -- put all liveOut, defs and uses in an internal state
     mapM_ (\(node, (liveIn, liveOut)) -> do
-            modify (\st -> st{live = liveOut})
+            traceShow (node,liveIn,liveOut) $ modify (\st -> st{live = liveOut})
             fg <- gets flowGraph
             let defN = maybe (error "!.555") (id) $ (Lv.def fg) M.!? node
             let useN = maybe (error "!.556") (id) $ (Lv.use fg) M.!? node
             modify (\st -> st{defs = Set.fromList defN,
                               uses = Set.fromList useN})
-            buildInstr (Gr.content node)
+            buildInstr ((Lv.info fg) M.! node)
         )
-        (M.toList lv) 
+        (M.toList lv)
+    -- treat precolored as of infinite degree
+    prec <- gets precolored
+    mapM_ (\pre -> do --TODO: adjList adjSet?
+            st <- get
+            put (st{degree = M.insert pre maxBound (degree st)})
+        ) 
+        (Set.elems prec)
 
 buildInstr :: As.Instr -> ColorMonad ()
 buildInstr ins = do
@@ -238,7 +246,7 @@ buildInstr ins = do
             st <- get
             mapM_ (\n -> do
                     st <- get
-                    let moveListN = maybe (Set.empty) (id) $ (moveList st) M.!? n --NOTE: doy empty por default, capaz no esté bien
+                    let moveListN = maybe (Set.empty) (id) $ (moveList st) M.!? n
                     modify (\st -> st{moveList = M.insert n (moveListN `Set.union` (Set.singleton ins)) (moveList st)})
                 ) 
                 (Set.elems $ (defs st) `Set.union` (uses st))
@@ -277,16 +285,16 @@ addEdge u v = do
 makeWorkList :: ColorMonad ()
 makeWorkList = do
     st <- get
-    mapM_ (\n -> do
+    traceShow ("initial",initial st) $ mapM_ (\n -> do
             st' <- get
             put (st'{initial = (initial st') Set.\\ (Set.singleton n)})
             moveRelatedN <- moveRelated n
-            let degreeN = maybe (0) (id) $ (degree st') M.!? n --NOTE: doy cero por default, capaz no esté bien
+            let degreeN = maybe (error $ "No degree?! #401"++(show n)) (id) $ (degree st') M.!? n
             if (degreeN >= (k st')) then
-                do modify (\st -> st{spillWorklist = (spillWorklist st) `Set.union` (Set.singleton n)})
+                do traceShow (n,"spills") $ modify (\st -> st{spillWorklist = (spillWorklist st) `Set.union` (Set.singleton n)})
             else if moveRelatedN then
-                do modify (\st -> st{freezeWorklist = (freezeWorklist st) `Set.union` (Set.singleton n)})
-            else do modify (\st -> st{simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton n)})
+                do traceShow (n,"freeze") $ modify (\st -> st{freezeWorklist = (freezeWorklist st) `Set.union` (Set.singleton n)})
+            else do traceShow (n,"simplifies") $ modify (\st -> st{simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton n)})
          )
          (initial st)
 
@@ -299,7 +307,7 @@ adjacent n = do
 nodeMoves :: Temp -> ColorMonad (Set.Set As.Instr)
 nodeMoves n = do
     st <- get
-    let moveListN = maybe (error "!.230") (id) $ (moveList st) M.!? n
+    let moveListN = maybe (Set.empty) (id) $ (moveList st) M.!? n
     return $ moveListN `Set.intersection` ((activeMoves st) `Set.union` (worklistMoves st))
 
 moveRelated :: Temp -> ColorMonad Bool
@@ -322,7 +330,7 @@ simplify = do
 decrementDegree :: Temp -> ColorMonad ()
 decrementDegree m = do
     st <- get
-    let d = maybe (0) (id) $ (degree st) M.!? m --NOTE: doy cero por default, capaz no esté bien
+    let d = maybe (error ("degree not found #3324"++(show m))) (id) $ (degree st) M.!? m
     put (st{degree = M.insert m (d-1) (degree st)})
     when (d == (k st)) $ do
         adjacentM <- adjacent m
