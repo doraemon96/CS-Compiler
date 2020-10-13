@@ -314,7 +314,7 @@ moveRelated :: Temp -> ColorMonad Bool
 moveRelated n = do
     st <- get
     nodeMovesN <- nodeMoves n
-    return $ Set.null nodeMovesN
+    return $ not $ Set.null nodeMovesN
 
 
 -- Simplify
