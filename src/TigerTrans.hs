@@ -327,30 +327,29 @@ instance (MemM w) => IrGen w where
                 (Temp t)
     -- callExp :: Label -> Externa -> IsProc -> Level -> [BExp] -> w BExp
     callExp name externa isproc lvl args = do
-        targs <- mapM (\arg -> do earg <- unEx arg
-                                  tmp  <- newTemp
-                                  return (Temp tmp,Move (Temp tmp) earg) ) args
+        targs <- mapM unEx args
         t     <- newTemp
         alev  <- getActualLevel
-        let args' = List.map fst targs
-            ins   = List.map snd targs
-            call  = case externa of
+        let call  = case externa of
                         Runtime -> externalCall ("_" ++ Data.Text.unpack name)
                         Propia  -> Call (Name name)
             lev   = getNlvl lvl
             slink = if lev > alev -- lev: callee , alev: caller
                     then Temp fp
                     else F.auxexp (alev-lev)
+            cargs = case externa of
+                        Runtime -> targs
+                        Propia  -> slink:targs
         case isproc of
             IsProc ->
                 return $ Nx $
-                    ExpS $ call (slink:args')
+                    ExpS $ call cargs
             IsFun ->
                 return $ Ex $
                     Eseq
-                        (seq    (ins ++ [ExpS (call (slink:args'))
-                                        , Move (Temp t) (Temp rv)]))
-                    (Temp t)
+                        (seq    [ExpS (call cargs)
+                                , Move (Temp t) (Temp rv)])
+                        (Temp t)
     -- letExp :: [BExp] -> BExp -> w BExp
     letExp [] e = do
       -- Des-empaquetar y empaquetar como un |Ex| puede generar
