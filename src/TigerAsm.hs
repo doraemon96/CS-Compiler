@@ -203,15 +203,11 @@ replaceAssem m (LW t1 i t2) = LW (m `getme` t1) i (m `getme` t2)
 replaceAssem m (SW t1 i t2) = SW (m `getme` t1) i (m `getme` t2)
 replaceAssem m (LI t1 i) = LI (m `getme` t1) i
 replaceAssem m (LA t1 l1) = LA (m `getme` t1) l1
-replaceAssem m (MFHI t) = MFHI t
-replaceAssem m (MFLO t) = MFLO t
+replaceAssem m (MFHI t) = MFHI (m `getme` t)
+replaceAssem m (MFLO t) = MFLO (m `getme` t)
 replaceAssem m (MOVE t1 t2) = MOVE (m `getme` t1) (m `getme` t2)
 replaceAssem m (LABEL l) = LABEL l
 replaceAssem m (NOOP) = NOOP
 
 getme :: Map.Map Temp Temp -> Temp -> Temp
-getme m t = maybe (t) (id) (Map.lookup t m)
-
-
-replaceMIPS :: (Temp -> String) -> MIPSAsm -> MIPSAsm
-replaceMIPS = undefined
+getme m t = maybe (error "No color for temp!") (id) (Map.lookup t m)
