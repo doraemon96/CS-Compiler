@@ -471,8 +471,7 @@ freezeMoves :: Temp -> ColorMonad ()
 freezeMoves u = do
     st <- get
     nodeMovesU <- nodeMoves u
-    when (not (Set.null nodeMovesU)) $ do
-        let m = head $ Set.elems nodeMovesU
+    mapM_ (\m -> do
         put (st{activeMoves = (activeMoves st) Set.\\ (Set.singleton m),
                 frozenMoves = (frozenMoves st) `Set.union` (Set.singleton m)})
         let (x,y) = (getSrc m, getDst m)
@@ -483,6 +482,8 @@ freezeMoves u = do
             freezeMoves' aliasX
         else
             freezeMoves' aliasY
+        )
+        (Set.elems nodeMovesU)
 
 freezeMoves' :: Temp -> ColorMonad ()
 freezeMoves' v = do
