@@ -250,6 +250,7 @@ buildInstr ins = do
                     modify (\st -> st{moveList = M.insert n (moveListN `Set.union` (Set.singleton ins)) (moveList st)})
                 ) 
                 (Set.elems $ (defs st) `Set.union` (uses st))
+            modify (\st -> st{worklistMoves = (worklistMoves st) `Set.union` (Set.singleton ins)})
         _   -> return ()
     modify (\st -> st{live = (live st) `Set.union` (defs st)})
     st <- get
