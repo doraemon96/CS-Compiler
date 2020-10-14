@@ -442,7 +442,8 @@ combine u v = do
     st <- get
     let moveListU = maybe (error "!.234") (id) $ (moveList st) M.!? u
     let moveListV = maybe (error "!.235") (id) $ (moveList st) M.!? v
-    put (st{alias = M.insert v u (alias st),
+    put (st{coalescedNodes = (coalescedNodes st) `Set.union` (Set.singleton v),
+            alias = M.insert v u (alias st),
             moveList = M.insert u (moveListU `Set.union` moveListV) (moveList st)})
     enableMoves $ Set.singleton v --errata
     st <- get
