@@ -388,7 +388,7 @@ coalesce' m u v = do
     if u == v then do
         put (st{coalescedMoves = (coalescedMoves st) `Set.union` (Set.singleton m)})
         addWorkList u
-    else if (Set.member v (precolored st)) then do
+    else if ((Set.member v (precolored st)) || (Set.member (u,v) (adjSet st))) then do
         put (st{constrainedMoves = (constrainedMoves st) `Set.union` (Set.singleton m)})
         addWorkList u
         addWorkList v
