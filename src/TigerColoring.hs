@@ -529,7 +529,10 @@ assignColors = do
                         aliasW <- getAlias w
                         st <- get
                         when (Set.member aliasW ((coloredNodes st) `Set.union` (precolored st)))
-                            $ put (st{okColors = (okColors st) Set.\\ (Set.singleton aliasW)})
+                            $ do
+                                stc <- get --la 'c' de color (porque no quiero mas comillas)
+                                let colorW = maybe (error "Impossible #3335") (id) $ (color stc) M.!? aliasW
+                                put (st{okColors = (okColors st) Set.\\ (Set.singleton colorW)})
                     )
                     (Set.elems adjListN)
                 st'' <- get
