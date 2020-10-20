@@ -80,6 +80,8 @@ doStm (Seq a b) = do
 doStm (Jump e lb) = reorderStm ([e], \l -> Jump (prim l) lb)
 doStm (CJump p a b t f) =
   reorderStm ([a, b], \l -> CJump p (prim l) (seg l) t f)
+doStm (Move (Temp t) (Call (Name f) el)) =
+  reorderStm (el, \l -> Move (Temp t) (Call (Name f) l))
 doStm (Move (Temp t) (Call e el)) =
   reorderStm (e : el, \l -> Move (Temp t) (Call (prim l) (tail l)))
 doStm (Move (Temp t) b) = reorderStm ([b], Move (Temp t) . prim)
@@ -103,6 +105,8 @@ doExp (Eseq s e   ) = do
   sts        <- doStm s
   (sts', e') <- doExp e
   return (sts % sts', e')
+doExp (Call (Name f) el) =
+  reorderExp (el, \l -> Call (Name f) l)
 doExp (Call e es) = reorderExp (e : es, \l -> Call (prim l) (tail l))
 doExp e           = reorderExp ([], const e)
 

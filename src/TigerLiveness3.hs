@@ -234,4 +234,4 @@ interferenceGraph2 flowgraph =
             in M.insert v (elema, elemb) $ joinMaps vs mapa mapb
             
         interLiveness = ST.execState (outloop (vertices fgr)) (initial (vertices fgr))
-    in traceShow (fdef,fuse) $ joinMaps (vertices fgr) (lin interLiveness) (lout interLiveness)
+    in joinMaps (vertices fgr) (lin interLiveness) (lout interLiveness)

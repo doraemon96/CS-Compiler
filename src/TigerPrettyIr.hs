@@ -55,7 +55,7 @@ prettyStm (Seq l r) = prettyStm l <> semi $+$ prettyStm r
 prettyStm (Label l) = text "Lab:" <> (text $ makeStringL l)
 
 prettyFrame :: Frame -> Doc
-prettyFrame (Frame nm fs ls aArg aLoc aReg) = brackets $ (text $ unpack nm)
+prettyFrame (Frame nm fs ls aArg aLoc aReg mReg) = brackets $ (text $ unpack nm)
 
 prettyFrag :: Frag -> Doc
 prettyFrag (Proc    s f ) = (prettyFrame f <> text ":") $+$ prettyStm s

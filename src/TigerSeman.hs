@@ -360,11 +360,13 @@ transExp UnitExp{} = (,TUnit) <$> TTr.unitExp
 transExp NilExp{} = (,TNil) <$> TTr.nilExp
 transExp (IntExp i _) = (,TInt RW) <$> (TTr.intExp i)
 transExp (StringExp s _) = (,TString) <$> (TTr.stringExp (pack s))
-transExp (CallExp nm args p) = do (lvl,lab,targs,ret,ext) <- getTipoFunV nm
-                                  targs' <- mapM transExp args
-                                  mbs <- zipWithM tiposIguales targs (P.map snd targs')
-                                  unless (and mbs && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
-                                  (,ret) <$> TTr.callExp lab ext (if ret == TUnit then IsProc else IsFun) lvl (P.map fst targs')
+transExp (CallExp nm args p) = do
+  TTr.callArgs (P.length args)
+  (lvl,lab,targs,ret,ext) <- getTipoFunV nm
+  targs' <- mapM transExp args
+  mbs <- zipWithM tiposIguales targs (P.map snd targs')
+  unless (and mbs && (P.length targs == P.length targs')) $ addpos (derror (pack "Tipos no compatibles #3")) p
+  (,ret) <$> TTr.callExp lab ext (if ret == TUnit then IsProc else IsFun) lvl (P.map fst targs')
 transExp (OpExp el' oper er' p) = do -- Esta va /gratis/
         (bl, el) <- transExp el'
         (br, er) <- transExp er'

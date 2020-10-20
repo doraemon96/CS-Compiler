@@ -172,42 +172,51 @@ replaceInstr m (IMOVE massem mdst msrc) = IMOVE (replaceAssem m massem) mdst msr
 replaceInstr m other = other
 
 replaceAssem :: Map.Map Temp Temp -> MIPSAsm -> MIPSAsm
-replaceAssem m (ADD t1 t2 t3) = ADD (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (ADDI t1 t2 i) = ADDI (m `getme` t1) (m `getme` t2) i
-replaceAssem m (ADDIU t1 t2 i) = ADDIU (m `getme` t1) (m `getme` t2) i
-replaceAssem m (ADDU t1 t2 t3) = ADDU (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (SUB t1 t2 t3) = SUB (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (SUBU t1 t2 t3) = SUBU (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (MULT t1 t2) = MULT (m `getme` t1) (m `getme` t2)
-replaceAssem m (MULTU t1 t2) = MULTU (m `getme` t1) (m `getme` t2)
-replaceAssem m (DIV t1 t2) = DIV (m `getme` t1) (m `getme` t2)
-replaceAssem m (DIVU t1 t2) = DIVU (m `getme` t1) (m `getme` t2)
-replaceAssem m (BEQ t1 t2 l) = BEQ (m `getme` t1) (m `getme` t2) l
-replaceAssem m (BNE t1 t2 l) = BNE (m `getme` t1) (m `getme` t2) l
-replaceAssem m (BGTZ t1 l) = BGTZ (m `getme` t1) l
-replaceAssem m (BGEZ t1 l) = BGEZ (m `getme` t1) l
-replaceAssem m (BLTZ t1 l) = BLTZ (m `getme` t1) l
-replaceAssem m (BLEZ t1 l) = BLEZ (m `getme` t1) l
-replaceAssem m (SLT t1 t2 t3) = SLT (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (SLTU t1 t2 t3) = SLTU (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (J l) = J l
-replaceAssem m (JAL l) = JAL l
-replaceAssem m (JR l) = JR l
-replaceAssem m (SLL t1 t2 i) = SLL (m `getme` t1) (m `getme` t2) i
-replaceAssem m (SRL t1 t2 i) = SRL (m `getme` t1) (m `getme` t2) i
-replaceAssem m (SLLV t1 t2 t3) = SLLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (SRLV t1 t2 t3) = SRLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (AND t1 t2 t3) = AND (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (OR t1 t2 t3) = OR (m `getme` t1) (m `getme` t2) (m `getme` t3)
-replaceAssem m (LW t1 i t2) = LW (m `getme` t1) i (m `getme` t2)
-replaceAssem m (SW t1 i t2) = SW (m `getme` t1) i (m `getme` t2)
-replaceAssem m (LI t1 i) = LI (m `getme` t1) i
-replaceAssem m (LA t1 l1) = LA (m `getme` t1) l1
-replaceAssem m (MFHI t) = MFHI (m `getme` t)
-replaceAssem m (MFLO t) = MFLO (m `getme` t)
-replaceAssem m (MOVE t1 t2) = MOVE (m `getme` t1) (m `getme` t2)
-replaceAssem m (LABEL l) = LABEL l
-replaceAssem m (NOOP) = NOOP
+replaceAssem = replaceAssem' getme1
 
-getme :: Map.Map Temp Temp -> Temp -> Temp
-getme m t = maybe (error "No color for temp!") (id) (Map.lookup t m)
+replaceAssemMissing :: Map.Map Temp Temp -> MIPSAsm -> MIPSAsm
+replaceAssemMissing = replaceAssem' getme2
+
+replaceAssem' :: (Map.Map Temp Temp -> Temp -> Temp) -> Map.Map Temp Temp -> MIPSAsm -> MIPSAsm
+replaceAssem' getme m (ADD t1 t2 t3) = ADD (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (ADDI t1 t2 i) = ADDI (m `getme` t1) (m `getme` t2) i
+replaceAssem' getme m (ADDIU t1 t2 i) = ADDIU (m `getme` t1) (m `getme` t2) i
+replaceAssem' getme m (ADDU t1 t2 t3) = ADDU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (SUB t1 t2 t3) = SUB (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (SUBU t1 t2 t3) = SUBU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (MULT t1 t2) = MULT (m `getme` t1) (m `getme` t2)
+replaceAssem' getme m (MULTU t1 t2) = MULTU (m `getme` t1) (m `getme` t2)
+replaceAssem' getme m (DIV t1 t2) = DIV (m `getme` t1) (m `getme` t2)
+replaceAssem' getme m (DIVU t1 t2) = DIVU (m `getme` t1) (m `getme` t2)
+replaceAssem' getme m (BEQ t1 t2 l) = BEQ (m `getme` t1) (m `getme` t2) l
+replaceAssem' getme m (BNE t1 t2 l) = BNE (m `getme` t1) (m `getme` t2) l
+replaceAssem' getme m (BGTZ t1 l) = BGTZ (m `getme` t1) l
+replaceAssem' getme m (BGEZ t1 l) = BGEZ (m `getme` t1) l
+replaceAssem' getme m (BLTZ t1 l) = BLTZ (m `getme` t1) l
+replaceAssem' getme m (BLEZ t1 l) = BLEZ (m `getme` t1) l
+replaceAssem' getme m (SLT t1 t2 t3) = SLT (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (SLTU t1 t2 t3) = SLTU (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (J l) = J l
+replaceAssem' getme m (JAL l) = JAL l
+replaceAssem' getme m (JR l) = JR l
+replaceAssem' getme m (SLL t1 t2 i) = SLL (m `getme` t1) (m `getme` t2) i
+replaceAssem' getme m (SRL t1 t2 i) = SRL (m `getme` t1) (m `getme` t2) i
+replaceAssem' getme m (SLLV t1 t2 t3) = SLLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (SRLV t1 t2 t3) = SRLV (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (AND t1 t2 t3) = AND (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (OR t1 t2 t3) = OR (m `getme` t1) (m `getme` t2) (m `getme` t3)
+replaceAssem' getme m (LW t1 i t2) = LW (m `getme` t1) i (m `getme` t2)
+replaceAssem' getme m (SW t1 i t2) = SW (m `getme` t1) i (m `getme` t2)
+replaceAssem' getme m (LI t1 i) = LI (m `getme` t1) i
+replaceAssem' getme m (LA t1 l1) = LA (m `getme` t1) l1
+replaceAssem' getme m (MFHI t) = MFHI (m `getme` t)
+replaceAssem' getme m (MFLO t) = MFLO (m `getme` t)
+replaceAssem' getme m (MOVE t1 t2) = MOVE (m `getme` t1) (m `getme` t2)
+replaceAssem' getme m (LABEL l) = LABEL l
+replaceAssem' getme m (NOOP) = NOOP
+
+getme1 :: Map.Map Temp Temp -> Temp -> Temp
+getme1 m t = maybe (error "No color for temp!") (id) (Map.lookup t m)
+
+getme2 :: Map.Map Temp Temp -> Temp -> Temp
+getme2 m t = maybe (t) (id) (Map.lookup t m)

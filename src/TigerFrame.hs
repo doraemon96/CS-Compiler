@@ -91,9 +91,11 @@ localsGap = 4
 -- | Dan inicio a los contadores de argumentos, variables y registros usados.
 -- Ver |defaultFrame|
 argsInicial, regInicial, localsInicial :: Int
-argsInicial = 4 -- MIPS reserva 4 lugares para los 4 argregs
+argsInicial = 1 -- MIPS reserva 4 lugares para los 4 argregs
 regInicial = 1
 localsInicial = 0
+
+mipsRegArgs = 4 -- MIPS pone los primeros 4 en registros y el resto en frame
 
 -- | Listas de registros que define la llamada y registros especiales
 specialregs, argregs, calleesaves, callersaves, calldefs :: [Temp]
@@ -155,7 +157,9 @@ data Frame = Frame {
         -- | Contadores de cantidad de argumentos, variables y registros.
         actualArg   :: Int,
         actualLocal :: Int,
-        actualReg   :: Int
+        actualReg   :: Int,
+        -- | Contador del maximo nro de argumentos de fn que llama el frame actual
+        maxArgs     :: Int
     }
     deriving Show
 -- Nota: claramente pueden no llevar contadores y calcularlos en base a la longitud de
@@ -169,6 +173,7 @@ defaultFrame = Frame
   , actualArg   = argsInicial
   , actualLocal = localsInicial
   , actualReg   = regInicial
+  , maxArgs     = 0
   }
 
 --------------------------------------------------------------------------------
@@ -226,9 +231,15 @@ allocArg fr Escapa =
   let actual = actualArg fr
       acc    = InFrame $ actual * wSz + argsGap -- formals en sp + n
   in  return (fr { formals = formals fr ++ [Escapa], actualArg = actual + 1 }, acc)
-allocArg fr NoEscapa = do
-  s <- newTemp
-  return (fr {formals = formals fr ++ [NoEscapa]}, InReg s)
+allocArg fr NoEscapa =
+  let actual = actualArg fr
+  in if (actual < mipsRegArgs)
+     then do
+        let s = argregs !! actual
+        return (fr {formals = formals fr ++ [NoEscapa], actualArg = actual + 1}, InReg s)
+     else do
+        let acc = InFrame $ actual * wSz + argsGap
+        return (fr { formals = formals fr ++ [Escapa], actualArg = actual + 1 }, acc)
 
 allocLocal :: (Monad w, TLGenerator w) => Frame -> Escapa -> w (Frame, Access)
 allocLocal fr Escapa =
@@ -238,6 +249,11 @@ allocLocal fr Escapa =
 allocLocal fr NoEscapa = do
   s <- newTemp
   return (fr {locals = locals fr ++ [NoEscapa]}, InReg s)
+
+-- | Función auxiliar para luego reservar espacio para argumentos de llamada
+callArgs :: (Monad w) => Frame -> Int -> w (Frame)
+callArgs f i =
+  return (f{maxArgs = max (maxArgs f) i})
 
 -- Función auxiliar par el calculo de acceso a una variable, siguiendo el Static Link.
 -- Revisar bien antes de usarla, pero ajustando correctamente la variable |fpPrevLev|

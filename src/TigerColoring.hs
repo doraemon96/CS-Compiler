@@ -23,7 +23,7 @@ import Control.Monad.Loops
 import Debug.Trace
 
 availableColors :: Set.Set Temp
-availableColors = Set.fromList (Fr.callersaves ++ Fr.calleesaves ++ Fr.argregs) --FIXME!!!!!!!!!!!!!!!!!!!!!!!!!
+availableColors = Set.fromList (Fr.callersaves ++ Fr.calleesaves ++ Fr.argregs)
 
 
 data ColorSets = ColorSetConstructor { 
@@ -154,16 +154,17 @@ coloring = do
             build
             -- makeWorkList llena todas los conjuntos worklist
             makeWorkList
+            st <- get
             -- intentamos simplify, coalesce, freeze y selectspill
             -- hasta que no tengamos mas nodos para trabajar
             untilM_ coloreoLoop coloreoCondition
             -- asignamos colores
-            traceShow "assi" $ assignColors
+            assignColors
             -- si la asignación hace spilll, alocamos memoria para los
             -- temporarios spilled y reintentamos
             rewrite <- rewriteCondition
             if rewrite then do
-                    traceShow "rewr" $ rewriteProgram
+                    rewriteProgram
                     coloring
             else do
                 st <- get
@@ -186,10 +187,10 @@ coloreoCondition = do
 coloreoLoop :: ColorMonad ()
 coloreoLoop = do
     st <- get
-    if (not $ Set.null $ simplifyWorklist st) then traceShow "simp" simplify
-    else if (not $ Set.null $ worklistMoves st) then traceShow "coal" coalesce
-    else if (not $ Set.null $ freezeWorklist st) then traceShow "free" freeze
-    else if (not $ Set.null $ spillWorklist st) then traceShow "sele" selectSpill
+    if (not $ Set.null $ simplifyWorklist st) then simplify
+    else if (not $ Set.null $ worklistMoves st) then coalesce
+    else if (not $ Set.null $ freezeWorklist st) then freeze
+    else if (not $ Set.null $ spillWorklist st) then selectSpill
     else error "How did you manage to get here? You are a monster! #ffff"
 
 
@@ -221,7 +222,7 @@ build = do
     lv <- gets livenessMap
     -- put all liveOut, defs and uses in an internal state
     mapM_ (\(node, (liveIn, liveOut)) -> do
-            traceShow (node,liveIn,liveOut) $ modify (\st -> st{live = liveOut})
+            modify (\st -> st{live = liveOut})
             fg <- gets flowGraph
             let defN = maybe (error "!.555") (id) $ (Lv.def fg) M.!? node
             let useN = maybe (error "!.556") (id) $ (Lv.use fg) M.!? node
@@ -323,10 +324,10 @@ simplify :: ColorMonad ()
 simplify = do
     st <- get
     let n = head $ Set.elems (simplifyWorklist st)
-    put (st{simplifyWorklist = Set.delete n (simplifyWorklist st),
+    traceShow ("simp",n) $ put (st{simplifyWorklist = Set.delete n (simplifyWorklist st),
             selectStack = Stack.stackPush (selectStack st) n})
     adjacentN <- adjacent n
-    mapM_ decrementDegree adjacentN --if this doesn't work do elems of the set
+    mapM_ decrementDegree adjacentN
 
 decrementDegree :: Temp -> ColorMonad ()
 decrementDegree m = do
@@ -380,7 +381,7 @@ getDst _ = error "Error al buscar dest del move #4444"
 
 coalesce' :: As.Instr -> Temp -> Temp -> ColorMonad ()
 coalesce' m u v = do
-    st <- get
+    st <- traceShow ("coal'",u,v) $ get
     adjacentV <- adjacent v
     adjacentU <- adjacent u
     cond1 <- mapM (\t -> ok t u) (Set.elems adjacentV)
@@ -465,7 +466,7 @@ freeze :: ColorMonad ()
 freeze = do
     st <- get
     let u = head $ Set.elems (freezeWorklist st)
-    put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
+    traceShow ("freeze",u) $ put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
             simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton u)})
     freezeMoves u
 
@@ -502,7 +503,7 @@ freezeMoves' v = do
 selectSpill :: ColorMonad ()
 selectSpill = do
     m <- selectSpillHeuristic
-    st <- get
+    st <- traceShow ("selectspill",m) $ get
     put (st{spillWorklist = (spillWorklist st) Set.\\ (Set.singleton m),
             simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton m)})
     freezeMoves m
@@ -537,10 +538,10 @@ assignColors = do
                     (Set.elems adjListN)
                 st'' <- get
                 if (Set.null (okColors st'')) then do
-                    put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
+                    traceShow ("spill",n) $ put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
                 else do
                     let c = head $ Set.elems (okColors st'')
-                    put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
+                    traceShow ("color",n,c)put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
                               color = M.insert n c (color st'')})
             )
     st <- get
@@ -548,7 +549,7 @@ assignColors = do
             st <- get
             aliasN <- getAlias n
             let colorAliasN = maybe (error "M.!#3334") (id) $ (color st) M.!? aliasN
-            put (st{color = M.insert n colorAliasN (color st)})
+            traceShow ("color",n,"alias",colorAliasN) $ put (st{color = M.insert n colorAliasN (color st)})
             )
             (coalescedNodes st)
 
@@ -583,31 +584,39 @@ allocSpilled t = do
     return (t,acc)
 
 rewriteSpilled :: [(Temp, Fr.Access)] -> As.Instr -> ColorMonad ([As.Instr], [Temp])
-rewriteSpilled tmap (IOPER oassem odst osrc ojmp) = do
+rewriteSpilled accmap (IOPER oassem odst osrc ojmp) = do
     spilled <- gets spilledNodes
     -- create store after each definition
-    dstTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.fromList odst)
-    storeInss <- mapM (createStore tmap) $ concat dstTemps
+    let dstSpills = spilled `Set.intersection` (Set.fromList odst)
+    dstTemps <- mapM createTemp $ Set.elems dstSpills
+    storeInss <- mapM (createStore accmap) $ Set.elems dstSpills
     -- create fetch before each use
-    srcTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.fromList osrc)
-    fetchInss <- mapM (createFetch tmap) $ concat srcTemps
+    let srcSpills = spilled `Set.intersection` (Set.fromList osrc)
+    srcTemps <- mapM createTemp $ Set.elems srcSpills
+    fetchInss <- mapM (createFetch accmap) $ Set.elems srcSpills
     reDst <- (rewriteTemps odst)
     reSrc <- (rewriteTemps osrc)
-    let rewrittenOp = As.IOPER oassem reDst reSrc ojmp
+    ntempmap <- gets newTempMap
+    let reAssem = (As.replaceAssemMissing ntempmap oassem)
+    let rewrittenOp = As.IOPER reAssem reDst reSrc ojmp
     return (fetchInss ++ [rewrittenOp] ++ storeInss, concat $ dstTemps ++ srcTemps)
-rewriteSpilled tmap (IMOVE massem mdst msrc) = do
+rewriteSpilled accmap (IMOVE massem mdst msrc) = do
     spilled <- gets spilledNodes
     -- create store after each definition
-    dstTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.singleton mdst)
-    storeInss <- mapM (createStore tmap) $ concat dstTemps
+    let dstSpills = spilled `Set.intersection` (Set.singleton mdst)
+    dstTemps <- mapM createTemp $ Set.elems dstSpills
+    storeInss <- mapM (createStore accmap) $ Set.elems dstSpills
     -- create fetch before each use
-    srcTemps <- mapM createTemp $ Set.elems $ spilled `Set.intersection` (Set.singleton msrc)
-    fetchInss <- mapM (createFetch tmap) $ concat srcTemps
+    let srcSpills = spilled `Set.intersection` (Set.singleton msrc)
+    srcTemps <- mapM createTemp $ Set.elems srcSpills
+    fetchInss <- mapM (createFetch accmap) $ Set.elems srcSpills
     reDst <- (rewriteTemp mdst)
     reSrc <- (rewriteTemp msrc)
-    let rewrittenOp = As.IMOVE massem reDst reSrc
+    ntempmap <- gets newTempMap
+    let reAssem = (As.replaceAssemMissing ntempmap massem)
+    let rewrittenOp = As.IMOVE reAssem reDst reSrc
     return (fetchInss ++ [rewrittenOp] ++ storeInss, concat $ dstTemps ++ srcTemps)
-rewriteSpilled tmap other = return ([other],[])
+rewriteSpilled accmap other = return ([other],[])
 
 createTemp :: Temp -> ColorMonad [Temp]
 createTemp t = do
@@ -616,28 +625,32 @@ createTemp t = do
         return []
     else do
         s <- newTemp
-        modify (\st -> st{newTempMap = M.insert t s (newTempMap st)})
-        return [s]
+        modify (\st -> traceShow ("createTemp",t,s) $ st{newTempMap = M.insert t s (newTempMap st)})
+        return $ [s]
 
 createStore :: [(Temp, Fr.Access)] -> Temp -> ColorMonad As.Instr
-createStore tmap t = do
-    let tmap' = M.fromList tmap
-    let acc = tmap' M.! t
+createStore accmap t = do
+    newTMap <- gets newTempMap
+    let accmap' = M.fromList accmap
+    let acc = maybe (error $ show ("createStore",t)) (id) $ accmap' M.!? t
+    let newt = maybe (error $ show ("createStore2",t)) (id) $ newTMap M.!? t
     let offset = case acc of (InFrame dir) -> dir
                              _                -> error "Esto no debe pasar #199"
-    return $ IOPER{oassem = SW t offset Fr.fp
+    return $ IOPER{oassem = SW newt offset Fr.fp
                     , odst = []
-                    , osrc = [Fr.fp, t]
+                    , osrc = [Fr.fp, newt]
                     , ojmp = Nothing}
 
 createFetch :: [(Temp, Fr.Access)] -> Temp -> ColorMonad As.Instr
-createFetch tmap t = do
-    let tmap' = M.fromList tmap
-    let acc = tmap' M.! t
+createFetch accmap t = do
+    newTMap <- gets newTempMap
+    let accmap' = M.fromList accmap
+    let acc = maybe (error $ show ("createFetch",t)) (id) $ accmap' M.!? t
+    let newt = maybe (error $ show ("createStore2",t)) (id) $ newTMap M.!? t
     let offset = case acc of (InFrame dir) -> dir
                              _              -> error "Esto no debe pasar #198"
-    return $ IOPER{oassem = LW t offset Fr.fp
-                    , odst = [t]
+    return $ IOPER{oassem = LW newt offset Fr.fp
+                    , odst = [newt]
                     , osrc = [Fr.sp]
                     , ojmp = Nothing}
 

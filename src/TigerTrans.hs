@@ -198,6 +198,15 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
         (f,a) <- F.allocArg (getFrame t) b
         pushLevel (setFrame f t)
         return a
+    -- | Manejo de espacio de memoria para argumentos de llamada a función.
+    callArgs :: Int -> w()
+    callArgs i = do
+        t <- topLevel
+        popLevel
+        f <- F.callArgs (getFrame t) (i+1) --static link también
+        let nf = setFrame f t
+        pushLevel nf
+        return ()
     -- | Frag management
     -- Básicamente los fragmentos van a ser un efecto lateral de la computación.
     -- Recuerden que los fragmentos son pedazos de código intermedio que se van
