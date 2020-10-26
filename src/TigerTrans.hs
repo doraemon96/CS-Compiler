@@ -199,14 +199,13 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
         pushLevel (setFrame f t)
         return a
     -- | Manejo de espacio de memoria para argumentos de llamada a función.
-    callArgs :: Int -> w()
+    callArgs :: Int -> w ()
     callArgs i = do
         t <- topLevel
         popLevel
-        f <- F.callArgs (getFrame t) (i+1) --static link también
+        let f = traceShow ("trans.callargs", i) $ F.callArgs (getFrame t) (i+1) --static link también
         let nf = setFrame f t
         pushLevel nf
-        return ()
     -- | Frag management
     -- Básicamente los fragmentos van a ser un efecto lateral de la computación.
     -- Recuerden que los fragmentos son pedazos de código intermedio que se van
@@ -267,9 +266,11 @@ instance (MemM w) => IrGen w where
       -- | Esto debería ser dependiente de la arquitectura...
       -- No estoy seguro que tenga que estar esto acá.
         l <- newLabel
-        let ln = T.append (pack ".long ")  (pack $ show $ T.length t)
-        let str = T.append (T.append (pack ".string \"") t) (pack "\"")
-        pushFrag $ AString l [ln,str]
+        --let ln = T.append (pack ".long ")  (pack $ show $ T.length t)
+        --let str = T.append (T.append (pack ".string \"") t) (pack "\"")
+        --pushFrag $ AString l [ln,str]
+        let str = T.append (T.append (pack "\"") t) (pack "\"")
+        pushFrag $ AString l [str]
         return $ Ex $ Name l
     -- | Función utilizada para la declaración de una función.
     envFunctionDec lvl funDec = do
@@ -294,7 +295,7 @@ instance (MemM w) => IrGen w where
                   IsFun  -> Move (Temp rv) <$> unEx bd
         let frame = getFrame lvl
         body' <- procEntryExit1 frame body
-        procEntryExit lvl (Nx $ Seq (Label $ name frame) body')
+        procEntryExit lvl (Nx body')
         return $ Ex $ Const 0
     -- simpleVar :: Access -> Int -> w BExp
     simpleVar acc lvl = return $ Ex $ exp acc lvl

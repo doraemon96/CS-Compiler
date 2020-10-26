@@ -1,0 +1,12 @@
+/* test number of arguments to a fn greater to arg in regs*/
+let
+
+function do_nothing (a : int, b : int, c : int, d : int, e : int) : int =
+		a + b + c + d + e
+
+function printresult (a : int) =
+		print(chr(a))
+
+in
+	printresult(do_nothing(1,1,1,1,1)); 0
+end

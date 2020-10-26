@@ -7,6 +7,7 @@ import           System.Console.GetOpt
 import qualified System.Environment    as Env
 import           System.Exit
 import           System.IO
+import qualified Data.Text.IO
 
 import           TigerAbs
 import           TigerEscap
@@ -104,7 +105,7 @@ templabRel ast = do
           frags
 
 -- | makeAssembly does all assembly related computations (Munch -> Live -> Color)
-makeAssembly :: ([Frag], [([Tree.Stm], Frame)]) -> StGen (Either Symb.Symbol [String])
+makeAssembly :: ([Frag], [([Tree.Stm], Frame)]) -> StGen (Either Symb.Symbol [Symb.Symbol])
 makeAssembly (chars,procs) = do
   let (stms, frms) = unzip procs
   -- Munch
@@ -115,11 +116,13 @@ makeAssembly (chars,procs) = do
   unq <- get
   let (frms'',inss'') = unzip $ zipWith (\frm ins -> traceShow (LV.defaultVis $ LV.instrs2graph ins) $ runColoring frm ins unq) frms inss'
   -- procEntryExit3
-  --return $ [strings ++ body]
-  --return (Right [])
-  let body = map (Asm.format show) (concat inss'')
-  let body2 = map Symb.unpack body
-  return $ Right $ body2
+  let inss''' = zipWith procEntryExit3 frms'' inss''
+  -- strings
+  let chars' = map string chars
+  -- format
+  let body = map (Asm.format id) (concat inss''')
+  let strs = map (Asm.format id) (concat chars')
+  return $ Right $ [Symb.pack ".data"] ++ strs ++ [Symb.pack "\n"] ++ body
 
 -- Toma opciones, nombre del archivo, source code
 -- Devuelve el archivo parseado o el error
@@ -129,11 +132,11 @@ parserStep opts nm sc = either
   return
   $ runParser expression () nm sc
 
-writeToFile :: String -> Either Symb.Symbol [String] -> IO ()
+writeToFile :: String -> Either Symb.Symbol [Symb.Symbol] -> IO ()
 writeToFile name asm =
-  let f = foldr (\a as -> a ++ "\n" ++ as ) "\n"
+  let f = foldr (\a as -> Symb.appends [a, (Symb.pack "\n"), as]) (Symb.pack "\n")
       filename = name ++ ".s"
-  in either print (writeFile filename . f) asm
+  in either print (Data.Text.IO.writeFile filename . f) asm
 
 
 main :: IO ()

@@ -9,7 +9,8 @@ import qualified TigerAsm
 import           TigerSymbol
 
 import           Prelude                 hiding ( exp )
---import           Data.Map                as Map
+
+import Debug.Trace
 
 
 -- | Registros muy usados.
@@ -251,9 +252,8 @@ allocLocal fr NoEscapa = do
   return (fr {locals = locals fr ++ [NoEscapa]}, InReg s)
 
 -- | Función auxiliar para luego reservar espacio para argumentos de llamada
-callArgs :: (Monad w) => Frame -> Int -> w (Frame)
-callArgs f i =
-  return (f{maxArgs = max (maxArgs f) i})
+callArgs :: Frame -> Int -> Frame
+callArgs f i = f{maxArgs = max (maxArgs f) i}
 
 -- Función auxiliar par el calculo de acceso a una variable, siguiendo el Static Link.
 -- Revisar bien antes de usarla, pero ajustando correctamente la variable |fpPrevLev|
@@ -275,6 +275,19 @@ exp (InFrame k) e = Mem (Binop Plus (auxexp e) (Const k))
 exp (InReg l) _ = Temp l
 
 
+string :: Frag -> [TigerAsm.Instr]
+string (AString lab syms) = [
+  TigerAsm.ILABEL{
+    TigerAsm.lassem = TigerAsm.LABEL lab,
+    TigerAsm.llab = lab
+    },
+  TigerAsm.IDIREC{
+    TigerAsm.dir = TigerAsm.ASCIIZ (unpack $ appends syms)
+  }
+  ]
+string _ = error "Not a string in string #s00"
+
+
 saverestore_callee :: (Monad w, TLGenerator w) => w ([Stm],[Stm])
 saverestore_callee = do
   temps <- mapM (\_ -> newTemp) calleesaves
@@ -292,7 +305,8 @@ saverestore_callee = do
 --  + load instructions to restore the callee-save registers
 procEntryExit1 :: (Monad w, TLGenerator w) => Frame -> Stm -> w Stm
 procEntryExit1 frame body = do
-  (save,restore) <- saverestore_callee
+  --(save,restore) <- saverestore_callee
+  (save,restore) <- return ([],[])
   return $ sequence $ save ++ [body] ++ restore
     where sequence [st]     = st
           sequence (st:sts) = Seq st (sequence sts)
@@ -312,8 +326,98 @@ procEntryExit2 fram bod = bod ++ [TigerAsm.IOPER{ TigerAsm.oassem = TigerAsm.NOO
 --  2. stack pointer entry adjustment
 --  3. stack pointer exit adjustment
 --  4. assembly function epilogue
+-- references
+--  - https://www.cs.swarthmore.edu/~newhall/cs75/s09/spim_mips_intro.html
+--  -https://courses.cs.washington.edu/courses/cse410/09sp/examples/MIPSCallingConventionsSummary.pdf
 procEntryExit3 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
 procEntryExit3 fr inss = let
-    prologue = [] --TODO
-    epilogue = [] --TODO
-  in prologue ++ inss ++ epilogue
+    fname = unpack $ name fr
+    --
+    local_space = actualLocal fr
+    param_space = 4 -- maxArgs fr
+    saves_space = 0 --NOTE: here we're not using calleesaves because of procEntryExit2... (?)
+    stack_space = stack_space' + pad
+    stack_space' = local_space + 2 + saves_space + param_space
+    --
+    pad = if (Prelude.even stack_space') then 0 else 1 --make sure its multiple of 2 (or 8??)
+    ra_offset = (local_space + pad + 1) * wSz
+    fp_offset = ra_offset + (1 * wSz)
+    sp_offset = fp_offset + (saves_space + param_space) * wSz
+    --
+    flabel = [
+      TigerAsm.ILABEL{
+        TigerAsm.lassem = TigerAsm.LABEL (name fr),
+        TigerAsm.llab = name fr
+      }
+      ]
+    --
+    directives = [
+      TigerAsm.IDIREC{TigerAsm.dir = TigerAsm.TEXT}, --text section
+      TigerAsm.IDIREC{TigerAsm.dir = TigerAsm.ALIGN 2}, --align to 2^2 = 4 bytes (32 bit data)
+      TigerAsm.IDIREC{TigerAsm.dir = TigerAsm.GLOBL fname} --visible externally
+      ]
+    --
+    stack_entry = [
+      TigerAsm.IOPER{ --store ra in stack
+        TigerAsm.oassem = TigerAsm.SW ra (-ra_offset) sp,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [],
+        TigerAsm.ojmp = Nothing
+      },
+      TigerAsm.IOPER{ --store fp in stack
+        TigerAsm.oassem = TigerAsm.SW fp (-fp_offset) sp,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [],
+        TigerAsm.ojmp = Nothing
+      },
+      TigerAsm.IMOVE{ --push frame pointer
+        TigerAsm.massem = TigerAsm.MOVE fp sp,
+        TigerAsm.mdst = fp,
+        TigerAsm.msrc = sp
+      },
+      TigerAsm.IOPER{ --push stack pointer
+        TigerAsm.oassem = TigerAsm.ADDI sp sp (-sp_offset),
+        TigerAsm.odst = [sp],
+        TigerAsm.osrc = [sp],
+        TigerAsm.ojmp = Nothing
+      }
+      ]
+    --
+    stack_exit = [
+      TigerAsm.IMOVE{ --pop stack pointer
+        TigerAsm.massem = TigerAsm.MOVE sp fp,
+        TigerAsm.mdst = sp,
+        TigerAsm.msrc = fp
+      },
+      TigerAsm.IOPER{ --pop frame pointer
+        TigerAsm.oassem = TigerAsm.LW fp (-fp_offset) sp,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [],
+        TigerAsm.ojmp = Nothing
+      },
+      TigerAsm.IOPER{ --fetch ra in stack
+        TigerAsm.oassem = TigerAsm.LW ra (-ra_offset) sp,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [],
+        TigerAsm.ojmp = Nothing
+      }
+      ]
+    --
+    return = [
+      TigerAsm.IOPER{
+        TigerAsm.oassem = TigerAsm.J ra,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [ra],
+        TigerAsm.ojmp = Just []
+      },
+      TigerAsm.IOPER{
+        TigerAsm.oassem = TigerAsm.NOOP,
+        TigerAsm.odst = [],
+        TigerAsm.osrc = [],
+        TigerAsm.ojmp = Nothing
+      }
+      ]
+    --
+    prologue = directives ++ flabel ++ stack_entry --label after directives?
+    epilogue = stack_exit ++ return
+  in traceShow ("SS",param_space) $ prologue ++ inss ++ epilogue

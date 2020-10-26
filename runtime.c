@@ -134,14 +134,14 @@ string *getstr()
 		return consts[i];
 }
 #if defined(__DEBUG__)
-long _tigermain(long l)
+long _tigermain_0(long l)
 {
 	return 0;
 }
 #endif
 int main()
 {
-	extern long _tigermain(long);
+	extern long _tigermain_0(long);
     int i, lelem=sizeof(string)+1;;
 	string *p=malloc(256*lelem);
     for (i = 0; i < 256; i++) {
@@ -149,5 +149,5 @@ int main()
 		consts[i]->length = 1;
 		consts[i]->chars[0] = i;
     }
-    return _tigermain(0 /* static link!? */ );
+    return _tigermain_0(0 /* static link!? */ );
 }

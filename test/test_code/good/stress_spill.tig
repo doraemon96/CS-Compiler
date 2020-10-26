@@ -1,0 +1,38 @@
+/* define lots of variables and actually use them*/
+let
+  var x1 : int := 1
+  var x2 : int := 2
+  var x3 : int := 3
+  var x4 : int := 4
+  var x5 : int := 5
+  var x6 : int := 6
+  var x7 : int := 7
+  var x8 : int := 8
+  var x9 : int := 9
+  var x10 : int := 10
+  var x11 : int := 11
+  var x12 : int := 12
+  var x13 : int := 13
+  var x14 : int := 14
+  var x15 : int := 15
+  var x16 : int := 16
+  var x17 : int := 17
+  var x18 : int := 18
+  var x19 : int := 19
+  var x20 : int := 20
+  var x21 : int := 21
+  var x22 : int := 22
+  var x23 : int := 23
+  var x24 : int := 24
+  var x25 : int := 25
+  var x26 : int := 26
+  var x27 : int := 27
+  var x28 : int := 28
+  var x29 : int := 29
+  var x30 : int := 30
+  var x31 : int := 31
+  var x32 : int := 32
+  var x33 : int := 33
+in
+  print(chr(x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18 + x19 + x20 + x21 + x22 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + x30 + x31 + x32 + x33)); 0
+end

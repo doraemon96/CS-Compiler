@@ -1,11 +1,11 @@
 {-# LANGUAGE GADTs #-}
 module TigerAsm where
 
-import Data.Text (pack, unpack)
+import           Data.Text
 import qualified Data.Map as Map
 
-import TigerSymbol
-import TigerTemp (Temp, Label)
+import           TigerSymbol
+import           TigerTemp (Temp, Label)
 
 --TODO: Change assem to corresponding types (lassem is directive?)
 data Instr = IOPER { oassem :: MIPSAsm
@@ -17,6 +17,7 @@ data Instr = IOPER { oassem :: MIPSAsm
                   , msrc   :: Temp }
            | ILABEL { lassem :: MIPSAsm
                    , llab   :: Label }
+           | IDIREC { dir :: MIPSDir}
     deriving (Show, Eq, Ord)
 
 -- | MIPSAsm represents MIPS assembly instructions in a way that Haskell can
@@ -57,7 +58,8 @@ data MIPSDir =
         | DATA | DATAA Int
         | TEXT | TEXTA Int
         | WORD [Int]
-  deriving Show
+        | GLOBL String
+  deriving (Show, Eq, Ord)
 
 -- | MipsCom represents MIPS assembly comments. (ToDo)
 data MIPSCom = COMMENT String
@@ -103,63 +105,75 @@ instance Show MIPSAsm where
     show (NOOP) = "noop"
 -}
 
-format :: (Temp -> String) -> Instr -> Symbol
+format :: (Temp -> Text) -> Instr -> Text
 format f ins@(IOPER{}) = format' f (oassem ins)
 format f ins@(IMOVE{}) = format' f (massem ins)
 format f ins@(ILABEL{}) = format' f (lassem ins)
+format f ins@(IDIREC{}) = formatdir (dir ins)
 
 
-format' :: (Temp -> String) -> MIPSAsm -> Symbol
-format' f (ADD t1 t2 t3) = ws ["add", cm (map f [t1, t2, t3])]
-format' f (ADDI t1 t2 i) = ws ["addi", cm ((map f [t1,  t2]) ++ [show i])]
-format' f (ADDIU t1 t2 i) = ws ["addiu", cm ((map f [t1,  t2]) ++ [show i])]
-format' f (ADDU t1 t2 t3) = ws ["addu", cm (map f [t1,  t2,  t3])]
-format' f (SUB t1 t2 t3) = ws ["sub", cm (map f [t1,  t2,  t3])]
-format' f (SUBU t1 t2 t3) = ws ["subu", cm (map f [t1,  t2,  t3])]
-format' f (MULT t1 t2) = ws ["mult", cm (map f [t1,  t2])]
-format' f (MULTU t1 t2) = ws ["multu", cm (map f [t1,  t2])]
-format' f (DIV t1 t2) = ws ["div", cm (map f [t1,  t2])]
-format' f (DIVU t1 t2) = ws ["divu", cm (map f [t1,  t2])]
-format' f (BEQ t1 t2 l) = ws ["beq", cm ((map f [t1,  t2]) ++ [unpack l])]
-format' f (BNE t1 t2 l) = ws ["bne", cm ((map f [t1,  t2]) ++ [unpack l])]
-format' f (BGTZ t1 l) = ws ["bgtz", cm ([f t1, unpack l])]
-format' f (BGEZ t1 l) = ws ["bgez", cm ([f t1, unpack l])]
-format' f (BLTZ t1 l) = ws ["bltz", cm ([f t1, unpack l])]
-format' f (BLEZ t1 l) = ws ["blez", cm ([f t1, unpack l])]
-format' f (SLT t1 t2 t3) = ws ["slt", cm (map f [t1,  t2,  t3])]
-format' f (SLTU t1 t2 t3) = ws ["sltu", cm (map f [t1,  t2,  t3])]
-format' f (J l) = ws ["j", unpack l]
-format' f (JAL l) = ws ["jal", unpack l]
-format' f (JR l) = ws ["jr", unpack l]
-format' f (SLL t1 t2 i) = ws ["sll", cm ((map f [t1,  t2]) ++ [show i])]
-format' f (SRL t1 t2 i) = ws ["srl", cm ((map f [t1,  t2]) ++ [show i])]
-format' f (SLLV t1 t2 t3) = ws ["sllv", cm (map f [t1,  t2,  t3])]
-format' f (SRLV t1 t2 t3) = ws ["srlv", cm (map f [t1,  t2,  t3])]
-format' f (AND t1 t2 t3) = ws ["and", cm (map f [t1,  t2,  t3])]
-format' f (OR t1 t2 t3) = ws ["or", cm (map f [t1,  t2,  t3])]
-format' f (LW t1 i t2) = ws ["lw", cm ([f t1, os (show i) (f t2)])]
-format' f (SW t1 i t2) = ws ["sw", cm ([f t1, os (show i) (f t2)])]
-format' f (LI t1 i) = ws ["li", cm ([f t1, show i])]
-format' f (LA t1 l1) = ws ["la", cm (map f [t1,  l1])]
-format' f (MFHI t) = ws ["mfhi", f t]
-format' f (MFLO t) = ws ["mflo", f t]
-format' f (MOVE t1 t2) = ws ["move", cm (map f [t1,  t2])]
+format' :: (Temp -> Text) -> MIPSAsm -> Text
+format' f (ADD t1 t2 t3) = ws [pack "add", cm (Prelude.map f [t1, t2, t3])]
+format' f (ADDI t1 t2 i) = ws [pack "addi", cm ((Prelude.map f [t1,  t2]) ++ [pack $ show i])]
+format' f (ADDIU t1 t2 i) = ws [pack "addiu", cm ((Prelude.map f [t1,  t2]) ++ [pack $ show i])]
+format' f (ADDU t1 t2 t3) = ws [pack "addu", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (SUB t1 t2 t3) = ws [pack "sub", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (SUBU t1 t2 t3) = ws [pack "subu", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (MULT t1 t2) = ws [pack "mult", cm (Prelude.map f [t1,  t2])]
+format' f (MULTU t1 t2) = ws [pack "multu", cm (Prelude.map f [t1,  t2])]
+format' f (DIV t1 t2) = ws [pack "div", cm (Prelude.map f [t1,  t2])]
+format' f (DIVU t1 t2) = ws [pack "divu", cm (Prelude.map f [t1,  t2])]
+format' f (BEQ t1 t2 l) = ws [pack "beq", cm ((Prelude.map f [t1,  t2]) ++ [l])]
+format' f (BNE t1 t2 l) = ws [pack "bne", cm ((Prelude.map f [t1,  t2]) ++ [l])]
+format' f (BGTZ t1 l) = ws [pack "bgtz", cm ([f t1, l])]
+format' f (BGEZ t1 l) = ws [pack "bgez", cm ([f t1, l])]
+format' f (BLTZ t1 l) = ws [pack "bltz", cm ([f t1, l])]
+format' f (BLEZ t1 l) = ws [pack "blez", cm ([f t1, l])]
+format' f (SLT t1 t2 t3) = ws [pack "slt", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (SLTU t1 t2 t3) = ws [pack "sltu", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (J l) = ws [pack "j", l]
+format' f (JAL l) = ws [pack "jal", l]
+format' f (JR l) = ws [pack "jr", l]
+format' f (SLL t1 t2 i) = ws [pack "sll", cm ((Prelude.map f [t1,  t2]) ++ [pack $ show i])]
+format' f (SRL t1 t2 i) = ws [pack "srl", cm ((Prelude.map f [t1,  t2]) ++ [pack $ show i])]
+format' f (SLLV t1 t2 t3) = ws [pack "sllv", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (SRLV t1 t2 t3) = ws [pack "srlv", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (AND t1 t2 t3) = ws [pack "and", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (OR t1 t2 t3) = ws [pack "or", cm (Prelude.map f [t1,  t2,  t3])]
+format' f (LW t1 i t2) = ws [pack "lw", cm ([f t1, os i (f t2)])]
+format' f (SW t1 i t2) = ws [pack "sw", cm ([f t1, os i (f t2)])]
+format' f (LI t1 i) = ws [pack "li", cm ([f t1, pack $ show i])]
+format' f (LA t1 l1) = ws [pack "la", cm (Prelude.map f [t1,  l1])]
+format' f (MFHI t) = ws [pack "mfhi", f t]
+format' f (MFLO t) = ws [pack "mflo", f t]
+format' f (MOVE t1 t2) = ws [pack "move", cm (Prelude.map f [t1,  t2])]
 format' f (LABEL l) =  appends [l, pack ":"]
-format' f (NOOP) = pack "noop"
+format' f (NOOP) = pack "nop"
 
 
 -- add whitespace between args
-ws :: [String] -> Symbol
-ws (x:[])   = pack x
-ws (x:y:ys) = appends [pack x , pack " " , (ws (y:ys))]
+ws :: [Text] -> Text
+ws (x:[])   = x
+ws (x:y:ys) = appends [x , pack " " , (ws (y:ys))]
 -- add commas between args
-cm :: [String] -> String
+cm :: [Text] -> Text
 cm (x:[])   = x
-cm (x:y:ys) = x ++ "," ++ (cm (y:ys))
+cm (x:y:ys) = appends [x, (pack ","), (cm (y:ys))]
 -- add offset with parenthesis
-os :: String -> String -> String
-os offset temp = offset ++ "(" ++ temp ++ ")"
+os :: Int -> Text -> Text
+os offset temp = appends [(pack $ show offset), (pack "("), temp, (pack ")")]
 
+-- format directive
+formatdir :: MIPSDir -> Text
+formatdir (ALIGN i) = ws [pack ".align", pack $ show i]
+formatdir (ASCII str) = ws [pack ".ascii", pack str]
+formatdir (ASCIIZ str) = ws [pack ".asciiz", pack str]
+formatdir (DATA) = ws [pack ".data"]
+formatdir (DATAA i) = ws [pack ".data", pack $ show i]
+formatdir (TEXT) = ws [pack ".text"]
+formatdir (TEXTA i) = ws [pack ".texta", pack $show i]
+formatdir (WORD is) = undefined --TODO!
+formatdir (GLOBL nam) = ws [pack ".globl", pack nam]
 
 --instance Show MIPSDir where
 
