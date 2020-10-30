@@ -157,7 +157,7 @@ coloring = do
             st <- get
             -- intentamos simplify, coalesce, freeze y selectspill
             -- hasta que no tengamos mas nodos para trabajar
-            untilM_ coloreoLoop coloreoCondition
+            whileM_ coloreoCondition coloreoLoop
             -- asignamos colores
             assignColors
             -- si la asignación hace spilll, alocamos memoria para los
@@ -181,7 +181,7 @@ coloreoCondition = do
     let wom = Set.null (worklistMoves st)
     let frw = Set.null (freezeWorklist st)
     let spw = Set.null (spillWorklist st)
-    return $ and [siw, wom, frw, spw]
+    return $ not $ and [siw, wom, frw, spw]
 
 -- coloreoLoop hace una pasada de simplify, coalesce, freeze o selectspill
 coloreoLoop :: ColorMonad ()
