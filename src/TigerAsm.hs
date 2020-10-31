@@ -57,7 +57,7 @@ data MIPSDir =
         | ASCII String | ASCIIZ String
         | DATA | DATAA Int
         | TEXT | TEXTA Int
-        | WORD [Int]
+        | WORD Int
         | GLOBL String
   deriving (Show, Eq, Ord)
 
@@ -171,8 +171,8 @@ formatdir (ASCIIZ str) = ws [pack ".asciiz", pack str]
 formatdir (DATA) = ws [pack ".data"]
 formatdir (DATAA i) = ws [pack ".data", pack $ show i]
 formatdir (TEXT) = ws [pack ".text"]
-formatdir (TEXTA i) = ws [pack ".texta", pack $show i]
-formatdir (WORD is) = undefined --TODO!
+formatdir (TEXTA i) = ws [pack ".texta", pack $ show i]
+formatdir (WORD i) = ws [pack ".word", pack $ show i]
 formatdir (GLOBL nam) = ws [pack ".globl", pack nam]
 
 --instance Show MIPSDir where

@@ -277,13 +277,19 @@ exp (InReg l) _ = Temp l
 
 string :: Frag -> [TigerAsm.Instr]
 string (AString lab syms) = [
+  TigerAsm.IDIREC{
+    TigerAsm.dir = TigerAsm.ALIGN 2
+    },
   TigerAsm.ILABEL{
     TigerAsm.lassem = TigerAsm.LABEL lab,
     TigerAsm.llab = lab
     },
   TigerAsm.IDIREC{
+    TigerAsm.dir = TigerAsm.WORD ((TigerSymbol.length $ appends syms) - 2) -- resto comillas
+    },
+  TigerAsm.IDIREC{
     TigerAsm.dir = TigerAsm.ASCIIZ (unpack $ appends syms)
-  }
+    }
   ]
 string _ = error "Not a string in string #s00"
 
