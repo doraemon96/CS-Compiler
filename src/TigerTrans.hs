@@ -203,7 +203,7 @@ class (Monad w, TLGenerator w, Demon w) => MemM w where
     callArgs i = do
         t <- topLevel
         popLevel
-        let f = traceShow ("trans.callargs", i) $ F.callArgs (getFrame t) (i+1) --static link también
+        let f = F.callArgs (getFrame t) (i+1) --static link también
         let nf = setFrame f t
         pushLevel nf
     -- | Frag management
@@ -245,10 +245,8 @@ class IrGen w where
     ifThenElseExp :: BExp -> BExp -> BExp -> w BExp
     ifThenElseExpUnit :: BExp -> BExp -> BExp -> w BExp
     assignExp :: BExp -> BExp -> w BExp
-    -- preFunctionDec :: Level -> w ()
-    -- posFunctionDec :: w ()
-    -- Esto fuerza a que haya menos opciones... ver bien con los que lleguen a
-    -- este lugar..
+    preFunctionDec :: Level -> w ()
+    posFunctionDec :: w ()
     envFunctionDec :: Level -> w BExp -> w BExp
     functionDec :: BExp -> Level -> IsProc -> w BExp
     binOpIntExp :: BExp -> Abs.Oper -> BExp -> w BExp
@@ -288,6 +286,19 @@ instance (MemM w) => IrGen w where
         downLvl
         -- devolvemos el código en el entorno donde fue computada.
         return fun
+    preFunctionDec lvl = do
+        -- preFunctionDec
+        -- mandamos un nada al stack, por si un /break/ aparece en algún lado que
+        -- no tenga un while y detectamos el error. Ver [breakExp]
+        pushSalida Nothing
+        upLvl
+        pushLevel lvl
+    posFunctionDec = do
+        -- posFunctionDec
+        -- | Cuando salimos de la función sacamos el 'Nothing' que agregamos en 'preFunctionDec'.
+        popLevel
+        popSalida
+        downLvl
     -- functionDec :: BExp -> Level -> Bool -> w BExp
     functionDec bd lvl proc = do
         body <- case proc of
@@ -298,7 +309,9 @@ instance (MemM w) => IrGen w where
         procEntryExit lvl (Nx body')
         return $ Ex $ Const 0
     -- simpleVar :: Access -> Int -> w BExp
-    simpleVar acc lvl = return $ Ex $ exp acc lvl
+    simpleVar acc lvl = do
+        alev <- getActualLevel
+        return $ Ex $ traceShow ("simplevar",alev,lvl) $ exp acc (alev - lvl)
     varDec acc = do { i <- getActualLevel; simpleVar acc i}
     unitExp = return $ Ex (Const 0)
     nilExp = return $ Ex (Const 0)

@@ -260,7 +260,8 @@ callArgs f i = f{maxArgs = max (maxArgs f) i}
 -- debería estar relativamente cerca de la solución
 auxexp :: Int -> Exp
 auxexp 0 = Temp fp
-auxexp n = Mem (Binop Plus (auxexp (n - 1)) (Const fpPrevLev))
+auxexp n | n > 0 = Mem (Binop Plus (auxexp (n - 1)) (Const fpPrevLev))
+         | n < 0 = error "auxexp negative"
 
 exp
   :: 
