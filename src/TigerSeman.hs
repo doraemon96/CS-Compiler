@@ -275,7 +275,8 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                            i       <- getActualLevel
                                                            (be, et) <- P.foldr (\(n,t,a) -> insertValV n (t,a,i)) (transExp exp) largs
                                                            unless (TUnit ?= et) $ addpos (derror (pack "Tipo de exp no es Unit")) p
-                                                           fundec <- TTr.functionDec be lvl IsProc
+                                                           lvl2 <- topLevel
+                                                           fundec <- TTr.functionDec be lvl2 IsProc
                                                            posFunctionDec
                                                            return fundec
                                                     inserte (nm,args,Just s,exp,p) =
@@ -287,7 +288,8 @@ transDecs ((FunctionDec fs) : xs)           m = let fs' = P.map (\ (nm , _, _ ,_
                                                            t       <- addpos (getTipoT s) p
                                                            bt      <- tiposIguales et t
                                                            unless bt $ addpos (derror (pack "Tipos no compatibles #2")) p
-                                                           fundec <- TTr.functionDec be lvl IsFun
+                                                           lvl2 <- topLevel
+                                                           fundec <- TTr.functionDec be lvl2 IsFun
                                                            posFunctionDec
                                                            return fundec
 transDecs ((TypeDec xs) : xss)               m = do unless (isJust sorted) $ derror (pack "Se ha encontrado un ciclo.")
