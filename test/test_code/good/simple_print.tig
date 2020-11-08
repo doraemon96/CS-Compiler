@@ -1,0 +1,5 @@
+let
+    var helloworld := "Hello, world!"
+in
+    print(helloworld) ; 0
+end

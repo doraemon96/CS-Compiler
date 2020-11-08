@@ -1,0 +1,9 @@
+let
+    var i := "X"
+    var j := "Y"
+
+    function printi() =
+        (print(i) ; print (j))
+in
+    printi() ; 0
+end
