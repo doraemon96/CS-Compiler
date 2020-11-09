@@ -168,7 +168,7 @@ coloring = do
                     coloring
             else do
                 st <- get
-                traceShow (color st) $ applyColors
+                applyColors
             -- sino, hemos finalizado
 
 
@@ -287,16 +287,16 @@ addEdge u v = do
 makeWorkList :: ColorMonad ()
 makeWorkList = do
     st <- get
-    traceShow ("initial",initial st) $ mapM_ (\n -> do
+    mapM_ (\n -> do
             st' <- get
             put (st'{initial = (initial st') Set.\\ (Set.singleton n)})
             moveRelatedN <- moveRelated n
             let degreeN = maybe (error $ "No degree?! #401"++(show n)) (id) $ (degree st') M.!? n
             if (degreeN >= (k st')) then
-                do traceShow (n,"spills") $ modify (\st -> st{spillWorklist = (spillWorklist st) `Set.union` (Set.singleton n)})
+                do modify (\st -> st{spillWorklist = (spillWorklist st) `Set.union` (Set.singleton n)})
             else if moveRelatedN then
-                do traceShow (n,"freeze") $ modify (\st -> st{freezeWorklist = (freezeWorklist st) `Set.union` (Set.singleton n)})
-            else do traceShow (n,"simplifies") $ modify (\st -> st{simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton n)})
+                do modify (\st -> st{freezeWorklist = (freezeWorklist st) `Set.union` (Set.singleton n)})
+            else do modify (\st -> st{simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton n)})
          )
          (initial st)
 
@@ -324,7 +324,7 @@ simplify :: ColorMonad ()
 simplify = do
     st <- get
     let n = head $ Set.elems (simplifyWorklist st)
-    traceShow ("simp",n) $ put (st{simplifyWorklist = Set.delete n (simplifyWorklist st),
+    put (st{simplifyWorklist = Set.delete n (simplifyWorklist st),
             selectStack = Stack.stackPush (selectStack st) n})
     adjacentN <- adjacent n
     mapM_ decrementDegree adjacentN
@@ -381,7 +381,7 @@ getDst _ = error "Error al buscar dest del move #4444"
 
 coalesce' :: As.Instr -> Temp -> Temp -> ColorMonad ()
 coalesce' m u v = do
-    st <- traceShow ("coal'",u,v) $ get
+    st <- get
     adjacentV <- adjacent v
     adjacentU <- adjacent u
     cond1 <- mapM (\t -> ok t u) (Set.elems adjacentV)
@@ -466,7 +466,7 @@ freeze :: ColorMonad ()
 freeze = do
     st <- get
     let u = head $ Set.elems (freezeWorklist st)
-    traceShow ("freeze",u) $ put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
+    put (st{freezeWorklist = (freezeWorklist st) Set.\\ (Set.singleton u),
             simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton u)})
     freezeMoves u
 
@@ -503,7 +503,7 @@ freezeMoves' v = do
 selectSpill :: ColorMonad ()
 selectSpill = do
     m <- selectSpillHeuristic
-    st <- traceShow ("selectspill",m) $ get
+    st <- get
     put (st{spillWorklist = (spillWorklist st) Set.\\ (Set.singleton m),
             simplifyWorklist = (simplifyWorklist st) `Set.union` (Set.singleton m)})
     freezeMoves m
@@ -538,10 +538,10 @@ assignColors = do
                     (Set.elems adjListN)
                 st'' <- get
                 if (Set.null (okColors st'')) then do
-                    traceShow ("spill",n) $ put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
+                    put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
                 else do
                     let c = head $ Set.elems (okColors st'')
-                    traceShow ("color",n,c)put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
+                    put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
                               color = M.insert n c (color st'')})
             )
     st <- get
@@ -549,7 +549,7 @@ assignColors = do
             st <- get
             aliasN <- getAlias n
             let colorAliasN = maybe (error "M.!#3334") (id) $ (color st) M.!? aliasN
-            traceShow ("color",n,"alias",colorAliasN) $ put (st{color = M.insert n colorAliasN (color st)})
+            put (st{color = M.insert n colorAliasN (color st)})
             )
             (coalescedNodes st)
 
