@@ -295,12 +295,12 @@ string (AString lab syms) = [
 string _ = error "Not a string in string #s00"
 
 
-saverestore_callee :: (Monad w, TLGenerator w) => w ([Stm],[Stm])
-saverestore_callee = do
-  temps <- mapM (\_ -> newTemp) calleesaves
+saverestore_callee :: (Monad w, TLGenerator w) => [Temp] -> w ([Stm],[Stm])
+saverestore_callee regs = do
+  temps <- mapM (\_ -> newTemp) regs
   let ziptemps = zip temps [0..]
-      sav = map (\(t, i) -> Move (Temp t) (Temp $ calleesaves !! i)) ziptemps
-      res = map (\(t, i) -> Move (Temp $ calleesaves !! i) (Temp t)) ziptemps
+      sav = map (\(t, i) -> Move (Temp t) (Temp $ regs !! i)) ziptemps
+      res = map (\(t, i) -> Move (Temp $ regs !! i) (Temp t)) ziptemps
   return (sav, res)
 
 -- procEntryExit1 does the view-shift (places incoming arguments where they belong)
@@ -312,8 +312,8 @@ saverestore_callee = do
 --  + load instructions to restore the callee-save registers
 procEntryExit1 :: (Monad w, TLGenerator w) => Frame -> Stm -> w Stm
 procEntryExit1 frame body = do
-  --(save,restore) <- saverestore_callee
-  (save,restore) <- return ([],[])
+  (save,restore) <- saverestore_callee (calleesaves ++ argregs)
+  --(save,restore) <- return ([],[])
   return $ sequence $ save ++ [body] ++ restore
     where sequence [st]     = st
           sequence (st:sts) = Seq st (sequence sts)
@@ -323,7 +323,7 @@ procEntryExit1 frame body = do
 -- the register allocator to try and use them for some other purpose
 procEntryExit2 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
 procEntryExit2 fram bod = bod ++ [TigerAsm.IOPER{ TigerAsm.oassem = TigerAsm.NOOP
-                                                , TigerAsm.osrc   = specialregs ++ calleesaves
+                                                , TigerAsm.osrc   = specialregs -- ++ calleesaves
                                                 , TigerAsm.odst   = []
                                                 , TigerAsm.ojmp   = Just []}]
 
@@ -341,7 +341,7 @@ procEntryExit3 fr inss = let
     fname = unpack $ name fr
     --
     local_space = actualLocal fr
-    param_space = 4 -- maxArgs fr
+    param_space = maxArgs fr
     saves_space = 0 --NOTE: here we're not using calleesaves because of procEntryExit2... (?)
     stack_space = stack_space' + pad
     stack_space' = local_space + 2 + saves_space + param_space
