@@ -79,7 +79,7 @@ munchStm (ExpS c@(Call e@(Name l) args)) = do
     args' <- munchArgs args
     emit $ IOPER{ oassem = JAL l
                 , osrc   = args'
-                , odst   = Frame.calldefs -- TODO: ++ argregs ?
+                , odst   = Frame.calldefs ++ Frame.argregs --TODO: argregs?
                 , ojmp   = Nothing}
     emit $ IOPER {oassem = NOOP, osrc = [], odst = [], ojmp = Nothing}
     -- TODO: Restore?
