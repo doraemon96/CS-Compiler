@@ -1,4 +1,7 @@
 let
+    type  rectype = {name : string, age : int}
+    var rec1 : rectype := rectype {age = 1000 , name = "St"}
+
     function printint(i:int) = 
         let function f(i : int) =
             if i > 0
@@ -7,6 +10,10 @@ let
            else if i > 0 then f(i)
            else print("0")
         end
+
 in
-    printint(59808); 0
+    rec1.name := "Somebody";
+    printint(rec1.age);
+    print(rec1.name);
+    0
 end

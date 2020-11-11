@@ -1,0 +1,7 @@
+let
+
+    var buffer := getchar()
+
+in
+    print(buffer) ; 0
+end

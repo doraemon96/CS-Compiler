@@ -1,0 +1,7 @@
+let
+    type intArray = array of int
+
+    var row := intArray [ 10 ] of 64
+in
+    row[2] := 65 ; 0
+end

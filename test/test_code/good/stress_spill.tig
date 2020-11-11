@@ -33,6 +33,16 @@ let
   var x31 : int := 31
   var x32 : int := 32
   var x33 : int := 33
+
+  function printint(i:int) = 
+        let function f(i : int) =
+            if i > 0
+            then (f (i/10); print(chr(i-i/10*10+ord("0"))))
+        in if i < 0 then (print("-"); f(i))
+           else if i > 0 then f(i)
+           else print("0")
+        end
 in
-  print(chr(x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18 + x19 + x20 + x21 + x22 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + x30 + x31 + x32 + x33)); 0
+  /* 1+2+...+33 = 561 */
+  printint(x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9 + x10 + x11 + x12 + x13 + x14 + x15 + x16 + x17 + x18 + x19 + x20 + x21 + x22 + x23 + x24 + x25 + x26 + x27 + x28 + x29 + x30 + x31 + x32 + x33); 0
 end
