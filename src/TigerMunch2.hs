@@ -80,9 +80,9 @@ munchStm (ExpS c@(Call e@(Name l) args)) = do
     emit $ IOPER{ oassem = JAL l
                 , osrc   = args'
                 , odst   = Frame.calldefs ++ Frame.argregs --TODO: argregs?
-                , ojmp   = Nothing}
+                , ojmp   = Just [l]}
     emit $ IOPER {oassem = NOOP, osrc = [], odst = [], ojmp = Nothing}
-    -- TODO: Restore?
+    --restoreArgs
 munchStm (Move (Mem (Binop Plus e1 (Const i))) e2) = do
     me1 <- munchExp e1
     me2 <- munchExp e2
@@ -171,7 +171,7 @@ munchStm (CJump rop e1 e2 lab1 lab2) = do
                             emit $ IOPER{ oassem = SLT t me1 me2 -- LT %s0, %s1, lab1
                                         , osrc   = [me1, me2]
                                         , odst   = [t]
-                                        , ojmp   = Just [lab1, lab2]}
+                                        , ojmp   = Nothing}
                             emit $ IOPER{ oassem = BNE t Frame.zero lab1
                                         , osrc = [t]
                                         , odst = []
@@ -433,3 +433,12 @@ munchArgs' n (e:es) | n < (length Frame.argregs)  = do
                             args <- munchArgs' (n+1) es
                             return args
 
+restoreArgs :: (Emitter w) => w ()
+restoreArgs = mapM_
+    (\(a,n) -> emit $ IOPER {
+        oassem = LW a (n * Frame.wSz) (Frame.sp)
+        , odst = [a]
+        , osrc = [Frame.sp]
+        , ojmp = Nothing
+    })
+    (zip Frame.argregs [0..])

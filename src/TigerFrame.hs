@@ -86,7 +86,7 @@ fpPrevLev = 0
 -- | Esto es un offset previo a al lugar donde se encuentra el lugar de las variables
 -- o de los argumentos.
 argsGap, localsGap :: Int
-argsGap = wSz
+argsGap = 0 --wSz
 localsGap = 4
 
 -- | Dan inicio a los contadores de argumentos, variables y registros usados.
@@ -234,11 +234,12 @@ allocArg fr Escapa =
   in  return (fr { formals = formals fr ++ [Escapa], actualArg = actual + 1 }, acc)
 allocArg fr NoEscapa =
   let actual = actualArg fr
-  in if (actual < mipsRegArgs)
-     then do
-        let s = argregs !! actual
-        return (fr {formals = formals fr ++ [NoEscapa], actualArg = actual + 1}, InReg s)
-     else do
+  in do
+  -- in if (actual < mipsRegArgs)
+  --    then do
+  --       let s = argregs !! actual
+  --       return (fr {formals = formals fr ++ [NoEscapa], actualArg = actual + 1}, InReg s)
+  --    else do
         let acc = InFrame $ actual * wSz + argsGap
         return (fr { formals = formals fr ++ [Escapa], actualArg = actual + 1 }, acc)
 
@@ -312,8 +313,8 @@ saverestore_callee regs = do
 --  + load instructions to restore the callee-save registers
 procEntryExit1 :: (Monad w, TLGenerator w) => Frame -> Stm -> w Stm
 procEntryExit1 frame body = do
-  (save,restore) <- saverestore_callee (calleesaves ++ argregs)
-  --(save,restore) <- return ([],[])
+  --(save,restore) <- saverestore_callee (calleesaves ++ argregs)
+  (save,restore) <- return ([],[])
   return $ sequence $ save ++ [body] ++ restore
     where sequence [st]     = st
           sequence (st:sts) = Seq st (sequence sts)
