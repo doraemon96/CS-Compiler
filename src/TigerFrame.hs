@@ -342,7 +342,7 @@ procEntryExit3 fr inss = let
     fname = unpack $ name fr
     --
     local_space = actualLocal fr
-    param_space = maxArgs fr
+    param_space = 4 --maxArgs fr
     saves_space = 0 --NOTE: here we're not using calleesaves because of procEntryExit2... (?)
     stack_space = stack_space' + pad
     stack_space' = local_space + 2 + saves_space + param_space
