@@ -165,6 +165,7 @@ coloring = do
             rewrite <- rewriteCondition
             if rewrite then do
                     rewriteProgram
+                    rewriteReset
                     coloring
             else do
                 st <- get
@@ -200,6 +201,29 @@ rewriteCondition = do
     st <- get
     return $ not $ Set.null (spilledNodes st)
 
+rewriteReset :: ColorMonad ()
+rewriteReset = do
+    modify (\st -> st{
+                    simplifyWorklist = Set.empty -- Set.Set Temp  --nodos low-degree non-moves
+                    , freezeWorklist = Set.empty -- Set.Set Temp  --nodos low-degree moves
+                    , spillWorklist = Set.empty -- Set.Set Temp  --nodos high-degree
+                    , spilledNodes = Set.empty -- Set.Set Temp  --nodos potential spill
+                    , coalescedNodes = Set.empty -- Set.Set Temp  --nodos coalescidos
+                    , coloredNodes = Set.empty -- Set.Set Temp  --nodos coloreados con exito
+                    , selectStack = Stack.stackNew -- Stack.Stack Temp --stack de temporarios removidos del grafo
+                    , coalescedMoves = Set.empty -- Set.Set As.Instr --moves coalescidos
+                    , constrainedMoves = Set.empty -- Set.Set As.Instr  --moves cuyo source y target interfieren
+                    , frozenMoves = Set.empty -- Set.Set As.Instr  --moves no considerados para coalescing
+                    , worklistMoves = Set.empty -- Set.Set As.Instr  --moves listos para coalescing
+                    , activeMoves = Set.empty -- Set.Set As.Instr  --moves no listos para coalescing
+                    , degree = M.empty -- M.Map Temp Int
+                    , adjSet = Set.empty -- Set.Set (Temp, Temp) --conjunto de aristas de interferencia
+                    , adjList = M.empty -- M.Map Temp (Set.Set Temp) --adjList[u] := nodos que interfieren con u
+                    , moveList = M.empty -- M.Map Temp (Set.Set As.Instr) --mapa de nodo a lista de moves con las que esta asociado
+                    , alias = M.empty -- M.Map Temp Temp
+                    , color = M.fromList $ zip Fr.registers Fr.registers
+                    , okColors = Set.empty -- Set.Set Temp -- colors internal
+                    })
 
 
 -- INVARIANT CHECKING --
@@ -540,7 +564,7 @@ assignColors = do
                 if (Set.null (okColors st'')) then do
                     put (st''{spilledNodes = (spilledNodes st'') `Set.union` (Set.singleton n)})
                 else do
-                    let c = head $ Set.elems (okColors st'')
+                    let c = last $ Set.elems (okColors st'')
                     put (st''{coloredNodes = (coloredNodes st'') `Set.union` (Set.singleton n),
                               color = M.insert n c (color st'')})
             )
@@ -565,7 +589,7 @@ rewriteProgram = do
     -- in instruction insert store after each definition of v
     -- in instruction insert fetch before each use of v
     inss <- gets instructions
-    (insss,temps) <- unzip <$> (mapM (rewriteSpilled accesses) (inss))
+    (insss,temps) <- unzip <$> (mapM (rewriteSpilled2 accesses) (inss))
     -- put all v in a set newTemps
     let newTemps = Set.fromList $ concat temps
     modify (\st -> st{spilledNodes = Set.empty
@@ -582,6 +606,84 @@ allocSpilled t = do
     (fr', acc) <- allocLocal fr Abs.Escapa
     modify (\st -> st{frame = fr'})
     return (t,acc)
+
+rewriteSpilled2 :: [(Temp, Fr.Access)] -> As.Instr -> ColorMonad ([As.Instr], [Temp])
+rewriteSpilled2 accmap (IOPER oassem odst osrc ojmp) = do
+    spilled <- gets spilledNodes
+    let dstSpills = spilled `Set.intersection` (Set.fromList odst)
+    let srcSpills = spilled `Set.intersection` (Set.fromList osrc)
+    let spilledInstr = Set.elems $ dstSpills `Set.union` srcSpills -- get all spilled uniquely
+    tempMap <- createTemps2 spilledInstr
+    storeInss <- mapM (createStore2 accmap tempMap) $ Set.elems dstSpills
+    fetchInss <- mapM (createFetch2 accmap tempMap) $ Set.elems srcSpills
+    let reAssem = (As.replaceAssemMissing (M.fromList tempMap) oassem)
+    let reDst = rewriteTemps2 tempMap odst
+    let reSrc = rewriteTemps2 tempMap osrc
+    let rewrittenOp = As.IOPER reAssem reDst reSrc ojmp
+    return (fetchInss ++ [rewrittenOp] ++ storeInss, snd <$> tempMap)
+rewriteSpilled2 accmap (IMOVE massem mdst msrc) = do
+    spilled <- gets spilledNodes
+    let dstSpills = spilled `Set.intersection` (Set.singleton mdst)
+    let srcSpills = spilled `Set.intersection` (Set.singleton msrc)
+    let spilledInstr = Set.elems $ dstSpills `Set.union` srcSpills -- get all spilled uniquely
+    tempMap <- createTemps2 spilledInstr
+    storeInss <- mapM (createStore2 accmap tempMap) $ Set.elems dstSpills
+    fetchInss <- mapM (createFetch2 accmap tempMap) $ Set.elems srcSpills
+    let reAssem = (As.replaceAssemMissing (M.fromList tempMap) massem)
+    let reDst = rewriteTemp2 tempMap mdst
+    let reSrc = rewriteTemp2 tempMap msrc
+    let rewrittenOp = As.IMOVE reAssem reDst reSrc
+    return (fetchInss ++ [rewrittenOp] ++ storeInss, snd <$> tempMap)
+rewriteSpilled2 accmap other = return ([other],[])
+
+createTemps2 :: [Temp] -> ColorMonad [(Temp,Temp)]
+createTemps2  []     = return []
+createTemps2 (t:ts) = do
+    ts' <- createTemps2 ts
+    s <- newTemp
+    return $ (t,s):ts'
+
+createFetch2 :: [(Temp, Fr.Access)] -> [(Temp, Temp)] -> Temp -> ColorMonad As.Instr
+createFetch2 accmap tmpmap t = do
+    let accmap' = M.fromList accmap
+    let tmpmap' = M.fromList tmpmap
+    let acc = maybe (error $ show ("CS2: accmap not found",t)) (id) $ accmap' M.!? t
+    let newt = maybe (error $ show ("CS2: tmpmap not found",t)) (id) $ tmpmap' M.!? t
+    let offset = case acc of (InFrame dir) -> dir
+                             _             -> error "Esto no debe pasar #998"
+    return $ IOPER{oassem = LW newt offset Fr.fp
+                    , odst = [newt]
+                    , osrc = [Fr.sp]
+                    , ojmp = Nothing}
+
+createStore2 :: [(Temp, Fr.Access)] -> [(Temp, Temp)] -> Temp -> ColorMonad As.Instr
+createStore2 accmap tmpmap t = do
+    let accmap' = M.fromList accmap
+    let tmpmap' = M.fromList tmpmap
+    let acc = maybe (error $ show ("CS2: accmap not found",t)) (id) $ accmap' M.!? t
+    let newt = maybe (error $ show ("CS2: tmpmap not found",t)) (id) $ tmpmap' M.!? t
+    let offset = case acc of (InFrame dir) -> dir
+                             _             -> error "Esto no debe pasar #999"
+    return $ IOPER{oassem = SW newt offset Fr.fp
+                    , odst = []
+                    , osrc = [Fr.fp, newt]
+                    , ojmp = Nothing}
+
+rewriteTemp2 :: [(Temp, Temp)] -> Temp -> Temp
+rewriteTemp2 tmpmap t =
+    let tmpmap' = M.fromList tmpmap
+        newt = maybe (t) (id) (M.lookup t tmpmap')
+    in newt
+
+rewriteTemps2 :: [(Temp, Temp)] -> [Temp] -> [Temp]
+rewriteTemps2 tmpmap []     = []
+rewriteTemps2 tmpmap (t:ts) =
+    let tmpmap' = M.fromList tmpmap
+        newt = maybe (t) (id) (M.lookup t tmpmap')
+        newts = rewriteTemps2 tmpmap ts
+    in newt:newts
+
+
 
 rewriteSpilled :: [(Temp, Fr.Access)] -> As.Instr -> ColorMonad ([As.Instr], [Temp])
 rewriteSpilled accmap (IOPER oassem odst osrc ojmp) = do
