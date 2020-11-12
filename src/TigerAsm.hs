@@ -148,13 +148,13 @@ format' f (MFHI t) = ws [pack "mfhi", f t]
 format' f (MFLO t) = ws [pack "mflo", f t]
 format' f (MOVE t1 t2) = ws [pack "move", cm (Prelude.map f [t1,  t2])]
 format' f (LABEL l) =  appends [l, pack ":"]
-format' f (NOOP) = pack "nop"
+format' f (NOOP) = pack "  nop"
 
 
 -- add whitespace between args
 ws :: [Text] -> Text
 ws (x:[])   = x
-ws (x:y:ys) = appends [x , pack " " , (ws (y:ys))]
+ws (x:y:ys) = appends [pack "  ", x , pack " " , (ws (y:ys))]
 -- add commas between args
 cm :: [Text] -> Text
 cm (x:[])   = x
