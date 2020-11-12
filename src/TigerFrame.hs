@@ -324,7 +324,7 @@ procEntryExit1 frame body = do
 -- the register allocator to try and use them for some other purpose
 procEntryExit2 :: Frame -> [TigerAsm.Instr] -> [TigerAsm.Instr]
 procEntryExit2 fram bod = bod ++ [TigerAsm.IOPER{ TigerAsm.oassem = TigerAsm.NOOP
-                                                , TigerAsm.osrc   = specialregs -- ++ calleesaves
+                                                , TigerAsm.osrc   = specialregs ++ calleesaves
                                                 , TigerAsm.odst   = []
                                                 , TigerAsm.ojmp   = Just []}]
 
@@ -342,7 +342,7 @@ procEntryExit3 fr inss = let
     fname = unpack $ name fr
     --
     local_space = actualLocal fr
-    param_space = 4 --maxArgs fr
+    param_space = maxArgs fr
     saves_space = 0 --NOTE: here we're not using calleesaves because of procEntryExit2... (?)
     stack_space = stack_space' + pad
     stack_space' = local_space + 2 + saves_space + param_space
