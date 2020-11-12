@@ -318,6 +318,7 @@ instance (MemM w) => IrGen w where
     intExp i = return $ Ex (Const i)
     -- fieldVar :: BExp -> Int -> w BExp
     fieldVar be i = do
+        TigerTrans.callArgs 0 -- 1 menos por el static link que aca no cuenta :facepalm:
         ebe <- unEx be
         tbe <- newTemp
         return $ Ex $
@@ -327,6 +328,7 @@ instance (MemM w) => IrGen w where
                 (Mem $ Binop Plus (Temp tbe) (Binop Mul (Const i) (Const wSz)))
     -- subscriptVar :: BExp -> BExp -> w BExp
     subscriptVar var ind = do
+        TigerTrans.callArgs 1 -- 1 menos por el static link que aca no cuenta :facepalm:
         evar <- unEx var
         eind <- unEx ind
         tvar <- newTemp
@@ -339,6 +341,7 @@ instance (MemM w) => IrGen w where
                 (Mem $ Binop Plus (Temp tvar) (Binop Mul (Temp tind) (Const wSz)))
     -- recordExp :: [(BExp,Int)]  -> w BExp
     recordExp flds = do
+        TigerTrans.callArgs 0 -- 1 menos por el static link que aca no cuenta :facepalm:
         sz    <- unEx . Ex $ Const (List.length flds)
         let ordered = List.sortBy (Ord.comparing snd) flds 
         eflds <- mapM (unEx . fst) flds
@@ -527,6 +530,7 @@ instance (MemM w) => IrGen w where
     -- binOpStrExp :: BExp -> Abs.Oper -> BExp -> w BExp
     -- TODO: llamar a _stringCompare y pasarle el rv a CJUMP
     binOpStrExp strl op strr = do
+        TigerTrans.callArgs 1 -- 1 menos por el static link que aca no cuenta :facepalm:
         estrl <- unEx strl
         estrr <- unEx strr
         t     <- newTemp
@@ -565,6 +569,7 @@ instance (MemM w) => IrGen w where
             _ -> internal $ pack "SEGUIMOS RETRASANDO #01m"
     -- arrayExp :: BExp -> BExp -> w BExp
     arrayExp size init = do
+        TigerTrans.callArgs 1 -- 1 menos por el static link que aca no cuenta :facepalm:
         sz <- unEx size
         ini <- unEx init
         t <- newTemp
