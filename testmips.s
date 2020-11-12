@@ -77,6 +77,24 @@ li $a0,1
 syscall
 
 
+#### CHECK NIL ####
+.data
+.align 2
+CNstr: .asciiz "cant access nil record\n"
+
+.text
+_checkNil:
+beqz $a0,CNbad
+j $ra
+CNbad:
+li $v0,4      #printstr
+la $a0,CIstr
+syscall
+li $v0,10     #exit
+li $a0,1
+syscall
+
+
 #### PRINT ####
 .text
 _print:
