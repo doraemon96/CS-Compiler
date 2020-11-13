@@ -362,7 +362,9 @@ instance (MemM w) => IrGen w where
             lev   = getNlvl lvl
             slink = if lev > alev -- lev: callee , alev: caller
                     then Temp fp
-                    else F.auxexp (alev-lev)
+                    else if lev == alev
+                         then F.auxexp 1
+                         else F.auxexp (alev-lev)
             cargs = case externa of
                         Runtime -> targs
                         Propia  -> slink:targs
