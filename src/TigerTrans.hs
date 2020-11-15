@@ -535,7 +535,7 @@ instance (MemM w) => IrGen w where
         TigerTrans.callArgs 1 -- 1 menos por el static link que aca no cuenta :facepalm:
         estrl <- unEx strl
         estrr <- unEx strr
-        t     <- newTemp
+        tmp   <- newTemp
         let jmpop' = case op of
                         Abs.EqOp  -> Just EQ
                         Abs.NeqOp -> Just NE
@@ -546,8 +546,8 @@ instance (MemM w) => IrGen w where
                         _         -> Nothing
         maybe (internal (pack "MASTURBACION ACADEMICA #12n"))
               (\jmpop -> return $ Cx $ (\(t,f) -> seq [ ExpS $ externalCall "_stringCompare" [estrl, estrr]
-                                                      , Move (Temp t) (Temp rv)
-                                                      , CJump jmpop (Temp t) (Const 0) t f]
+                                                      , Move (Temp tmp) (Temp rv)
+                                                      , CJump jmpop (Temp tmp) (Const 0) t f]
                                        ))
               (jmpop')
     --binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
