@@ -3,5 +3,7 @@ let
 
     var row := intArray [ 10 ] of 64
 in
-    row[2] := 65 ; 0
+    row[2] := 65 ; 
+    print(chr(row[2]));
+    0
 end

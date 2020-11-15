@@ -1,0 +1,11 @@
+let
+    var N := 33
+
+    function ifmulti () =
+        if N < 40 & N > 20
+            then (
+                print("hurray")
+            )
+in 
+    ifmulti() ; 0
+end

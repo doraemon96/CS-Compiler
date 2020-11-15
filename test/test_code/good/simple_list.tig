@@ -1,0 +1,19 @@
+let
+    type List = {item:int, rest:List}
+    function cons(x:int, xs:List):List = List{item = x, rest = xs}
+    /*var l := cons(1, cons(2,nil))*/
+    /*var l := List{item = 1, rest = List{item = 2, rest = nil}}*/
+    /*var l := cons(1, List{item = 2, rest = nil})*/
+    var l := List{item = 1, rest = cons(2,nil)}
+
+    function printint(i:int) = 
+        let function f(i : int) =
+            if i > 0
+            then (f (i/10); print(chr(i-i/10*10+ord("0"))))
+        in if i < 0 then (print("-"); f(i))
+           else if i > 0 then f(i)
+           else print("0")
+        end
+in
+    printint(l.rest.item); 0
+end

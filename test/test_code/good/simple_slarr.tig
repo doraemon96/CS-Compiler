@@ -1,0 +1,13 @@
+let
+    var N := 10
+    type intArray = array of int
+    var arr := intArray [ N ] of 65
+
+    function printfst() =
+        print(chr(arr[0]))
+
+    function calltheother() =
+        printfst()
+in
+    calltheother() ; 0
+end

@@ -1,0 +1,21 @@
+let
+    function ackerman (n : int, m : int) : int =
+        if  n = 0
+            then m+1
+            else (if n>0 & m = 0 
+                     then ackerman(n-1, 1)
+                     else (if n>0 & m>0 
+                              then ackerman(n-1, ackerman(n,m-1))
+			         else (print("ERROR");0)))
+
+    function printint(i:int) = 
+        let function f(i : int) =
+            if i > 0
+            then (f (i/10); print(chr(i-i/10*10+ord("0"))))
+        in if i < 0 then (print("-"); f(i))
+           else if i > 0 then f(i)
+           else print("0")
+        end
+in
+    printint(ackerman(3,7)) ; 0
+end

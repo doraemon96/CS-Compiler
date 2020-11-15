@@ -1,0 +1,18 @@
+let
+    var N := 33
+
+    type intArray = array of int
+
+    var arr := intArray [ N ] of 0
+
+    function printarr () =
+        (for i := 0 to N-1
+            do (if arr[i] = 1
+	            then print(" 0")))
+
+    function change (c : int) =
+        (if arr[0] = 0
+        then (arr[c]=1; printarr())) 
+
+ in change(0); 0
+end
