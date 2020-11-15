@@ -547,7 +547,7 @@ instance (MemM w) => IrGen w where
         maybe (internal (pack "MASTURBACION ACADEMICA #12n"))
               (\jmpop -> return $ Cx $ (\(t,f) -> seq [ ExpS $ externalCall "_stringCompare" [estrl, estrr]
                                                       , Move (Temp tmp) (Temp rv)
-                                                      , CJump jmpop (Temp tmp) (Const 0) t f]
+                                                      , CJump jmpop (Temp tmp) (Const 1) t f]
                                        ))
               (jmpop')
     --binOpIntRelExp :: BExp -> Abs.Oper -> BExp -> w BExp
