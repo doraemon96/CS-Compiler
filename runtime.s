@@ -119,7 +119,7 @@ addiu $a0,$a0,4
 addiu $a1,$a1,4
 beq $a2,$a3,Lrunt11
 Lrunt13:
-li  $v0,0
+sub  $v0,$t0,$t1
 j $ra
 Lrunt12:
 lbu  $t0,($a0)
@@ -131,7 +131,7 @@ addiu $a2,$a2,-1
 Lrunt11:
 bgez $a2,Lrunt12
 Lrunt10:
-li $v0,1
+li $v0,0
 j $ra
 
 #### FLUSH? ####
