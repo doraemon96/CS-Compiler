@@ -29,6 +29,7 @@ import           Data.Ord                      as Ord hiding ( EQ
                                                 )
 import           Data.Text
 import           Data.Maybe                     (isJust)
+import qualified Data.Map                      as M
 
 
 import           Debug.Trace
@@ -342,14 +343,21 @@ instance (MemM w) => IrGen w where
     -- recordExp :: [(BExp,Int)]  -> w BExp
     recordExp flds = do
         TigerTrans.callArgs 0 -- 1 menos por el static link que aca no cuenta :facepalm:
-        sz    <- unEx . Ex $ Const (List.length flds)
-        let ordered = List.sortBy (Ord.comparing snd) flds 
-        eflds <- mapM (unEx . fst) flds
+        let sz = List.length flds
+        let ordered = List.sortBy (Ord.comparing snd) flds
         t     <- newTemp
+        eflds <- mapM (\(fld,i) -> (i,) <$> (unEx fld)) ordered -- :: w [(Int,Exp)]
+        iflds <- mapM (\(_, i) -> (i,) <$> (fieldVar (Ex $ Temp t) i)) ordered --  :: w [(Int,BExp)]
+        iflds' <- mapM (\(i,re) -> (i,) <$> (unEx re)) iflds
+        fflds <- mapM (\(i,fldexp) -> do
+            let recordmap = M.fromList iflds'
+            let recordexp = recordmap M.! i
+            return $ Move recordexp fldexp
+            ) eflds
         return $ Ex $ 
             Eseq 
-                (seq    [ExpS $ externalCall "_allocRecord" (sz : eflds)
-                        , Move (Temp t) (Temp rv)]) 
+                (seq    ([ExpS $ externalCall "_allocRecord" [(Binop Mul (Const sz) (Const wSz))]
+                        , Move (Temp t) (Temp rv)] ++ fflds)) 
                 (Temp t)
     -- callExp :: Label -> Externa -> IsProc -> Level -> [BExp] -> w BExp
     callExp name externa isproc lvl args = do
