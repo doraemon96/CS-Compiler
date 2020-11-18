@@ -460,16 +460,18 @@ instance (MemM w) => IrGen w where
         evar   <- unEx var
         nbody  <- unNx body
         lsigue <- newLabel
+        lcond  <- newLabel
         lastM  <- topSalida
         case lastM of
             Just done -> 
                 return $ Nx $
                     seq    [Move evar elo
+                           , Label lcond
                            , CJump GT evar ehi done lsigue
                            , Label lsigue
                            , nbody
                            , Move evar (Binop Plus evar (Const 1))
-                           , CJump GE evar ehi done lsigue
+                           , Jump (Name lcond) lcond
                            , Label done]
             _ -> internal $ pack "no hay label de salida del for"
     -- ifThenExp :: BExp -> BExp -> w BExp
