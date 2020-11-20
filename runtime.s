@@ -158,9 +158,99 @@ j $ra
 
 
 #### SIZE ####
+_size:
+lw $v0,($a0)
+j $ra
+
+
 #### SUBSTRING ####
+.data
+Lrunt40:  .asciiz "substring out of bounds\n"
+.align 2
+Lruntempty:
+.word 0
+.ascii ""
+
+.text
+_substring:
+lw $t1,($a0)
+bltz $a1,Lrunt41
+add $t2,$a1,$a2
+sgt $t3,$t2,$t1
+bnez $t3,Lrunt41
+add $t1,$a0,$a1
+addi $t1, 4
+bne $a2,1,Lrunt42
+lbu $a0,($t1)
+b _chr
+Lrunt42:
+bnez $a2,Lrunt43
+la  $v0,Lruntempty
+j $ra
+Lrunt43:
+addi $a0,$a2,4 # add space for the length field
+li   $v0,9
+syscall
+move $t2,$v0
+sw $a2,($t2) # store the length in the length field
+addiu $t2,4
+Lrunt44:
+lbu  $t3,($t1)
+sb   $t3,($t2)
+addiu $t1,1
+addiu $t2,1
+addiu $a2,-1
+bgtz $a2,Lrunt44
+j $ra
+Lrunt41:
+li   $v0,4
+la   $a0,Lrunt40
+syscall
+li   $v0,10
+syscall
+
+
 #### CONCAT ####
+_concat:
+lw $t0,($a0) # length str1
+lw $t1,($a1) # length str2
+beqz $t0,Lrunt50
+beqz $t1,Lrunt51
+addiu  $t2,$a0,4 # point to str1
+addiu  $t3,$a1,4 # point to str2
+add  $t4,$t0,$t1 # store the new length
+addiu $a0,$t4,4 # new length + 4 = size to allocate
+li $v0,9
+syscall
+addiu $t5,$v0,4 # point to the first char in newStr
+sw $t4,($v0) # store the size
+Lrunt52:
+lbu $a0,($t2)
+sb  $a0,($t5)
+addiu $t2,1
+addiu $t5,1
+addiu $t0,-1
+bgtz $t0,Lrunt52
+Lrunt53:
+lbu $a0,($t3)
+sb  $a0,($t5)
+addiu $t3,1
+addiu $t5,1
+addiu $t1,-1
+bgtz $t1,Lrunt53
+j $ra
+Lrunt50:
+move $v0,$a1
+j $ra
+Lrunt51:
+move $v0,$a0
+j $ra
+
+
 #### NOT ####
+_not:
+seq $v0,$a0,0
+j $ra
 
 
 #### GETCHAR ####
@@ -190,6 +280,11 @@ sll  $v0,$v0,3 # Multiply by 8 b/c string pointers are 8
 la   $v0,Runtconsts($v0)
 j $ra
 
+
+#### EXIT ####
+exit:
+li $v0, 10
+syscall
 
 
 #### TIGERMAIN #####
