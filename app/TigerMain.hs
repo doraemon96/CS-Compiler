@@ -75,9 +75,14 @@ showIR (chars,procs) = do
     putStrLn $ show chars
     putStrLn "Procs:"
     let stms = concat $ fst $ unzip procs
-    foldMap (putStrLn . show) stms
+    mapM_ showProc procs
     putStrLn "#################################################"
     putStrLn ""
+
+showProc :: ([Tree.Stm], Frame) -> IO ()
+showProc (sts, fr) = do
+    putStrLn $ show (name fr)
+    foldMap (putStrLn . ("  " ++) . show) sts
 
 
 calculoEscapadas :: Exp -> Options -> IO Exp
@@ -114,7 +119,8 @@ makeAssembly (chars,procs) = do
   let inss' = zipWith procEntryExit2 frms inss
   -- Color
   unq <- get
-  let (frms'',inss'') = unzip $ zipWith (\frm ins -> traceShow (LV.defaultVis $ LV.instrs2graph ins) $ runColoring frm ins unq) frms inss'
+  --let (frms'',inss'') = unzip $ zipWith (\frm ins -> traceShow (LV.defaultVis $ LV.instrs2graph ins) $ runColoring frm ins unq) frms inss'
+  let (frms'',inss'') = unzip $ zipWith (\frm ins -> runColoring frm ins unq) frms inss'
   -- procEntryExit3
   let inss''' = zipWith procEntryExit3 frms'' inss''
   -- strings

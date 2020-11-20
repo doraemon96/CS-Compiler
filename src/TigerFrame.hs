@@ -428,4 +428,4 @@ procEntryExit3 fr inss = let
     --
     prologue = directives ++ flabel ++ stack_entry --label after directives?
     epilogue = stack_exit ++ return
-  in traceShow ("SS",param_space) $ prologue ++ inss ++ epilogue
+  in prologue ++ inss ++ epilogue

@@ -584,7 +584,7 @@ rewriteProgram = do
     spills <- gets spilledNodes
     let spillslist = Set.elems spills --ordered list
     -- allocate memory locations
-    accesses <- traceShow ("rewriting:",spillslist) $ mapM allocSpilled spillslist
+    accesses <- mapM allocSpilled spillslist
     -- create a new temp for each def and use
     -- in instruction insert store after each definition of v
     -- in instruction insert fetch before each use of v
@@ -727,7 +727,7 @@ createTemp t = do
         return []
     else do
         s <- newTemp
-        modify (\st -> traceShow ("createTemp",t,s) $ st{newTempMap = M.insert t s (newTempMap st)})
+        modify (\st -> st{newTempMap = M.insert t s (newTempMap st)})
         return $ [s]
 
 createStore :: [(Temp, Fr.Access)] -> Temp -> ColorMonad As.Instr
